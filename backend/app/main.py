@@ -2,6 +2,9 @@ import json
 import asyncio
 
 from fastapi import FastAPI
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.orm import Session
@@ -26,6 +29,21 @@ from .routers_ai_measurements import router as ai_measurements_router
 from .routers_analytics import router as analytics_router
 from .security import hash_password
 from .services.otp_service import cleanup_expired_otps
+from .config import logger, settings
+
+# Initialize Sentry if DSN is configured
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.SENTRY_ENVIRONMENT,
+        integrations=[
+            FastApiIntegration(),
+            SqlalchemyIntegration(),
+        ],
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
+    )
+    logger.info("Sentry initialized")
 
 app = FastAPI(title="TailorHub Backend", version="1.0.0")
 
@@ -71,7 +89,7 @@ def on_startup():
     # Start background tasks
     asyncio.create_task(otp_cleanup_loop())
 
-    # ── Print feature availability summary ───────────────────────────────────
+    # ── Log feature availability summary ───────────────────────────────────
     # This shows which optional services are configured WITHOUT logging secrets.
     _CHECK = "[OK]"
     _CROSS = "[--]"
@@ -84,14 +102,14 @@ def on_startup():
         ("Facebook OAuth",  bool(settings.FACEBOOK_CLIENT_ID and settings.FACEBOOK_CLIENT_SECRET)),
         ("Apple OAuth",     bool(settings.APPLE_CLIENT_ID and settings.APPLE_CLIENT_SECRET)),
     ]
-    print("\n" + "="*50)
-    print("  TailorHub Backend — Feature Status")
-    print("="*50)
+    logger.info("="*50)
+    logger.info("TailorHub Backend — Feature Status")
+    logger.info("="*50)
     for name, enabled in features:
         icon = _CHECK if enabled else _CROSS
         status_label = "active" if enabled else "not configured"
-        print(f"  {icon}  {name:<22} {status_label}")
-    print("="*50 + "\n")
+        logger.info(f"{icon}  {name:<22} {status_label}")
+    logger.info("="*50)
 
 
 async def otp_cleanup_loop():
@@ -102,11 +120,11 @@ async def otp_cleanup_loop():
             try:
                 count = cleanup_expired_otps(db)
                 if count > 0:
-                    print(f"[CLEANUP] Deleted {count} expired OTP records.")
+                    logger.info(f"[CLEANUP] Deleted {count} expired OTP records.")
             finally:
                 db.close()
         except Exception as e:
-            print(f"[CLEANUP] Error in OTP cleanup loop: {e}")
+            logger.error(f"[CLEANUP] Error in OTP cleanup loop: {e}")
         
         await asyncio.sleep(6 * 3600)  # 6 hours
 

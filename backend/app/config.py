@@ -19,9 +19,33 @@ Usage:
 """
 
 import os
+import logging
+import sys
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def setup_logging() -> logging.Logger:
+    """Configure structured logging for the application."""
+    logger = logging.getLogger("tailorhub")
+    logger.setLevel(logging.INFO)
+
+    if not logger.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S"
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+    return logger
+
+
+# Global logger instance
+logger = setup_logging()
 
 # Resolve the backend/ directory regardless of where Python is invoked from
 _BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -91,6 +115,10 @@ class Settings(BaseSettings):
     # ── Application ───────────────────────────────────────────────────────────
     FRONTEND_URL: str = "http://localhost:8080"
     CORS_ORIGINS: str = "http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173"
+
+    # ── Sentry Error Tracking ───────────────────────────────────────────────
+    SENTRY_DSN: str = ""  # Leave empty to disable Sentry
+    SENTRY_ENVIRONMENT: str = "development"
 
     # ── Seeded Admin Account ─────────────────────────────────────────────────
     # These seed the first admin user on startup if they don't already exist.

@@ -36,10 +36,6 @@ router = APIRouter(prefix="/api/auth", tags=["oauth"])
 starlette_config = Config(environ={
     "GOOGLE_CLIENT_ID": settings.GOOGLE_CLIENT_ID,
     "GOOGLE_CLIENT_SECRET": settings.GOOGLE_CLIENT_SECRET,
-    "APPLE_CLIENT_ID": settings.APPLE_CLIENT_ID,
-    "APPLE_CLIENT_SECRET": settings.APPLE_CLIENT_SECRET,
-    "FACEBOOK_CLIENT_ID": settings.FACEBOOK_CLIENT_ID,
-    "FACEBOOK_CLIENT_SECRET": settings.FACEBOOK_CLIENT_SECRET,
 })
 
 oauth = OAuth(starlette_config)
@@ -49,22 +45,6 @@ oauth.register(
     name='google',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid email profile'},
-)
-
-# Setup Facebook (Basic)
-oauth.register(
-    name='facebook',
-    api_base_url='https://graph.facebook.com/v15.0/',
-    access_token_url='https://graph.facebook.com/v15.0/oauth/access_token',
-    authorize_url='https://www.facebook.com/v15.0/dialog/oauth',
-    client_kwargs={'scope': 'email public_profile'},
-)
-
-# Setup Apple (Requires advanced setup with private keys in prod, basic mapping here)
-oauth.register(
-    name='apple',
-    server_metadata_url='https://appleid.apple.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'name email', 'response_mode': 'form_post'},
 )
 
 # Helper to create temporary token
@@ -88,8 +68,6 @@ async def login(provider: str, request: Request):
     # Feature-flag guard — check credentials before attempting OAuth dance
     _PROVIDER_ENABLED = {
         "google": settings.google_oauth_enabled,
-        "facebook": bool(settings.FACEBOOK_CLIENT_ID and settings.FACEBOOK_CLIENT_SECRET),
-        "apple": bool(settings.APPLE_CLIENT_ID and settings.APPLE_CLIENT_SECRET),
     }
     if provider not in _PROVIDER_ENABLED:
         raise HTTPException(

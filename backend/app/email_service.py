@@ -10,7 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from typing import Optional
 
-from .config import settings
+from .config import settings, logger
 
 OTP_EXPIRY_MINUTES = 15  # Matches the otp_service.py default
 
@@ -49,7 +49,7 @@ def _send_via_smtp(to_email: str, subject: str, text: str, html: str, pdf_bytes:
         server.quit()
         return True
     except Exception as e:
-        print(f"[EMAIL SERVICE] SMTP Error: {e}")
+        logger.error(f"[EMAIL SERVICE] SMTP Error: {e}")
         return False
 
 
@@ -97,7 +97,7 @@ If you did not request this, please ignore this email.
     # In development or if SMTP fails, log to console and file
     if not success or settings.ENVIRONMENT != "production":
         log_line = f"[EMAIL SERVICE] OTP for {to_email}: {otp_code}"
-        print(f"\n{'='*60}\n{log_line}\n{'='*60}\n")
+        logger.info(f"{'='*60} {log_line} {'='*60}")
         try:
             import os
             log_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dev_otp.log")
