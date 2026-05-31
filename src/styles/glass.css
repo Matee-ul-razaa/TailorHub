@@ -1,0 +1,280 @@
+/* ── Global Layout Gradients ── */
+body.light-theme {
+  background: var(--th-body-bg) !important;
+  background-attachment: fixed !important;
+  color: #1f2937 !important;
+}
+
+body.dark-theme {
+  background: var(--th-body-bg) !important;
+  background-attachment: fixed !important;
+  color: #f8fafc !important;
+}
+
+/* ── Glass Navbar ── */
+.glass-navbar {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02) !important;
+  transition: all 0.3s ease;
+}
+
+body.dark-theme .glass-navbar {
+  background: rgba(17, 24, 39, 0.9) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Ensure navbar links are readable */
+.glass-navbar .nav-link, 
+.glass-navbar .navbar-brand,
+.glass-navbar .th-nav-link,
+.glass-navbar svg {
+  color: #1f2937 !important;
+  text-shadow: none !important;
+}
+
+body.dark-theme .glass-navbar .nav-link,
+body.dark-theme .glass-navbar .navbar-brand,
+body.dark-theme .glass-navbar .th-nav-link,
+body.dark-theme .glass-navbar svg {
+  color: #f8fafc !important;
+}
+
+/* ── Glass Card Base ── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.03) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04) !important;
+  color: #1f2937 !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease !important;
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+body.dark-theme .glass-card {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2) !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme .glass-card:hover {
+  background: rgba(30, 41, 59, 1) !important;
+}
+
+/* ── Gradient Buttons ── */
+.btn-gradient {
+  background: linear-gradient(45deg, #c5a059, #aa8033) !important;
+  border: none !important;
+  color: #ffffff !important;
+  border-radius: 50px !important;
+  padding: 0.6rem 1.8rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(197, 160, 89, 0.4) !important;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(45deg, #d4af37, #c5a059);
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.btn-gradient:hover {
+  transform: scale(1.05) translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(197, 160, 89, 0.6) !important;
+  color: #ffffff !important;
+}
+
+.btn-gradient:hover::before {
+  opacity: 1;
+}
+
+/* ── Transparent Glass Forms ── */
+.glass-input {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  color: #1f2937 !important;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.glass-input::placeholder {
+  color: rgba(31, 41, 55, 0.6) !important;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: rgba(184, 138, 68, 0.5) !important;
+  box-shadow: 0 0 15px rgba(184, 138, 68, 0.2) !important;
+  outline: none !important;
+}
+
+body.dark-theme .glass-input {
+  background: rgba(30, 41, 59, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #f8fafc !important;
+}
+body.dark-theme .glass-input::placeholder {
+  color: rgba(248, 250, 252, 0.5) !important;
+}
+body.dark-theme .glass-input:focus {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(212, 175, 55, 0.6) !important;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3) !important;
+}
+
+/* General Text Fixes for Glass Layout */
+body.light-theme .glass-card p, 
+body.light-theme .glass-card h1, 
+body.light-theme .glass-card h2, 
+body.light-theme .glass-card h3, 
+body.light-theme .glass-card h4, 
+body.light-theme .glass-card h5, 
+body.light-theme .glass-card h6, 
+body.light-theme .glass-card span {
+  color: #1f2937 !important;
+}
+
+body.dark-theme .glass-card p, 
+body.dark-theme .glass-card h1, 
+body.dark-theme .glass-card h2, 
+body.dark-theme .glass-card h3, 
+body.dark-theme .glass-card h4, 
+body.dark-theme .glass-card h5, 
+body.dark-theme .glass-card h6, 
+body.dark-theme .glass-card span {
+  color: #f8fafc !important;
+}
+
+body.light-theme .text-muted {
+  color: #6b7280 !important;
+}
+
+body.dark-theme .text-muted {
+  color: #cbd5e1 !important;
+}
+
+/* Override existing cards globally to give them glass look implicitly if desired */
+body.light-theme .th-card, body.light-theme .th-card-static {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  color: #1f2937 !important;
+}
+
+body.dark-theme .th-card, body.dark-theme .th-card-static {
+  background: rgba(30, 41, 59, 0.6) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #f8fafc !important;
+}
+
+/* ── Animated Background for Hero ── */
+body.light-theme .th-hero {
+  background-color: var(--th-body-bg) !important;
+  background-image: none !important;
+}
+
+body.light-theme .th-hero::before,
+body.light-theme .th-hero::after {
+  display: none !important; /* Clean hero without blobs */
+}
+
+body.dark-theme .th-hero {
+  background-color: var(--th-body-bg) !important;
+  background-image: none !important;
+}
+
+/* ── Floating Particles ── */
+.particles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  background: rgba(184, 138, 68, 0.05); /* Subtle gold */
+  animation: floatUp 25s infinite linear;
+  bottom: -150px;
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+}
+
+body.dark-theme .particle {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.particle:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+.particle:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+.particle:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+.particle:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+.particle:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+.particle:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+.particle:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+.particle:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+.particle:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+.particle:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+
+@keyframes floatUp {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 0; }
+  100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 50%; }
+}
+
+body.light-theme .th-hero h1,
+body.light-theme .th-hero h1 span,
+body.light-theme .th-hero div:not(.badge):not(.th-badge):not(.btn),
+body.light-theme .th-hero p {
+  color: #1f2937 !important;
+  text-shadow: none !important;
+}
+
+body.dark-theme .th-hero h1,
+body.dark-theme .th-hero h1 span:not(.text-warning),
+body.dark-theme .th-hero div:not(.badge):not(.th-badge):not(.btn),
+body.dark-theme .th-hero p {
+  color: #f8fafc !important;
+}
+
+/* ── Section Separation Layers ── */
+body.light-theme .th-section-muted {
+  background: rgba(0, 0, 0, 0.02) !important;
+  backdrop-filter: none !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+body.dark-theme .th-section-muted {
+  background: rgba(15, 23, 42, 0.4) !important;
+  backdrop-filter: blur(10px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}

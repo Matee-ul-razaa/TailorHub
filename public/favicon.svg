@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Deep Navigation Background -->
+  <rect width="512" height="512" rx="128" fill="hsl(222.2, 84%, 4.9%)" />
+  
+  <g fill="none" stroke="hsl(24, 95%, 53%)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+    
+    <!-- "T" in middle -->
+    <!-- T Crossbar at top -->
+    <path d="M 100 114 L 412 114" />
+    <!-- T Stem dropping to the pivot -->
+    <path d="M 256 114 L 256 274" />
+
+    <!-- "H" structured as Tailor Shears -->
+    <!-- Pivot Crossbar (H bridging bar) -->
+    <path d="M 160 274 L 352 274" />
+    
+    <!-- Left Blade/Shaft (Left column of H) -->
+    <path d="M 160 78 L 160 352" />
+    <!-- Right Blade/Shaft (Right column of H) -->
+    <path d="M 352 78 L 352 352" />
+    
+    <!-- Scissor Handles (Bottom loops of H) -->
+    <circle cx="160" cy="384" r="32" />
+    <circle cx="352" cy="384" r="32" />
+
+    <!-- Tailor Shear Tang (Finger rest on right handle) -->
+    <path d="M 400 384 L 420 384" stroke-width="20" />
+    
+  </g>
+  
+  <!-- Pivot Bolt Detailing (The joining screw of the shears in the center) -->
+  <circle cx="256" cy="274" r="14" fill="hsl(222.2, 84%, 4.9%)" />
+  <circle cx="256" cy="274" r="6" fill="hsl(24, 95%, 53%)" />
+  
+</svg>
