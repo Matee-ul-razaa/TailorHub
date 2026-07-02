@@ -125,6 +125,14 @@ def _to_out(p: Payment) -> PaymentOut:
         createdAt=p.created_at,
     )
 
+@router.get("/methods")
+def list_payment_methods():
+    """List supported payment methods for checkout UI."""
+    return [
+        {"id": PaymentMethod.cod.value, "label": "Cash on Delivery"},
+        {"id": PaymentMethod.card.value, "label": "Card"},
+    ]
+
 @router.get("/{order_id}", response_model=PaymentOut)
 def get_payment(order_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     payment = db.query(Payment).filter(Payment.order_id == order_id).first()
