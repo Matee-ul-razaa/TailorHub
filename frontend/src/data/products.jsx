@@ -29,21 +29,8 @@ const shalwarKameezPalettes = [
   ['Stone', 'Chocolate', 'Graphite', 'Ice Blue'],
 ];
 
-const unstitchedPentCoatPalettes = [
-  ['Ivory', 'Gold', 'Maroon', 'Black'],
-  ['Navy', 'Teal', 'Charcoal', 'Olive'],
-  ['Cream', 'Rust', 'Bottle Green', 'Plum'],
-  ['Ivory', 'Gold', 'Maroon', 'Black'],
-  ['Navy', 'Teal', 'Charcoal', 'Olive'],
-];
-
-const unstitchedShalwarKameezPalettes = [
-  ['Off White', 'Charcoal', 'Navy', 'Olive'],
-  ['Stone', 'Chocolate', 'Graphite', 'Ice Blue'],
-  ['Cream', 'Black', 'Khaki', 'Sage'],
-  ['Off White', 'Charcoal', 'Navy', 'Olive'],
-  ['Stone', 'Chocolate', 'Graphite', 'Ice Blue'],
-];
+const unstitchedPentCoatPalettes = pentCoatPalettes;
+const unstitchedShalwarKameezPalettes = shalwarKameezPalettes;
 
 const categorySeeds = {
   'pent-coat': {
