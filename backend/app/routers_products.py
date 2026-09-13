@@ -28,6 +28,7 @@ def _to_product_out(item: Product) -> ProductOut:
         hasWaistcoatOption=item.has_waistcoat_option,
         suitOptions=json.loads(item.suit_options) if item.suit_options else None,
         brand=item.brand,
+        isSoldOut=item.is_sold_out,
     )
 
 
@@ -62,6 +63,7 @@ def create_product(
         has_waistcoat_option=payload.hasWaistcoatOption,
         suit_options=json.dumps(payload.suitOptions) if payload.suitOptions else None,
         brand=payload.brand,
+        is_sold_out=payload.isSoldOut,
     )
     db.add(item)
     db.commit()
@@ -94,6 +96,7 @@ def update_product(
     item.has_waistcoat_option = payload.hasWaistcoatOption
     item.suit_options = json.dumps(payload.suitOptions) if payload.suitOptions else None
     item.brand = payload.brand
+    item.is_sold_out = payload.isSoldOut
     db.commit()
     db.refresh(item)
     return _to_product_out(item)
@@ -111,3 +114,20 @@ def delete_product(
     db.delete(item)
     db.commit()
     return {"ok": True}
+
+
+@router.patch("/{product_id}/sold-out", response_model=ProductOut)
+def toggle_product_sold_out(
+    product_id: str,
+    _admin: User = Depends(require_role(UserRole.admin)),
+    db: Session = Depends(get_db),
+):
+    item = db.get(Product, product_id)
+    if not item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    
+    item.is_sold_out = not item.is_sold_out
+    db.commit()
+    db.refresh(item)
+    return _to_product_out(item)
+

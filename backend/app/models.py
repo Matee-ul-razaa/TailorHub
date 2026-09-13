@@ -110,6 +110,7 @@ class Product(Base):
     has_waistcoat_option: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     suit_options: Mapped[str] = mapped_column(Text, nullable=True)
     brand: Mapped[str] = mapped_column(String(100), nullable=True)
+    is_sold_out: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
 
 class Order(Base):
@@ -128,6 +129,8 @@ class Order(Base):
     delivery_address: Mapped[str] = mapped_column(Text, nullable=True)
     delivery_phone: Mapped[str] = mapped_column(String(30), nullable=True)
     delivery_city: Mapped[str] = mapped_column(String(100), nullable=True)
+    # Use a large text field (LONGTEXT in MySQL) to safely store base64 PNG signatures
+    signature_image: Mapped[str] = mapped_column(Text(length=4294967295), nullable=True)
     inventory_consumed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)  # set once when stock is decremented (idempotency guard)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
@@ -193,6 +196,9 @@ class InventoryItem(Base):
     unit: Mapped[str] = mapped_column(String(50), default="meters")
     price_per_unit: Mapped[float] = mapped_column(Float, nullable=False)
     threshold: Mapped[float] = mapped_column(Float, default=10.0) # Low stock alert threshold
+    # Admin-controlled sold-out toggle (independent of computed stock level).
+    # Use to manually hide items even when quantity > 0 (e.g. discontinued fabric).
+    is_sold_out: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 

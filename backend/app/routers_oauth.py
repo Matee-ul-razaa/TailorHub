@@ -101,7 +101,6 @@ async def login(provider: str, request: Request):
     return await client.authorize_redirect(request, str(redirect_uri), **kwargs)
 
 @router.get("/{provider}/callback", include_in_schema=False)
-@router.post("/{provider}/callback", include_in_schema=False)  # Apple uses form_post
 async def auth_callback(provider: str, request: Request, db: Session = Depends(get_db)):
     client = oauth.create_client(provider)
     if not client:
@@ -144,8 +143,13 @@ async def auth_callback(provider: str, request: Request, db: Session = Depends(g
             # Link accounts logically if they signed up locally first
             user.oauth_id = oauth_id
             user.auth_provider = provider
-            db.commit()
-            
+
+        # Google has verified this email; ensure our flag reflects that
+        if not user.email_verified:
+            user.email_verified = True
+
+        db.commit()
+
         # Existing user — issue a short-lived opaque code, redirect with that
         access_token = create_access_token(user.id, user.role.value)
         code = secrets.token_urlsafe(32)

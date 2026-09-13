@@ -103,12 +103,24 @@ async def stripe_webhook(
 if settings.ENVIRONMENT != "production":
     @router.post("/simulate_webhook")
     def simulate_webhook(order_id: str, amount: float, p_type: str, db: Session = Depends(get_db)):
-        order = db.get(Order, order_id)
-        if order:
-            if p_type == "advance":
-                order.advance_amount += amount
-            order.amount_paid += amount
-            db.commit()
+        from .services.webhook_service import _handle_checkout_completed
+        mock_event = {
+            'data': {
+                'object': {
+                    'metadata': {
+                        'order_id': order_id,
+                        'payment_type': p_type,
+                    },
+                    'amount_total': amount * 100,
+                    'payment_intent': 'pi_mock_simulate',
+                }
+            }
+        }
+        try:
+            _handle_checkout_completed(db, mock_event)
+        except Exception as e:
+            print(f"Simulated webhook error: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
         return {"status": "success"}
 
 
@@ -167,6 +179,17 @@ def mark_payment_paid(
     payment.status = PaymentStatus.completed
     order = db.get(Order, payment.order_id)
     order.amount_paid = order.total_amount
+    
+    # Mark any existing unpaid invoices as paid
+    from .models import Invoice, InvoiceStatus
+    from .invoice_service import mark_invoice_paid
+    unpaid_invoices = db.query(Invoice).filter(
+        Invoice.order_id == order.id,
+        Invoice.status == InvoiceStatus.unpaid
+    ).all()
+    for inv in unpaid_invoices:
+        mark_invoice_paid(db, inv, "cod")
+        
     db.commit()
     return {"message": "COD payment recorded"}
 

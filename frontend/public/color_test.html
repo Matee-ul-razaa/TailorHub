@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><style>body { font-family: sans-serif; } .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; } img { width: 100px; height: auto; }</style></head>
+<body>
+<h1>Color Test</h1>
+<div id="content"></div>
+<script>
+const content = document.getElementById('content');
+let html = '';
+for (let i = 1; i <= 10; i++) {
+  html += `<h2>Garment ${i}</h2><div class="grid">`;
+  for (let j = 1; j <= 4; j++) {
+    html += `<div><img src="/catalog/garments/g${i}-${j}.jpg"><p>g${i}-${j}</p></div>`;
+  }
+  html += `</div>`;
+}
+content.innerHTML = html;
+</script>
+</body>
+</html>

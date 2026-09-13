@@ -99,8 +99,6 @@ def on_startup():
         ("VTO (HuggingFace)", settings.vto_enabled),
         ("SMTP Email",      bool(settings.SMTP_USER and settings.SMTP_PASSWORD)),
         ("Gemini AI",       bool(settings.GEMINI_API_KEY)),
-        ("Facebook OAuth",  bool(settings.FACEBOOK_CLIENT_ID and settings.FACEBOOK_CLIENT_SECRET)),
-        ("Apple OAuth",     bool(settings.APPLE_CLIENT_ID and settings.APPLE_CLIENT_SECRET)),
     ]
     logger.info("="*50)
     logger.info("TailorHub Backend — Feature Status")

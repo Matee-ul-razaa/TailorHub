@@ -86,19 +86,11 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
 
-    # ── Facebook OAuth ────────────────────────────────────────────────────────
-    # Create an app at: https://developers.facebook.com/apps/
-    FACEBOOK_CLIENT_ID: str = ""
-    FACEBOOK_CLIENT_SECRET: str = ""
-
-    # ── Apple Sign In ─────────────────────────────────────────────────────────
-    # Register at: https://developer.apple.com/account/resources/identifiers/list
-    APPLE_CLIENT_ID: str = ""
-    APPLE_CLIENT_SECRET: str = ""
-
     # ── AI / ML APIs ──────────────────────────────────────────────────────────
     # Gemini (Virtual Try-On): https://aistudio.google.com/apikey
     GEMINI_API_KEY: str = ""
+    # OpenRouter (Nano Banana / Gemini 2.5 Flash Image for VTO): https://openrouter.ai/settings/keys
+    OPENROUTER_API_KEY: str = ""
     # HuggingFace (IDM-VTON model): https://huggingface.co/settings/tokens
     HUGGINGFACE_TOKEN: str = ""
 
@@ -166,8 +158,8 @@ class Settings(BaseSettings):
 
     @property
     def vto_enabled(self) -> bool:
-        """True only when a HuggingFace token is available for the VTO model."""
-        return bool(self.HUGGINGFACE_TOKEN)
+        """True when the VTO feature can be used. IDM-VTON works anonymously too."""
+        return True
 
     # ─────────────────────────────────────────────────────────────────────────
     # Startup validation — runs once when 'settings' is first imported
@@ -248,9 +240,6 @@ class Settings(BaseSettings):
 
         if bool(self.GOOGLE_CLIENT_ID) != bool(self.GOOGLE_CLIENT_SECRET):
             _warnings.append("GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET: only one is set — Google OAuth will fail.")
-
-        if bool(self.FACEBOOK_CLIENT_ID) != bool(self.FACEBOOK_CLIENT_SECRET):
-            _warnings.append("FACEBOOK_CLIENT_ID / FACEBOOK_CLIENT_SECRET: only one is set — Facebook OAuth will fail.")
 
         if bool(self.STRIPE_SECRET_KEY) != bool(self.STRIPE_WEBHOOK_SECRET):
             _warnings.append("STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET: only one is set — Stripe webhooks will fail.")

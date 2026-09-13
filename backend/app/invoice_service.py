@@ -39,6 +39,19 @@ def create_invoice(db: Session, order: Order, invoice_type: InvoiceType, subtota
     invoice_number = generate_invoice_number(db)
     total_amount = subtotal + delivery_fee
     
+    initial_status = InvoiceStatus.unpaid
+    paid_at = None
+    
+    if invoice_type == InvoiceType.advance and order.advance_amount >= total_amount:
+        initial_status = InvoiceStatus.paid
+        paid_at = datetime.utcnow()
+    elif invoice_type == InvoiceType.full and order.amount_paid >= order.total_amount:
+        initial_status = InvoiceStatus.paid
+        paid_at = datetime.utcnow()
+    elif invoice_type == InvoiceType.balance and order.amount_paid >= order.total_amount:
+        initial_status = InvoiceStatus.paid
+        paid_at = datetime.utcnow()
+    
     invoice = Invoice(
         invoice_number=invoice_number,
         order_id=order.id,
@@ -47,7 +60,8 @@ def create_invoice(db: Session, order: Order, invoice_type: InvoiceType, subtota
         subtotal=subtotal,
         delivery_fee=delivery_fee,
         total_amount=total_amount,
-        status=InvoiceStatus.unpaid,
+        status=initial_status,
+        paid_at=paid_at,
         due_date=datetime.utcnow() + timedelta(days=7),
     )
     

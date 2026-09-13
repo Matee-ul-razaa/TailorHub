@@ -3,6 +3,7 @@ from typing import Optional
 
 from jose import jwt
 from passlib.context import CryptContext
+from passlib.exc import UnknownHashError
 
 from .config import settings
 
@@ -14,10 +15,18 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(password: str, password_hash: Optional[str]) -> bool:
-    """Verify a plain password against a bcrypt hash. Returns False for OAuth users (no hash)."""
+    """Verify a plain password against a bcrypt hash.
+
+    Returns False for OAuth users (no hash) and for any stored hash that is not
+    a recognizable bcrypt hash (e.g. a legacy MySQL ``PASSWORD()`` value). This
+    keeps login failures at HTTP 401 instead of crashing with a 500.
+    """
     if not password_hash:
         return False
-    return pwd_context.verify(password, password_hash)
+    try:
+        return pwd_context.verify(password, password_hash)
+    except (UnknownHashError, ValueError):
+        return False
 
 
 def create_access_token(user_id: str, role: str) -> str:

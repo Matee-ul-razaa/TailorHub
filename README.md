@@ -86,8 +86,10 @@ uvicorn app.main:app --reload --port 3001
 ```
 
 ### 3. Frontend Setup
-Open a new terminal and navigate to the project root:
+Open a new terminal and navigate to the `frontend` directory:
 ```bash
+cd frontend
+
 # Install dependencies
 npm install
 
@@ -127,6 +129,7 @@ pytest --cov=app
 
 ### Frontend Tests (Vitest)
 ```bash
+cd frontend
 npm test
 ```
 - 41 tests covering API, CartContext, AuthContext, pages

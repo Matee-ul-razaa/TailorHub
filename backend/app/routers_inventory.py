@@ -53,6 +53,23 @@ def deduct_stock(
     db.refresh(item)
     return item
 
+
+@router.patch("/{item_id}/sold-out", response_model=InventoryItemOut)
+def toggle_sold_out(
+    item_id: int,
+    _admin: Session = Depends(require_role(UserRole.admin)),
+    db: Session = Depends(get_db)
+):
+    """Toggle the is_sold_out flag for an inventory item (admin only)."""
+    item = db.get(InventoryItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    item.is_sold_out = not item.is_sold_out
+    db.commit()
+    db.refresh(item)
+    return item
+
 @router.get("/alerts", response_model=List[InventoryItemOut])
 def get_low_stock_alerts(
     _admin: Session = Depends(require_role(UserRole.admin)),
