@@ -1,7 +1,11 @@
 """AI-powered body measurement extraction from photos (Gemini Vision).
 
 Accepts front and side full-body photos as base64 and returns estimated
-body measurements in inches. Requires GEMINI_API_KEY to be configured.
+body measurements in inches.
+
+Providers (tried in order):
+  1. Direct Google Gemini (gemini-2.0-flash) — fastest
+  2. OpenRouter (google/gemini-2.0-flash) — fallback when direct key has no quota
 
 The endpoint NEVER auto-saves — it only returns estimates that the
 frontend renders with an "AI estimated — verify before saving" banner.
@@ -16,6 +20,7 @@ import tempfile
 import traceback
 import uuid
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
@@ -99,6 +104,9 @@ The confidence should be:
 Include 1-3 short notes about the estimation quality.
 """
 
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL = "google/gemini-2.5-flash"
+
 
 def _parse_gemini_response(text: str) -> dict:
     """Extract the JSON object from Gemini's response, handling markdown fences."""
@@ -127,13 +135,15 @@ def extract_measurements_from_photos(
     Returns estimates only — the frontend must display them with a verification
     banner and let the user manually save after review.
     """
-    # ── Guard: GEMINI_API_KEY must be set ─────────────────────────────────────
-    if not settings.GEMINI_API_KEY:
+    # ── Guard: at least one AI provider key must be set ───────────────────────
+    has_direct = bool(settings.GEMINI_API_KEY)
+    has_openrouter = bool(settings.OPENROUTER_API_KEY)
+    if not has_direct and not has_openrouter:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=(
                 "AI Measurement extraction is not configured on this server. "
-                "Set GEMINI_API_KEY in backend/.env to enable this feature."
+                "Set GEMINI_API_KEY or OPENROUTER_API_KEY in backend/.env to enable this feature."
             ),
         )
 
@@ -163,40 +173,82 @@ def extract_measurements_from_photos(
             gender_line=gender_line,
         )
 
-        # ── Call Gemini Vision API ───────────────────────────────────────────
-        from google import genai
-        from google.genai import types
-
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
-
-        # Read image files as bytes
+        # ── Read image files as bytes ──────────────────────────────────────
         with open(front_path, "rb") as f:
             front_bytes = f.read()
         with open(side_path, "rb") as f:
             side_bytes = f.read()
 
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[
-                types.Content(
-                    role="user",
-                    parts=[
-                        types.Part.from_text(text=prompt),
-                        types.Part.from_bytes(
-                            data=front_bytes,
-                            mime_type="image/jpeg",
-                        ),
-                        types.Part.from_bytes(
-                            data=side_bytes,
-                            mime_type="image/jpeg",
-                        ),
+        # ── Provider 1: Direct Google Gemini ─────────────────────────────────
+        raw_text = None
+        provider_used = None
+
+        if has_direct:
+            try:
+                from google import genai
+                from google.genai import types
+
+                client = genai.Client(api_key=settings.GEMINI_API_KEY)
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=[
+                        types.Content(
+                            role="user",
+                            parts=[
+                                types.Part.from_text(text=prompt),
+                                types.Part.from_bytes(data=front_bytes, mime_type="image/jpeg"),
+                                types.Part.from_bytes(data=side_bytes, mime_type="image/jpeg"),
+                            ],
+                        )
                     ],
                 )
-            ],
-        )
+                raw_text = response.text
+                provider_used = "direct"
+                print(f"[AI-MEASURE] Direct Gemini raw response:\n{raw_text[:500]}")
+            except Exception as direct_err:
+                err_str = str(direct_err).lower()
+                # Only fallback on quota/rate-limit errors; bubble up other errors
+                if "429" in err_str or "quota" in err_str or "resource_exhausted" in err_str:
+                    print(f"[AI-MEASURE] Direct Gemini quota exceeded, will try OpenRouter fallback. Error: {direct_err}")
+                else:
+                    raise
 
-        raw_text = response.text
-        print(f"[AI-MEASURE] Gemini raw response:\n{raw_text[:500]}")
+        # ── Provider 2: OpenRouter fallback ──────────────────────────────────
+        if raw_text is None and has_openrouter:
+            front_b64_url = f"data:image/jpeg;base64,{base64.b64encode(front_bytes).decode()}"
+            side_b64_url = f"data:image/jpeg;base64,{base64.b64encode(side_bytes).decode()}"
+
+            or_payload = {
+                "model": OPENROUTER_MODEL,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {"type": "image_url", "image_url": {"url": front_b64_url}},
+                            {"type": "image_url", "image_url": {"url": side_b64_url}},
+                        ],
+                    }
+                ],
+                "max_tokens": 2048,
+            }
+            or_headers = {
+                "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": settings.FRONTEND_URL,
+                "X-Title": "TailorHub",
+            }
+            or_resp = httpx.post(OPENROUTER_URL, headers=or_headers, json=or_payload, timeout=120)
+            if or_resp.status_code != 200:
+                detail = or_resp.text[:300]
+                raise RuntimeError(f"OpenRouter returned {or_resp.status_code}: {detail}")
+            data = or_resp.json()
+            raw_text = data["choices"][0]["message"]["content"]
+            provider_used = "openrouter"
+            print(f"[AI-MEASURE] OpenRouter raw response:\n{raw_text[:500]}")
+
+        if raw_text is None:
+            raise RuntimeError("All AI providers failed. Please check your API keys and quotas.")
 
         # ── Parse response ───────────────────────────────────────────────────
         parsed = _parse_gemini_response(raw_text)

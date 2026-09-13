@@ -42,6 +42,7 @@ def _to_order_out(order: Order) -> OrderOut:
         deliveryAddress=order.delivery_address,
         deliveryPhone=order.delivery_phone,
         deliveryCity=order.delivery_city,
+        signatureImage=order.signature_image,
         createdAt=order.created_at,
         items=[
             OrderItemOut(
@@ -174,6 +175,9 @@ def update_order_status(
 
     previous_status = order.status.value
     order.status = payload.status
+    if payload.signature:
+        order.signature_image = payload.signature
+        
     db.commit()
     db.refresh(order)
 

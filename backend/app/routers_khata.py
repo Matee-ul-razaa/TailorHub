@@ -54,20 +54,21 @@ def add_khata_entry(
         order = db.get(Order, order_id)
         order.amount_paid = round(float(order.amount_paid) + float(payload.amount), 2)
 
-        # Mark unpaid invoices as paid if the order is now fully settled
-        remaining = round(float(order.total_amount) - float(order.amount_paid), 2)
-        unpaid_invoices = (
+        # Settle invoices based on total amount paid so far
+        paid_so_far = order.amount_paid
+        all_invoices = (
             db.query(Invoice)
-            .filter(Invoice.order_id == order_id, Invoice.status == InvoiceStatus.unpaid)
+            .filter(Invoice.order_id == order_id)
             .order_by(Invoice.created_at)
             .all()
         )
-        for inv in unpaid_invoices:
-            if remaining <= 0:
-                mark_invoice_paid(db, inv, "cash")
-            elif inv.total_amount <= remaining + 0.01:
-                mark_invoice_paid(db, inv, "cash")
-                remaining = round(remaining - float(inv.total_amount), 2)
+        for inv in all_invoices:
+            if paid_so_far >= inv.total_amount:
+                if inv.status == InvoiceStatus.unpaid:
+                    mark_invoice_paid(db, inv, "cash")
+                paid_so_far -= inv.total_amount
+            else:
+                break
 
     db.commit()
     db.refresh(entry)

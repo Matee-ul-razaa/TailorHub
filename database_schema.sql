@@ -65,6 +65,8 @@ CREATE TABLE IF NOT EXISTS products (
   featured              BOOLEAN        NOT NULL DEFAULT FALSE,
   has_waistcoat_option  BOOLEAN        NOT NULL DEFAULT FALSE,
   suit_options          TEXT           NULL,
+  brand                 VARCHAR(100)   NULL,
+  is_sold_out           BOOLEAN        NOT NULL DEFAULT FALSE,
   PRIMARY KEY (id),
   KEY idx_products_category  (category),
   KEY idx_products_featured  (featured)

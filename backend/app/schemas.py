@@ -57,6 +57,7 @@ class ProductIn(BaseModel):
     hasWaistcoatOption: bool = False
     suitOptions: Optional[list[str]]= None
     brand: Optional[str]= None
+    isSoldOut: bool = False
 
 
 class ProductOut(ProductIn):
@@ -119,6 +120,7 @@ class OrderOut(BaseModel):
     deliveryAddress: Optional[str]= None
     deliveryPhone: Optional[str]= None
     deliveryCity: Optional[str]= None
+    signatureImage: Optional[str]= None
     createdAt: datetime
     items: list[OrderItemOut]
     payment: "PaymentOut" = None
@@ -126,6 +128,7 @@ class OrderOut(BaseModel):
 
 class UpdateOrderStatusIn(BaseModel):
     status: OrderStatus
+    signature: Optional[str]= None
 
 
 class AssignOrderIn(BaseModel):
@@ -201,6 +204,7 @@ class InventoryItemIn(BaseModel):
     unit: str = "meters"
     price_per_unit: float
     threshold: float = 10.0
+    is_sold_out: bool = False
 
 class InventoryItemOut(InventoryItemIn):
     model_config = ConfigDict(from_attributes=True)
