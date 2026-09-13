@@ -91,17 +91,22 @@ async def login(provider: str, request: Request):
             detail=f"OAuth provider '{provider}' could not be initialised.",
         )
 
-    redirect_uri = request.url_for("auth_callback", provider=provider)
+    redirect_uri = str(request.url_for("auth_callback", provider=provider))
+    if request.headers.get("x-forwarded-proto") == "https" or "railway.app" in redirect_uri or not (redirect_uri.startswith("http://localhost") or redirect_uri.startswith("http://127.0.0.1")):
+        redirect_uri = redirect_uri.replace("http://", "https://", 1)
 
     # Enforce account-picker for Google to avoid silent re-use of cached sessions
     kwargs = {}
     if provider == "google":
         kwargs["prompt"] = "select_account"
 
-    return await client.authorize_redirect(request, str(redirect_uri), **kwargs)
+    return await client.authorize_redirect(request, redirect_uri, **kwargs)
 
 @router.get("/{provider}/callback", include_in_schema=False)
 async def auth_callback(provider: str, request: Request, db: Session = Depends(get_db)):
+    if request.headers.get("x-forwarded-proto") == "https" or "railway.app" in str(request.base_url):
+        request.scope["scheme"] = "https"
+
     client = oauth.create_client(provider)
     if not client:
         raise HTTPException(status_code=400, detail="Invalid provider")
