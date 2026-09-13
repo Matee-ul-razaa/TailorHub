@@ -14,35 +14,35 @@ const descriptors = [
 ];
 
 const pentCoatPalettes = [
-  ['Silver', 'Gold', 'Maroon', 'Black'],
-  ['Cream', 'Light Grey', 'Dark Grey', 'Black'],
-  ['Cream', 'Beige', 'Light Grey', 'Off White'],
-  ['Light Grey', 'Beige', 'Grey', 'Off White'],
-  ['Black', 'Cream', 'White', 'Dark Olive'],
+  ['Ivory', 'Gold', 'Maroon', 'Black'],
+  ['Navy', 'Teal', 'Charcoal', 'Olive'],
+  ['Cream', 'Rust', 'Bottle Green', 'Plum'],
+  ['Ivory', 'Gold', 'Maroon', 'Black'],
+  ['Navy', 'Teal', 'Charcoal', 'Olive'],
 ];
 
 const shalwarKameezPalettes = [
-  ['Beige', 'Mustard', 'Maroon', 'Black'],
-  ['Black', 'Charcoal', 'Jet Black', 'Brown'],
-  ['Cream', 'Light Grey', 'Dark Teal', 'Plum'],
-  ['Pink', 'Tan', 'Burgundy', 'Black'],
-  ['Black', 'Jet Black', 'Dark Charcoal', 'Midnight Blue'],
+  ['Off White', 'Charcoal', 'Navy', 'Olive'],
+  ['Stone', 'Chocolate', 'Graphite', 'Ice Blue'],
+  ['Cream', 'Black', 'Khaki', 'Sage'],
+  ['Off White', 'Charcoal', 'Navy', 'Olive'],
+  ['Stone', 'Chocolate', 'Graphite', 'Ice Blue'],
 ];
 
 const unstitchedPentCoatPalettes = [
-  ['Cream', 'Grey', 'Black', 'Maroon'],
-  ['Black', 'Dark Charcoal', 'Charcoal', 'Light Charcoal'],
-  ['Cream', 'Brown', 'Black', 'Charcoal'],
-  ['Plum', 'Rust', 'Dark Maroon', 'Black'],
-  ['Midnight Blue', 'Jet Black', 'Black', 'Dark Olive'],
+  ['Ivory', 'Gold', 'Maroon', 'Black'],
+  ['Navy', 'Teal', 'Charcoal', 'Olive'],
+  ['Cream', 'Rust', 'Bottle Green', 'Plum'],
+  ['Ivory', 'Gold', 'Maroon', 'Black'],
+  ['Navy', 'Teal', 'Charcoal', 'Olive'],
 ];
 
 const unstitchedShalwarKameezPalettes = [
-  ['Plum', 'Grey', 'Maroon', 'Charcoal'],
-  ['Dark Teal', 'Deep Charcoal', 'Charcoal', 'Light Charcoal'],
-  ['Cream', 'Maroon', 'Dark Teal', 'Charcoal'],
-  ['Dusty Rose', 'Rust', 'Dark Brown', 'Black'],
-  ['Navy', 'Steel Grey', 'Charcoal', 'Black'],
+  ['Off White', 'Charcoal', 'Navy', 'Olive'],
+  ['Stone', 'Chocolate', 'Graphite', 'Ice Blue'],
+  ['Cream', 'Black', 'Khaki', 'Sage'],
+  ['Off White', 'Charcoal', 'Navy', 'Olive'],
+  ['Stone', 'Chocolate', 'Graphite', 'Ice Blue'],
 ];
 
 const categorySeeds = {
