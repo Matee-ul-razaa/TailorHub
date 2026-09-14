@@ -68,10 +68,21 @@ const measurementTemplates = {
   },
 };
 
-const tutorialVideos = [
-  { title: 'How to Measure a Shirt Correctly', url: 'https://www.youtube.com/embed/C4zY6rzA4iA' },
-  { title: 'Pant & Waist Measurement Guide', url: 'https://www.youtube.com/embed/q-Rv4f3xvJQ' },
-];
+const getCategoryTutorial = (category) => {
+  if (category === 'pent-coat' || category === 'unstitched-pent-coat') {
+    return {
+      title: 'Pent Coat Measurement Guide',
+      embedUrl: 'https://www.youtube.com/embed/_8CsQNTHN5w',
+      watchUrl: 'https://youtube.com/shorts/_8CsQNTHN5w?si=bkSWp-rJLfHL9fBU',
+    };
+  }
+  // Default / shalwar kameez
+  return {
+    title: 'Measurement Guide Tutorial',
+    embedUrl: 'https://www.youtube.com/embed/O_gDvfG7iQM',
+    watchUrl: 'https://www.youtube.com/watch?v=O_gDvfG7iQM',
+  };
+};
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -81,6 +92,7 @@ const ProductDetail = () => {
   const { language, t } = useLanguage();
   const product = products?.find(p => p.id === id);
   const ref = useScrollAnim();
+  const categoryTutorial = getCategoryTutorial(product?.category);
 
   const [mode, setMode] = useState('ready-to-wear');
   const [size, setSize] = useState('');
@@ -373,22 +385,28 @@ const ProductDetail = () => {
                 </div>
 
                 <div>
-                  <h6 className="fw-medium small mb-2">{t('product.measurementTutorial', 'Measurement Tutorials')}</h6>
-                  <div className="row g-3">
-                    {tutorialVideos.map(video => (
-                      <div key={video.url} className="col-md-6">
-                        <div className="rounded-3 overflow-hidden border" style={{ aspectRatio: '16/9' }}>
-                          <iframe
-                            src={video.url}
-                            title={video.title}
-                            className="w-100 h-100"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          />
-                        </div>
-                        <p className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>{video.title}</p>
-                      </div>
-                    ))}
+                  <h6 className="fw-medium small mb-2">{t('product.measurementTutorial', 'Measurement Tutorial')}</h6>
+                  <div style={{ maxWidth: 440 }}>
+                    <div className="rounded-3 overflow-hidden border shadow-sm" style={{ aspectRatio: '16/9', background: '#000' }}>
+                      <iframe
+                        src={categoryTutorial.embedUrl}
+                        title={categoryTutorial.title}
+                        className="w-100 h-100"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                    <div className="d-flex align-items-center justify-content-between mt-2">
+                      <p className="text-muted mb-0 small fw-medium">{categoryTutorial.title}</p>
+                      <a
+                        href={categoryTutorial.watchUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-accent small text-decoration-none fw-medium"
+                      >
+                        Watch on YouTube ↗
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
