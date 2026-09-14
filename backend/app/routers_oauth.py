@@ -59,12 +59,36 @@ def create_temp_registration_token(email: str, name: str, provider: str, oauth_i
     return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 
+def resolve_frontend_url(request: Request) -> str:
+    origin = (
+        request.session.get("oauth_origin")
+        or request.query_params.get("origin")
+        or settings.FRONTEND_URL
+        or "https://frontend-omega-six-42.vercel.app"
+    ).rstrip("/")
+
+    # If the URL is an internal/protected Vercel preview deployment, automatically use the public production domain
+    if "frontend-hvg2vxuru" in origin:
+        return "https://frontend-omega-six-42.vercel.app"
+
+    return origin
+
+
 @router.get("/{provider}/login")
 async def login(provider: str, request: Request):
     """
     Initiate OAuth login for the given provider.
     Returns HTTP 503 if the provider credentials are not configured.
     """
+    # Track frontend origin for redirect after authentication
+    origin = request.query_params.get("origin") or ""
+    if not origin:
+        referer = request.headers.get("referer") or ""
+        if referer:
+            origin = referer.split("/login")[0].rstrip("/")
+    if origin:
+        request.session["oauth_origin"] = origin
+
     # Feature-flag guard — check credentials before attempting OAuth dance
     _PROVIDER_ENABLED = {
         "google": settings.google_oauth_enabled,
@@ -107,6 +131,8 @@ async def auth_callback(provider: str, request: Request, db: Session = Depends(g
     if request.headers.get("x-forwarded-proto") == "https" or "railway.app" in str(request.base_url):
         request.scope["scheme"] = "https"
 
+    target_frontend = resolve_frontend_url(request)
+
     client = oauth.create_client(provider)
     if not client:
         raise HTTPException(status_code=400, detail="Invalid provider")
@@ -117,7 +143,7 @@ async def auth_callback(provider: str, request: Request, db: Session = Depends(g
         print(f"[OAuth] Error during {provider} callback: {e}")
         # Redirect to login with a user-friendly error — avoids a blank JSON error page
         return RedirectResponse(
-            url=f"{settings.FRONTEND_URL}/login?error=oauth_failed",
+            url=f"{target_frontend}/login?error=oauth_failed",
             status_code=302,
         )
 
@@ -171,7 +197,7 @@ async def auth_callback(provider: str, request: Request, db: Session = Depends(g
     access_token = create_access_token(user.id, user.role.value)
     code = secrets.token_urlsafe(32)
     _oauth_code_store[code] = access_token
-    return RedirectResponse(url=f"{settings.FRONTEND_URL}/auth-success?code={code}", status_code=302)
+    return RedirectResponse(url=f"{target_frontend}/auth-success?code={code}", status_code=302)
 
 @router.post("/oauth-complete", response_model=AuthTokenOut)
 def complete_oauth_profile(payload: CompleteProfileIn, db: Session = Depends(get_db)):
