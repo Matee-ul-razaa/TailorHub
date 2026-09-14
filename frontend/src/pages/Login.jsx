@@ -64,7 +64,8 @@ const Login = () => {
 
   const handleSocialLogin = (provider) => {
     const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
-    window.location.href = `${API_BASE_URL}/api/auth/${provider}/login`;
+    const origin = window.location.origin;
+    window.location.href = `${API_BASE_URL}/api/auth/${provider}/login?origin=${encodeURIComponent(origin)}`;
   };
 
   const handleSubmit = async (e) => {
