@@ -36,14 +36,14 @@ const GARMENT_FIELDS = {
   'pent-coat': {
     label: 'Pent Coat',
     fields: [
-      { key: 'coatLength', label: 'Coat Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'chest', label: 'Chest', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'waist', label: 'Waist', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'hip', label: 'Hip', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'shoulder', label: 'Shoulder', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'sleeveLength', label: 'Sleeve Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'neck', label: 'Neck', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'pantLength', label: 'Pant Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
+      { key: 'coatLength', label: 'Coat Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
+      { key: 'chest', label: 'Chest', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
+      { key: 'waist', label: 'Waist', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
+      { key: 'hip', label: 'Hip', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
+      { key: 'shoulder', label: 'Shoulder', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
+      { key: 'sleeveLength', label: 'Sleeve Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
+      { key: 'neck', label: 'Neck', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
+      { key: 'pantLength', label: 'Pant Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
     ],
   },
   'shalwar-kameez': {
