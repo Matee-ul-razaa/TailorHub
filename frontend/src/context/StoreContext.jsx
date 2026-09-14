@@ -44,9 +44,11 @@ const computeConfiguredUnitPrice = (item) => {
 
 const normalizeTeamMember = (item) => ({
   id: item.id,
-  fullName: item.full_name || item.fullName || '',
+  fullName: item.full_name || item.fullName || (item.email ? item.email.split('@')[0] : 'Customer'),
   email: item.email,
-  role: item.role,
+  role: String(item.role || 'customer').toLowerCase(),
+  emailVerified: Boolean(item.email_verified ?? item.emailVerified),
+  createdAt: item.created_at || item.createdAt || null,
 });
 
 export const StoreProvider = ({ children }) => {
@@ -115,19 +117,29 @@ export const StoreProvider = ({ children }) => {
         try {
           const members = await apiRequest('/api/users/team');
           setTeamMembers(members.map(normalizeTeamMember));
-          
+        } catch (err) {
+          console.error('Failed to load team/users:', err);
+        }
+
+        try {
           const inv = await apiRequest('/api/inventory');
-          setInventory(inv);
-          
+          setInventory(inv || []);
+        } catch (err) {
+          console.error('Failed to load inventory:', err);
+        }
+
+        try {
           const exp = await apiRequest('/api/khata/expenses');
-          setExpenses(exp);
-          
+          setExpenses(exp || []);
+        } catch (err) {
+          console.error('Failed to load expenses:', err);
+        }
+
+        try {
           const summary = await apiRequest('/api/khata/summary');
-          setKhataSummary(summary);
-        } catch (_error) {
-          setTeamMembers([]);
-          setInventory([]);
-          setExpenses([]);
+          setKhataSummary(summary || { total_revenue: 0, outstanding_balance: 0, total_expenses: 0, net_profit: 0 });
+        } catch (err) {
+          console.error('Failed to load khata summary:', err);
         }
       } else {
         setTeamMembers([]);
@@ -144,6 +156,17 @@ export const StoreProvider = ({ children }) => {
     orders,
     teamMembers,
     invoices,
+    refreshTeamMembers: async () => {
+      try {
+        const members = await apiRequest('/api/users/team');
+        const normalized = members.map(normalizeTeamMember);
+        setTeamMembers(normalized);
+        return normalized;
+      } catch (e) {
+        console.error('Failed to refresh team members:', e);
+        return [];
+      }
+    },
     refreshInvoices: async () => {
       try {
         const data = await apiRequest('/api/invoices');

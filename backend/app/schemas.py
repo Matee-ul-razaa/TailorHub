@@ -33,10 +33,11 @@ class AuthTokenOut(BaseModel):
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
-    email: EmailStr
+    email: str
     full_name: Optional[str] = None
     role: UserRole
     email_verified: bool
+    created_at: Optional[datetime] = None
 
 
 # ── Products ──────────────────────────────────────────────────────────────────
