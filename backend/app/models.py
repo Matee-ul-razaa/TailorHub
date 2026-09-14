@@ -58,6 +58,13 @@ class InvoiceStatus(str, Enum):
     cancelled = "cancelled"
 
 
+class AppointmentStatus(str, Enum):
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
+    completed = "completed"
+
+
 class OTPPurpose(str, Enum):
     email_verification = "email_verification"
     password_reset = "password_reset"
@@ -90,6 +97,27 @@ class User(Base):
     oauth_id: Mapped[str] = mapped_column(String(255), nullable=True, index=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    appointments: Mapped[list["Appointment"]] = relationship("Appointment", back_populates="user", cascade="all, delete-orphan")
+
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    customer_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    customer_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    phone: Mapped[str] = mapped_column(String(30), nullable=False)
+    appointment_date: Mapped[str] = mapped_column(String(20), nullable=False)
+    time_slot: Mapped[str] = mapped_column(String(50), nullable=False)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+    status: Mapped[AppointmentStatus] = mapped_column(SqlEnum(AppointmentStatus), default=AppointmentStatus.pending, nullable=False, index=True)
+    admin_notes: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    user: Mapped[User] = relationship("User", back_populates="appointments")
 
 
 class Product(Base):

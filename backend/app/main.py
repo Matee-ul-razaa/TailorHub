@@ -2,9 +2,13 @@ import json
 import asyncio
 
 from fastapi import FastAPI
-import sentry_sdk
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+    HAVE_SENTRY = True
+except ImportError:
+    HAVE_SENTRY = False
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
@@ -25,6 +29,7 @@ from .routers_vto import router as vto_router
 from .routers_inventory import router as inventory_router
 from .routers_khata import router as khata_router
 from .routers_admin import router as admin_router
+from .routers_appointments import router as appointments_router
 from .routers_notifications import router as notifications_router
 from .routers_ai_measurements import router as ai_measurements_router
 from .routers_analytics import router as analytics_router
@@ -33,7 +38,7 @@ from .services.otp_service import cleanup_expired_otps
 from .config import logger, settings
 
 # Initialize Sentry if DSN is configured
-if settings.SENTRY_DSN:
+if HAVE_SENTRY and settings.SENTRY_DSN:
     sentry_sdk.init(
         dsn=settings.SENTRY_DSN,
         environment=settings.SENTRY_ENVIRONMENT,
@@ -76,12 +81,12 @@ def seed_defaults(db: Session):
 
 @app.on_event("startup")
 def on_startup():
-    """Seed default data on startup.
+    """Seed default data and ensure tables exist on startup."""
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        logger.warning(f"Metadata table creation warning: {e}")
 
-    NOTE: Schema changes are handled exclusively by Alembic migrations.
-    Run `alembic upgrade head` before starting the server for the first time
-    or after pulling new migrations.
-    """
     db = SessionLocal()
     try:
         seed_defaults(db)
@@ -146,6 +151,7 @@ app.include_router(users_router)
 app.include_router(vto_router)
 app.include_router(inventory_router)
 app.include_router(notifications_router)
+app.include_router(appointments_router)
 app.include_router(admin_router)
 app.include_router(analytics_router)
 app.include_router(khata_router)

@@ -168,6 +168,75 @@ const AdminDashboard = () => {
     }
   };
 
+  // ── Appointment state ──
+  const [appointments, setAppointments] = useState([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [appointmentFilter, setAppointmentFilter] = useState('all'); // all | pending | approved | rejected | completed
+  const [appointmentSearch, setAppointmentSearch] = useState('');
+
+  const fetchAppointments = async () => {
+    if (!token) return;
+    setAppointmentsLoading(true);
+    try {
+      const data = await apiRequest('/api/appointments', { token });
+      setAppointments(data || []);
+    } catch (e) {
+      console.error('Failed to load appointments:', e);
+    } finally {
+      setAppointmentsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [token]);
+
+  const updateAppointmentStatus = async (id, status, adminNotes = '') => {
+    try {
+      await apiRequest(`/api/appointments/${id}/status`, {
+        method: 'PATCH',
+        token,
+        body: { status, admin_notes: adminNotes },
+      });
+      toast.success(`Appointment marked as ${status}!`);
+      fetchAppointments();
+    } catch (err) {
+      toast.error(err.message || 'Failed to update appointment');
+    }
+  };
+
+  const deleteAppointment = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this appointment request?')) return;
+    try {
+      await apiRequest(`/api/appointments/${id}`, {
+        method: 'DELETE',
+        token,
+      });
+      toast.success('Appointment deleted');
+      fetchAppointments();
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete appointment');
+    }
+  };
+
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter(a => {
+      const matchesFilter = appointmentFilter === 'all' || a.status === appointmentFilter;
+      const q = appointmentSearch.toLowerCase().trim();
+      const matchesSearch = !q ||
+        a.customer_name?.toLowerCase().includes(q) ||
+        a.customer_email?.toLowerCase().includes(q) ||
+        a.phone?.toLowerCase().includes(q) ||
+        a.appointment_date?.toLowerCase().includes(q) ||
+        a.notes?.toLowerCase().includes(q);
+      return matchesFilter && matchesSearch;
+    });
+  }, [appointments, appointmentFilter, appointmentSearch]);
+
+  const pendingAppointmentsCount = useMemo(() => {
+    return appointments.filter(a => a.status === 'pending').length;
+  }, [appointments]);
+
   // ── Orders tab filters ──
   const [orderFilter, setOrderFilter] = useState('all'); // all | assigned | unassigned
   const [orderSearch, setOrderSearch] = useState('');
@@ -335,6 +404,15 @@ const AdminDashboard = () => {
           <TabsList>
             <TabsTrigger value="orders">{t('admin.orders', 'Orders')}</TabsTrigger>
             <TabsTrigger value="customers"><Users size={14} className="me-1" /> {t('admin.customers', 'Customers')}</TabsTrigger>
+            <TabsTrigger value="appointments">
+              <Calendar size={14} className="me-1" />
+              {t('admin.appointments', 'Appointments')}
+              {pendingAppointmentsCount > 0 && (
+                <span className="badge rounded-pill bg-warning text-dark ms-1" style={{ fontSize: '0.68rem', padding: '2px 6px' }}>
+                  {pendingAppointmentsCount}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="khata"><BookOpen size={14} className="me-1" /> {t('admin.khataTab')}</TabsTrigger>
             <TabsTrigger value="invoices"><FileText size={14} className="me-1" /> {t('admin.invoicesTab')}</TabsTrigger>
             <TabsTrigger value="inventory"><Package size={14} className="me-1" /> {t('admin.inventoryTab')}</TabsTrigger>
@@ -1040,6 +1118,193 @@ const AdminDashboard = () => {
               </div>
             </div>
           </TabsContent>
+
+          {/* ── APPOINTMENTS TAB ── */}
+          <TabsContent value="appointments">
+            <div className="th-card-static p-4">
+              <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                  <h5 className="font-playfair fw-semibold mb-1 d-flex align-items-center gap-2">
+                    <Calendar className="text-accent" size={20} />
+                    {t('admin.appointments.title', 'Customer Measurement Appointments')}
+                  </h5>
+                  <p className="text-muted small mb-0">
+                    {t('admin.appointments.desc', 'Review, approve, or decline customer appointment requests for in-person measurements.')}
+                  </p>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-muted small">
+                    {filteredAppointments.length} of {appointments.length}
+                  </span>
+                  <Button variant="outline" size="sm" onClick={fetchAppointments} disabled={appointmentsLoading}>
+                    {appointmentsLoading ? <Loader2 size={14} className="anim-spin me-1" /> : null}
+                    Refresh
+                  </Button>
+                </div>
+              </div>
+
+              {/* Filter tabs + Search */}
+              <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
+                <div className="btn-group" role="group">
+                  {[
+                    { key: 'all', label: 'All', count: appointments.length },
+                    { key: 'pending', label: 'Pending', count: appointments.filter(a => a.status === 'pending').length },
+                    { key: 'approved', label: 'Approved', count: appointments.filter(a => a.status === 'approved').length },
+                    { key: 'rejected', label: 'Declined', count: appointments.filter(a => a.status === 'rejected').length },
+                    { key: 'completed', label: 'Completed', count: appointments.filter(a => a.status === 'completed').length },
+                  ].map(f => (
+                    <button
+                      key={f.key}
+                      type="button"
+                      className={`btn btn-sm ${appointmentFilter === f.key ? 'btn-dark' : 'btn-outline-secondary'}`}
+                      onClick={() => setAppointmentFilter(f.key)}
+                    >
+                      {f.label} ({f.count})
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  className="th-input"
+                  placeholder="Search by customer, email, phone, date..."
+                  value={appointmentSearch}
+                  onChange={e => setAppointmentSearch(e.target.value)}
+                  style={{ maxWidth: 320, flex: 1 }}
+                />
+                {(appointmentFilter !== 'all' || appointmentSearch) && (
+                  <Button variant="ghost" size="sm" onClick={() => { setAppointmentFilter('all'); setAppointmentSearch(''); }}>
+                    Reset
+                  </Button>
+                )}
+              </div>
+
+              {/* Table of Appointments */}
+              {appointmentsLoading ? (
+                <div className="text-center py-5">
+                  <Loader2 className="anim-spin text-accent mb-2" size={32} />
+                  <p className="text-muted small mb-0">Loading appointments...</p>
+                </div>
+              ) : filteredAppointments.length === 0 ? (
+                <div className="text-center py-5 border rounded-3 text-muted">
+                  <Calendar size={36} className="mb-2 opacity-50 text-accent" />
+                  <p className="mb-0">No appointments found matching your filter.</p>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle mb-0">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Customer</th>
+                        <th>Preferred Date & Time</th>
+                        <th>Phone</th>
+                        <th>Customer Notes</th>
+                        <th>Status</th>
+                        <th className="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAppointments.map(appt => {
+                        const statusColors = {
+                          pending: { bg: 'rgba(234,179,8,0.12)', color: '#ca8a04', text: 'Pending Approval' },
+                          approved: { bg: 'rgba(34,197,94,0.12)', color: '#16a34a', text: 'Approved' },
+                          rejected: { bg: 'rgba(239,68,68,0.12)', color: '#dc2626', text: 'Declined' },
+                          completed: { bg: 'rgba(59,130,246,0.12)', color: '#2563eb', text: 'Completed' },
+                        };
+                        const sc = statusColors[appt.status] || statusColors.pending;
+
+                        return (
+                          <tr key={appt.id}>
+                            <td>
+                              <div className="fw-semibold">{appt.customer_name}</div>
+                              <div className="text-muted small">{appt.customer_email}</div>
+                            </td>
+                            <td>
+                              <div className="fw-medium text-dark">{appt.appointment_date}</div>
+                              <div className="text-muted small">{appt.time_slot}</div>
+                            </td>
+                            <td>
+                              <span className="font-monospace small">{appt.phone}</span>
+                            </td>
+                            <td style={{ maxWidth: 220 }}>
+                              <div className="small text-truncate" title={appt.notes || ''}>
+                                {appt.notes || <span className="text-muted italic">—</span>}
+                              </div>
+                              {appt.admin_notes && (
+                                <div className="text-muted small fst-italic">
+                                  Admin: {appt.admin_notes}
+                                </div>
+                              )}
+                            </td>
+                            <td>
+                              <span
+                                className="badge px-2 py-1 rounded-pill"
+                                style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.color}33` }}
+                              >
+                                {sc.text}
+                              </span>
+                            </td>
+                            <td className="text-end">
+                              <div className="d-inline-flex align-items-center gap-1">
+                                {appt.status === 'pending' && (
+                                  <>
+                                    <button
+                                      className="btn btn-sm btn-success text-white py-1 px-2"
+                                      onClick={() => updateAppointmentStatus(appt.id, 'approved')}
+                                      title="Approve Appointment"
+                                    >
+                                      Approve
+                                    </button>
+                                    <button
+                                      className="btn btn-sm btn-outline-danger py-1 px-2"
+                                      onClick={() => {
+                                        const reason = window.prompt('Reason for declining (optional):');
+                                        if (reason !== null) updateAppointmentStatus(appt.id, 'rejected', reason);
+                                      }}
+                                      title="Decline Appointment"
+                                    >
+                                      Decline
+                                    </button>
+                                  </>
+                                )}
+                                {appt.status === 'approved' && (
+                                  <>
+                                    <button
+                                      className="btn btn-sm btn-outline-primary py-1 px-2"
+                                      onClick={() => updateAppointmentStatus(appt.id, 'completed')}
+                                      title="Mark Completed"
+                                    >
+                                      Complete
+                                    </button>
+                                    <button
+                                      className="btn btn-sm btn-outline-secondary py-1 px-2"
+                                      onClick={() => updateAppointmentStatus(appt.id, 'rejected')}
+                                      title="Cancel Approval"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-muted p-1"
+                                  onClick={() => deleteAppointment(appt.id)}
+                                  title="Delete Record"
+                                >
+                                  <Trash2 size={15} />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
           {/* ── SETTINGS TAB ── */}
           <TabsContent value="settings">
             <div className="th-card-static p-4">
