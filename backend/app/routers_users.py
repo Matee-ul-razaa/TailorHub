@@ -10,36 +10,60 @@ from .security import hash_password
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 
+def _safe_user_out(user: User) -> UserOut:
+    role_val = user.role
+    if isinstance(role_val, str):
+        try:
+            role_val = UserRole(role_val.lower())
+        except Exception:
+            role_val = UserRole.customer
+    elif not isinstance(role_val, UserRole):
+        role_val = UserRole.customer
+
+    return UserOut(
+        id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        role=role_val,
+        email_verified=bool(user.email_verified),
+        created_at=user.created_at,
+    )
+
+
 @router.get("/team", response_model=list[UserOut])
 def team_members(_admin: User = Depends(require_role(UserRole.admin)), db: Session = Depends(get_db)):
     users = db.query(User).order_by(User.created_at.desc()).all()
-    return [
-        UserOut(
-            id=user.id,
-            email=user.email,
-            full_name=user.full_name,
-            role=user.role,
-            email_verified=bool(user.email_verified),
-            created_at=user.created_at,
-        )
-        for user in users
-    ]
+    return [_safe_user_out(u) for u in users]
+
+
+@router.get("/delivery-riders", response_model=list[UserOut])
+def list_delivery_riders(
+    _user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    users = db.query(User).filter(User.role == UserRole.delivery).order_by(User.created_at.desc()).all()
+    if not users:
+        # Check if default rider exists
+        rider = db.query(User).filter(User.email == "rider@tailorhub.pk").first()
+        if not rider:
+            rider = User(
+                email="rider@tailorhub.pk",
+                password_hash=hash_password("Rider@123456"),
+                full_name="Delivery Rider",
+                role=UserRole.delivery,
+                email_verified=True,
+            )
+            db.add(rider)
+            db.commit()
+            db.refresh(rider)
+        users = [rider]
+    return [_safe_user_out(u) for u in users]
 
 
 @router.get("/customers", response_model=list[UserOut])
 def list_customers(_admin: User = Depends(require_role(UserRole.admin)), db: Session = Depends(get_db)):
     users = db.query(User).filter(User.role == UserRole.customer).order_by(User.created_at.desc()).all()
-    return [
-        UserOut(
-            id=user.id,
-            email=user.email,
-            full_name=user.full_name,
-            role=user.role,
-            email_verified=bool(user.email_verified),
-            created_at=user.created_at,
-        )
-        for user in users
-    ]
+    return [_safe_user_out(u) for u in users]
 
 
 @router.post("/team", response_model=UserOut)

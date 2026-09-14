@@ -53,6 +53,7 @@ const AdminDashboard = () => {
   const {
     products,
     orders,
+    refreshOrders,
     teamMembers,
     refreshTeamMembers,
     addProduct,
@@ -161,6 +162,20 @@ const AdminDashboard = () => {
       toast.error('Failed to refresh customers');
     } finally {
       setRefreshingCustomers(false);
+    }
+  };
+
+  const [refreshingOrders, setRefreshingOrders] = useState(false);
+  const handleRefreshOrders = async () => {
+    setRefreshingOrders(true);
+    try {
+      if (refreshOrders) await refreshOrders();
+      if (refreshTeamMembers) await refreshTeamMembers();
+      toast.success('Orders & riders updated');
+    } catch (e) {
+      toast.error('Failed to refresh orders');
+    } finally {
+      setRefreshingOrders(false);
     }
   };
 
@@ -502,6 +517,16 @@ const AdminDashboard = () => {
                   onChange={e => setOrderSearch(e.target.value)}
                   style={{ maxWidth: 320, flex: 1 }}
                 />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshOrders}
+                  disabled={refreshingOrders}
+                  className="d-flex align-items-center gap-1"
+                >
+                  <RefreshCw size={14} className={refreshingOrders ? 'anim-spin' : ''} />
+                  Refresh
+                </Button>
                 {(orderFilter !== 'all' || orderSearch) && (
                   <Button variant="ghost" size="sm" onClick={() => { setOrderFilter('all'); setOrderSearch(''); }}>
                     Reset
@@ -601,13 +626,39 @@ const AdminDashboard = () => {
                         </div>
                         {/* Assign Delivery */}
                         <div className="col-md-3">
-                          <select className="th-select" value={order.assignedTo || 'unassigned'}
-                            onChange={async e => { try { await assignOrder(order.id, e.target.value === 'unassigned' ? '' : e.target.value); } catch (error) { toast.error(error.message || 'Unable to assign'); } }}>
-                            <option value="unassigned">Unassigned</option>
-                            {teamMembers.filter(m => m.role === 'delivery').map(m => (
-                              <option key={m.id} value={m.id}>{m.fullName || m.email}</option>
-                            ))}
-                          </select>
+                          {(() => {
+                            const riders = teamMembers.filter(m => (m.role || '').toLowerCase() === 'delivery');
+                            return (
+                              <select className="th-select" value={order.assignedTo || 'unassigned'}
+                                onChange={async e => {
+                                  const val = e.target.value === 'unassigned' ? '' : e.target.value;
+                                  try {
+                                    await assignOrder(order.id, val);
+                                    if (val) {
+                                      const r = riders.find(x => x.id === val);
+                                      toast.success(`Order assigned to ${r?.fullName || 'Delivery Rider'}!`);
+                                    } else {
+                                      toast.success('Order unassigned');
+                                    }
+                                  } catch (error) {
+                                    toast.error(error.message || 'Unable to assign');
+                                  }
+                                }}>
+                                <option value="unassigned">Unassigned</option>
+                                {riders.map(m => (
+                                  <option key={m.id} value={m.id}>{m.fullName || m.email}</option>
+                                ))}
+                                {riders.length === 0 && (
+                                  <option value="f069dc21-8495-49ba-98ff-87daa8b126ad">Delivery Rider (rider@tailorhub.pk)</option>
+                                )}
+                                {order.assignedTo && !riders.some(m => m.id === order.assignedTo) && order.assignedTo !== 'f069dc21-8495-49ba-98ff-87daa8b126ad' && (
+                                  <option value={order.assignedTo}>
+                                    {assignedRider?.fullName || `Assigned Rider (${order.assignedTo.slice(0, 8)})`}
+                                  </option>
+                                )}
+                              </select>
+                            );
+                          })()}
                         </div>
                         {/* Generate Invoice */}
                         <div className="col-md-3">
