@@ -6,7 +6,7 @@ import { useStore } from '@/context/StoreContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Pencil, ShoppingBag, Trash2, Users, Package, TrendingUp, FileText, BookOpen, Download, Settings, KeyRound, Clock, Loader2, Eye, ChevronDown, ChevronUp, Calendar, CreditCard, Shield, Activity, UserCheck } from 'lucide-react';
+import { Pencil, ShoppingBag, Trash2, Users, Package, TrendingUp, FileText, BookOpen, Download, Settings, KeyRound, Clock, Loader2, Eye, ChevronDown, ChevronUp, Calendar, CreditCard, Shield, Activity, UserCheck, RefreshCw, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { categories } from '@/data/products';
 import useScrollAnim from '@/hooks/useScrollAnim';
@@ -54,6 +54,7 @@ const AdminDashboard = () => {
     products,
     orders,
     teamMembers,
+    refreshTeamMembers,
     addProduct,
     updateProduct,
     deleteProduct,
@@ -145,16 +146,51 @@ const AdminDashboard = () => {
   const [auditLogs, setAuditLogs] = useState([]);
   const [auditLoading, setAuditLoading] = useState(false);
 
-  // ── Customer data computed ──
+  // ── Customer state & data computed ──
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [refreshingCustomers, setRefreshingCustomers] = useState(false);
+
+  const handleRefreshCustomers = async () => {
+    setRefreshingCustomers(true);
+    try {
+      if (refreshTeamMembers) {
+        await refreshTeamMembers();
+        toast.success('Customer list refreshed');
+      }
+    } catch (e) {
+      toast.error('Failed to refresh customers');
+    } finally {
+      setRefreshingCustomers(false);
+    }
+  };
+
   const customerData = useMemo(() => {
-    const customers = teamMembers.filter(m => m.role === 'customer');
+    const customers = teamMembers.filter(m => (m.role || '').toLowerCase() === 'customer');
     return customers.map(c => {
-      const custOrders = orders.filter(o => o.customer_id === c.id || o.customerEmail === c.email);
+      const custOrders = orders.filter(o => 
+        o.customer_id === c.id || 
+        (c.email && o.customerEmail && o.customerEmail.toLowerCase() === c.email.toLowerCase())
+      );
       const totalSpent = custOrders.reduce((s, o) => s + (o.totalAmount || 0), 0);
       const outstanding = custOrders.reduce((s, o) => s + Math.max(0, (o.totalAmount || 0) - (o.amountPaid || 0)), 0);
       return { ...c, orderCount: custOrders.length, totalSpent, outstanding };
-    }).sort((a, b) => b.totalSpent - a.totalSpent);
+    }).sort((a, b) => {
+      if (a.createdAt && b.createdAt) {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return b.totalSpent - a.totalSpent;
+    });
   }, [teamMembers, orders]);
+
+  const filteredCustomers = useMemo(() => {
+    if (!customerSearch.trim()) return customerData;
+    const q = customerSearch.toLowerCase();
+    return customerData.filter(c => 
+      (c.fullName && c.fullName.toLowerCase().includes(q)) ||
+      (c.email && c.email.toLowerCase().includes(q)) ||
+      (c.id && String(c.id).toLowerCase().includes(q))
+    );
+  }, [customerData, customerSearch]);
 
   const fetchAuditLogs = async () => {
     setAuditLoading(true);
@@ -189,6 +225,9 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchAppointments();
+    if (refreshTeamMembers) {
+      refreshTeamMembers();
+    }
   }, [token]);
 
   const updateAppointmentStatus = async (id, status, adminNotes = '') => {
@@ -605,55 +644,123 @@ const AdminDashboard = () => {
           <TabsContent value="customers">
             <div className="th-card-static p-4">
               <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-                <h5 className="font-playfair fw-semibold mb-0">{t('admin.customers', 'Customer Management')}</h5>
-                <span className="text-muted small">{customerData.length} customers</span>
+                <div>
+                  <h5 className="font-playfair fw-semibold mb-1">{t('admin.customers', 'Customer Management')}</h5>
+                  <p className="text-muted small mb-0">Total registered customers: <strong>{customerData.length}</strong></p>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  <div className="input-group input-group-sm" style={{ minWidth: '220px', maxWidth: '300px' }}>
+                    <span className="input-group-text bg-light border-end-0">
+                      <Search size={14} className="text-muted" />
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control bg-light border-start-0 ps-0"
+                      placeholder="Search by name, email..."
+                      value={customerSearch}
+                      onChange={(e) => setCustomerSearch(e.target.value)}
+                    />
+                    {customerSearch && (
+                      <button
+                        className="btn btn-sm bg-light border-start-0 text-muted"
+                        type="button"
+                        onClick={() => setCustomerSearch('')}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefreshCustomers}
+                    disabled={refreshingCustomers}
+                    className="d-flex align-items-center gap-1.5"
+                  >
+                    <RefreshCw size={14} className={refreshingCustomers ? 'animate-spin' : ''} />
+                    <span>{refreshingCustomers ? 'Refreshing...' : 'Refresh'}</span>
+                  </Button>
+                </div>
               </div>
 
-              {customerData.length === 0 && (
-                <p className="py-5 text-center text-muted">No customers registered yet</p>
-              )}
-
-              <div className="table-responsive">
-                <table className="table table-borderless small mb-0">
-                  <thead>
-                    <tr className="border-bottom">
-                      <th className="text-muted pb-2">Customer</th>
-                      <th className="text-muted pb-2 text-center">Orders</th>
-                      <th className="text-muted pb-2 text-end">Total Spent</th>
-                      <th className="text-muted pb-2 text-end">Outstanding</th>
-                      <th className="text-muted pb-2 text-center">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {customerData.map(c => (
-                      <tr key={c.id} className="border-bottom" style={{ borderColor: 'rgba(0,0,0,0.03)' }}>
-                        <td className="py-3">
-                          <div className="fw-medium">{c.fullName || '—'}</div>
-                          <div className="text-muted x-small">{c.email}</div>
-                        </td>
-                        <td className="py-3 text-center">
-                          <span className="th-badge th-badge-soft">{c.orderCount}</span>
-                        </td>
-                        <td className="py-3 text-end fw-medium">
-                          Rs. {c.totalSpent.toLocaleString()}
-                        </td>
-                        <td className="py-3 text-end fw-bold" style={{ color: c.outstanding > 0 ? '#d97706' : '#16a34a' }}>
-                          Rs. {c.outstanding.toLocaleString()}
-                        </td>
-                        <td className="py-3 text-center">
-                          {c.outstanding > 0 ? (
-                            <span className="th-badge bg-warning bg-opacity-10 text-warning">Pending</span>
-                          ) : c.totalSpent > 0 ? (
-                            <span className="th-badge bg-success bg-opacity-10 text-success">Paid</span>
-                          ) : (
-                            <span className="th-badge bg-secondary bg-opacity-10 text-secondary">New</span>
-                          )}
-                        </td>
+              {filteredCustomers.length === 0 ? (
+                <div className="py-5 text-center text-muted">
+                  <p className="mb-2">
+                    {customerSearch ? `No customers found matching "${customerSearch}"` : 'No registered customers found yet.'}
+                  </p>
+                  <Button variant="outline" size="sm" onClick={handleRefreshCustomers} disabled={refreshingCustomers}>
+                    <RefreshCw size={14} className={`me-1.5 ${refreshingCustomers ? 'animate-spin' : ''}`} />
+                    Refresh Customer List
+                  </Button>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover table-borderless align-middle small mb-0">
+                    <thead>
+                      <tr className="border-bottom">
+                        <th className="text-muted pb-2">Customer</th>
+                        <th className="text-muted pb-2 text-center">Email Status</th>
+                        <th className="text-muted pb-2 text-center">Registered Date</th>
+                        <th className="text-muted pb-2 text-center">Orders</th>
+                        <th className="text-muted pb-2 text-end">Total Spent</th>
+                        <th className="text-muted pb-2 text-end">Outstanding</th>
+                        <th className="text-muted pb-2 text-center">Payment Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {filteredCustomers.map(c => {
+                        const regDate = c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-PK', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        }) : '—';
+
+                        return (
+                          <tr key={c.id} className="border-bottom" style={{ borderColor: 'rgba(0,0,0,0.04)' }}>
+                            <td className="py-3">
+                              <div className="fw-semibold text-dark">{c.fullName || '—'}</div>
+                              <div className="text-muted x-small">{c.email}</div>
+                              {c.id && <div className="text-muted" style={{ fontSize: '10px' }}>ID: {c.id}</div>}
+                            </td>
+                            <td className="py-3 text-center">
+                              {c.emailVerified ? (
+                                <span className="badge bg-success bg-opacity-10 text-success fw-normal px-2 py-1 rounded-pill">
+                                  Verified
+                                </span>
+                              ) : (
+                                <span className="badge bg-warning bg-opacity-10 text-warning fw-normal px-2 py-1 rounded-pill">
+                                  Unverified
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 text-center text-muted">
+                              {regDate}
+                            </td>
+                            <td className="py-3 text-center">
+                              <span className="th-badge th-badge-soft">{c.orderCount}</span>
+                            </td>
+                            <td className="py-3 text-end fw-medium">
+                              Rs. {c.totalSpent.toLocaleString()}
+                            </td>
+                            <td className="py-3 text-end fw-bold" style={{ color: c.outstanding > 0 ? '#d97706' : '#16a34a' }}>
+                              Rs. {c.outstanding.toLocaleString()}
+                            </td>
+                            <td className="py-3 text-center">
+                              {c.outstanding > 0 ? (
+                                <span className="th-badge bg-warning bg-opacity-10 text-warning">Pending</span>
+                              ) : c.totalSpent > 0 ? (
+                                <span className="th-badge bg-success bg-opacity-10 text-success">Paid</span>
+                              ) : (
+                                <span className="th-badge bg-secondary bg-opacity-10 text-secondary">New</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </TabsContent>
 

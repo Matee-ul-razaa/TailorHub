@@ -12,8 +12,34 @@ router = APIRouter(prefix="/api/users", tags=["users"])
 
 @router.get("/team", response_model=list[UserOut])
 def team_members(_admin: User = Depends(require_role(UserRole.admin)), db: Session = Depends(get_db)):
-    users = db.query(User).all()
-    return [UserOut(id=user.id, email=user.email, full_name=user.full_name, role=user.role, email_verified=user.email_verified) for user in users]
+    users = db.query(User).order_by(User.created_at.desc()).all()
+    return [
+        UserOut(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            role=user.role,
+            email_verified=bool(user.email_verified),
+            created_at=user.created_at,
+        )
+        for user in users
+    ]
+
+
+@router.get("/customers", response_model=list[UserOut])
+def list_customers(_admin: User = Depends(require_role(UserRole.admin)), db: Session = Depends(get_db)):
+    users = db.query(User).filter(User.role == UserRole.customer).order_by(User.created_at.desc()).all()
+    return [
+        UserOut(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            role=user.role,
+            email_verified=bool(user.email_verified),
+            created_at=user.created_at,
+        )
+        for user in users
+    ]
 
 
 @router.post("/team", response_model=UserOut)
