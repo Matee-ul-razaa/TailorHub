@@ -142,28 +142,36 @@ async def auth_callback(provider: str, request: Request, db: Session = Depends(g
     # Check if user exists
     user = db.query(User).filter(User.email == email).first()
     
-    if user:
-        # Existing user, log them in
+    if not user:
+        # New Google/OAuth user — automatically create verified customer account
+        user = User(
+            email=email,
+            full_name=name or email.split("@")[0],
+            role=UserRole.customer,
+            auth_provider=provider,
+            oauth_id=oauth_id,
+            email_verified=True,
+            password_hash=None,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        # Existing user: link OAuth ID if needed and ensure email is verified
         if not user.oauth_id and user.auth_provider == "local":
-            # Link accounts logically if they signed up locally first
             user.oauth_id = oauth_id
             user.auth_provider = provider
 
-        # Google has verified this email; ensure our flag reflects that
         if not user.email_verified:
             user.email_verified = True
 
         db.commit()
 
-        # Existing user — issue a short-lived opaque code, redirect with that
-        access_token = create_access_token(user.id, user.role.value)
-        code = secrets.token_urlsafe(32)
-        _oauth_code_store[code] = access_token
-        return RedirectResponse(url=f"{settings.FRONTEND_URL}/auth-success?code={code}", status_code=302)
-    else:
-        # New social user, issue temporary token and send to Complete Profile
-        temp_token = create_temp_registration_token(email, name, provider, oauth_id)
-        return RedirectResponse(url=f"{settings.FRONTEND_URL}/complete-profile?temp_token={temp_token}", status_code=302)
+    # Log user in directly
+    access_token = create_access_token(user.id, user.role.value)
+    code = secrets.token_urlsafe(32)
+    _oauth_code_store[code] = access_token
+    return RedirectResponse(url=f"{settings.FRONTEND_URL}/auth-success?code={code}", status_code=302)
 
 @router.post("/oauth-complete", response_model=AuthTokenOut)
 def complete_oauth_profile(payload: CompleteProfileIn, db: Session = Depends(get_db)):
