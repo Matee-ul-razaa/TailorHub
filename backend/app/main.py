@@ -71,10 +71,24 @@ def seed_defaults(db: Session):
         db.add(
             User(
                 email=settings.DEFAULT_ADMIN_EMAIL,
-                password_hash=hash_password(settings.DEFAULT_ADMIN_PASSWORD),
+                password_hash=hash_password(settings.DEFAULT_ADMIN_PASSWORD or "TailorHub@2026!"),
                 full_name=settings.DEFAULT_ADMIN_NAME,
                 role=UserRole.admin,
                 email_verified=True,  # Admin is pre-verified
+            )
+        )
+        db.commit()
+
+    # Seed default delivery rider
+    rider = db.query(User).filter(User.email == "rider@tailorhub.pk").first()
+    if not rider:
+        db.add(
+            User(
+                email="rider@tailorhub.pk",
+                password_hash=hash_password("Rider@123456"),
+                full_name="Delivery Rider",
+                role=UserRole.delivery,
+                email_verified=True,
             )
         )
         db.commit()
