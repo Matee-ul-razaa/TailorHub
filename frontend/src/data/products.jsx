@@ -21,15 +21,22 @@ const pentCoatPalettes = [
   ['Navy', 'Teal', 'Charcoal', 'Olive'],
 ];
 
-const shalwarKameezPalettes = [
-  ['Off White', 'Charcoal', 'Navy', 'Olive'],
-  ['Stone', 'Chocolate', 'Graphite', 'Ice Blue'],
-  ['Cream', 'Black', 'Khaki', 'Sage'],
-  ['Off White', 'Charcoal', 'Navy', 'Olive'],
-  ['Stone', 'Chocolate', 'Graphite', 'Ice Blue'],
+const unstitchedPentCoatPalettes = [
+  ['Ivory', 'Gold', 'Black', 'Maroon'],
+  ['Navy', 'Teal', 'Charcoal', 'Olive'],
+  ['Cream', 'Rust', 'Bottle Green', 'Plum'],
+  ['Ivory', 'Gold', 'Maroon', 'Black'],
+  ['Navy', 'Teal', 'Charcoal', 'Olive'],
 ];
 
-const unstitchedPentCoatPalettes = pentCoatPalettes;
+const shalwarKameezPalettes = [
+  ['Beige', 'Mustard', 'Maroon', 'Black'],
+  ['Navy', 'Teal', 'Charcoal', 'Olive'],
+  ['Cream', 'Rust', 'Bottle Green', 'Plum'],
+  ['Ivory', 'Gold', 'Maroon', 'Black'],
+  ['Navy', 'Teal', 'Charcoal', 'Olive'],
+];
+
 const unstitchedShalwarKameezPalettes = shalwarKameezPalettes;
 
 const categorySeeds = {
@@ -147,10 +154,19 @@ export const products = categories.flatMap((category, categoryIndex) => {
         : `/catalog/garments/g${productImageIndex}-${colorIndex + 1}.jpg`
     }));
 
-    const unstitchedColorImages = colors.map((color, colorIndex) => ({
-      color: color,
-      image: `/catalog/garments/us_${productImageIndex}-${colorIndex + 1}.jpg`
-    }));
+    const unstitchedColorImages = colors.map((color, colorIndex) => {
+      let imagePath = `/catalog/garments/us_${productImageIndex}-${colorIndex + 1}.jpg`;
+      if (productImageIndex === 1) {
+        if (color === 'Ivory') imagePath = '/catalog/garments/us_1-1.jpg';
+        else if (color === 'Gold') imagePath = '/catalog/garments/us_1-2.jpg';
+        else if (color === 'Black') imagePath = '/catalog/garments/us_1-3.jpg';
+        else if (color === 'Maroon') imagePath = '/catalog/garments/us_1-4.jpg';
+      }
+      return {
+        color: color,
+        image: imagePath,
+      };
+    });
 
     return {
       id: `${category.id}-${index + 1}`,
