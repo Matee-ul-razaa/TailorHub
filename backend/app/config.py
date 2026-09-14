@@ -106,7 +106,7 @@ class Settings(BaseSettings):
 
     # ── Application ───────────────────────────────────────────────────────────
     FRONTEND_URL: str = "http://localhost:8080"
-    CORS_ORIGINS: str = "http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173"
+    CORS_ORIGINS: str = "http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,https://frontend-omega-six-42.vercel.app"
 
     # ── Sentry Error Tracking ───────────────────────────────────────────────
     SENTRY_DSN: str = ""  # Leave empty to disable Sentry
@@ -176,8 +176,15 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> list[str]:
-        """Parse the comma-separated CORS_ORIGINS string into a list."""
-        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        """Parse the comma-separated CORS_ORIGINS string into a list and include FRONTEND_URL."""
+        origins = [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        if self.FRONTEND_URL:
+            clean_front = self.FRONTEND_URL.rstrip("/")
+            if clean_front not in origins:
+                origins.append(clean_front)
+        if "https://frontend-omega-six-42.vercel.app" not in origins:
+            origins.append("https://frontend-omega-six-42.vercel.app")
+        return origins
 
     @property
     def google_oauth_enabled(self) -> bool:
