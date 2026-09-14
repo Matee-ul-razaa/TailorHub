@@ -119,6 +119,15 @@ const dictionary = {
   'measurements.appointment.phone': { en: 'Phone Number', ur: 'فون نمبر' },
   'measurements.appointment.notes': { en: 'Notes (Optional)', ur: 'نوٹ (اختیاری)' },
   'measurements.appointment.submit': { en: 'Submit Request', ur: 'درخواست بھیجیں' },
+  'measurements.appointment.myTitle': { en: 'My Measurement Appointments', ur: 'میری پیمائش کی اپوائنٹمنٹس' },
+  'measurements.appointment.phoneRequired': { en: 'Please enter your phone number', ur: 'براہ کرم اپنا فون نمبر درج کریں' },
+  'measurements.appointment.dateRequired': { en: 'Please select preferred date', ur: 'براہ کرم پسندیدہ تاریخ منتخب کریں' },
+  'measurements.appointment.submitted': { en: 'Appointment request submitted! Admin will review and approve soon.', ur: 'درخواست جمع ہو گئی ہے! ایڈمن جلد تصدیق کرے گا۔' },
+  'measurements.appointment.empty': { en: 'No appointment booked yet. Can’t take measurements yourself? Book a session with our Master Tailor.', ur: 'ابھی تک کوئی اپوائنٹمنٹ بک نہیں ہوئی۔ خود پیمائش نہیں لے سکتے؟ ہمارے ماسٹر ٹیلر سے وقت لیں۔' },
+  'measurements.appointment.bookNew': { en: 'Book New Appointment', ur: 'نیا وقت لیں' },
+  'admin.appointments': { en: 'Appointments', ur: 'اپوائنٹمنٹس' },
+  'admin.appointments.title': { en: 'Customer Measurement Appointments', ur: 'گاہکوں کی پیمائش کی اپوائنٹمنٹس' },
+  'admin.appointments.desc': { en: 'Review, approve, or decline customer appointment requests for in-person measurements.', ur: 'گاہکوں کی پیمائش کی درخواستوں کا جائزہ لیں، منظور کریں یا مسترد کریں۔' },
   'measurements.tutorial.title': { en: 'Measurement Tutorial', ur: 'پیمائش کا طریقہ کار' },
 
   // ── AI Measurements ────────────────────────────────────────────────────────

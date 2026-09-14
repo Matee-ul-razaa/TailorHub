@@ -3,7 +3,7 @@ import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'sonner';
-import { Ruler, Plus, Trash2, Edit3, Copy, PlayCircle, Save, X, CalendarDays, Loader2 } from 'lucide-react';
+import { Ruler, Plus, Trash2, Edit3, Copy, PlayCircle, Save, X, CalendarDays, Loader2, CheckCircle2, Clock, AlertCircle, CalendarCheck } from 'lucide-react';
 import useScrollAnim from '@/hooks/useScrollAnim';
 import { Button } from '@/components/ui/button';
 
@@ -77,8 +77,78 @@ const Measurements = () => {
   const [tutorialUrl, setTutorialUrl] = useState(null);
   const [lookupCode, setLookupCode] = useState('');
   const [showBooking, setShowBooking] = useState(false);
+  const [appointmentForm, setAppointmentForm] = useState({
+    date: '',
+    timeSlot: '10:00 AM - 11:00 AM',
+    phone: '',
+    notes: '',
+  });
+  const [isSubmittingAppointment, setIsSubmittingAppointment] = useState(false);
+  const [myAppointments, setMyAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
 
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+  const fetchMyAppointments = useCallback(async () => {
+    if (!token) return;
+    setLoadingAppointments(true);
+    try {
+      const res = await fetch(`${API}/api/appointments/my`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMyAppointments(data);
+      }
+    } catch (err) {
+      console.error('Error loading appointments:', err);
+    } finally {
+      setLoadingAppointments(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchMyAppointments();
+  }, [fetchMyAppointments]);
+
+  const handleSubmitAppointment = async () => {
+    if (!appointmentForm.phone.trim()) {
+      toast.error(t('measurements.appointment.phoneRequired', 'Please enter your phone number'));
+      return;
+    }
+    if (!appointmentForm.date) {
+      toast.error(t('measurements.appointment.dateRequired', 'Please select preferred date'));
+      return;
+    }
+    setIsSubmittingAppointment(true);
+    try {
+      const res = await fetch(`${API}/api/appointments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          phone: appointmentForm.phone,
+          appointment_date: appointmentForm.date,
+          time_slot: appointmentForm.timeSlot,
+          notes: appointmentForm.notes,
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || 'Failed to submit appointment');
+      }
+      toast.success(t('measurements.appointment.submitted', 'Appointment request submitted! Admin will review and approve soon.'));
+      setShowBooking(false);
+      setAppointmentForm({ date: '', timeSlot: '10:00 AM - 11:00 AM', phone: '', notes: '' });
+      fetchMyAppointments();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsSubmittingAppointment(false);
+    }
+  };
 
   const fetchMeasurements = useCallback(async () => {
     try {
@@ -233,6 +303,119 @@ const Measurements = () => {
           </div>
         </div>
 
+        {/* My Measurement Appointments Section */}
+        <div className="th-card-static p-4 mb-4 scroll-anim">
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <div className="d-flex align-items-center gap-2">
+              <CalendarCheck className="text-accent" size={22} />
+              <h5 className="font-playfair fw-semibold mb-0">
+                {t('measurements.appointment.myTitle', 'My Measurement Appointments')}
+              </h5>
+              {myAppointments.length > 0 && (
+                <span className="badge bg-secondary text-white rounded-pill px-2 py-0.5" style={{ fontSize: '0.75rem' }}>
+                  {myAppointments.length}
+                </span>
+              )}
+            </div>
+            <Button size="sm" onClick={() => setShowBooking(true)}>
+              <Plus size={14} className="me-1" />
+              {t('measurements.appointment.bookNew', 'Book New Appointment')}
+            </Button>
+          </div>
+
+          {loadingAppointments ? (
+            <div className="text-center py-4">
+              <Loader2 size={24} className="animate-spin text-accent mb-2" />
+              <p className="text-muted small mb-0">Loading appointments...</p>
+            </div>
+          ) : myAppointments.length === 0 ? (
+            <div className="text-center py-4 px-3 border rounded-3 bg-light bg-opacity-50 text-muted">
+              <CalendarDays size={32} className="mb-2 opacity-50 text-accent" />
+              <p className="small mb-3">
+                {t('measurements.appointment.empty', 'No appointment booked yet. Can’t take measurements yourself? Book a session with our Master Tailor.')}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => setShowBooking(true)}>
+                <CalendarDays size={14} className="me-1" />
+                {t('measurements.book', 'Book Appointment')}
+              </Button>
+            </div>
+          ) : (
+            <div className="row g-3">
+              {myAppointments.map(appt => {
+                const statusMeta = {
+                  pending: {
+                    badgeClass: 'bg-warning text-dark',
+                    border: 'border-warning',
+                    icon: <Clock size={14} className="me-1" />,
+                    label: isUrdu ? 'زیر التواء منظوری' : 'Pending Admin Approval',
+                    desc: isUrdu ? 'ایڈمن کی تصدیق کا انتظار ہے۔ منظوری کے بعد آپ کو مطلع کیا جائے گا۔' : 'Waiting for Admin Approval. You will receive an in-app notification once confirmed.',
+                  },
+                  approved: {
+                    badgeClass: 'bg-success text-white',
+                    border: 'border-success',
+                    icon: <CheckCircle2 size={14} className="me-1" />,
+                    label: isUrdu ? 'منظور شدہ اور تصدیق شدہ' : 'Approved & Confirmed',
+                    desc: isUrdu ? '✓ ماسٹر ٹیلر نے وقت کنفرم کر دیا ہے! براہ کرم مقررہ وقت پر تیار رہیں۔' : '✓ Master Tailor confirmed your slot! Please be available at the scheduled time.',
+                  },
+                  rejected: {
+                    badgeClass: 'bg-danger text-white',
+                    border: 'border-danger',
+                    icon: <AlertCircle size={14} className="me-1" />,
+                    label: isUrdu ? 'درخواست مسترد' : 'Declined',
+                    desc: isUrdu ? 'معذرت، یہ وقت دستیاب نہیں تھا۔ براہ کرم دوسرا وقت منتخب کریں۔' : 'This time slot was unavailable. Please select another date or time slot.',
+                  },
+                  completed: {
+                    badgeClass: 'bg-primary text-white',
+                    border: 'border-primary',
+                    icon: <CheckCircle2 size={14} className="me-1" />,
+                    label: isUrdu ? 'مکمل' : 'Completed',
+                    desc: isUrdu ? 'پیمائش کا سیشن مکمل ہو چکا ہے۔' : 'Measurement session completed.',
+                  },
+                };
+                const meta = statusMeta[appt.status] || statusMeta.pending;
+
+                return (
+                  <div key={appt.id} className="col-md-6">
+                    <div className={`p-3 rounded-3 border h-100 d-flex flex-column justify-content-between bg-white shadow-sm ${meta.border} border-opacity-25`}>
+                      <div>
+                        <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
+                          <span className="fw-semibold fs-6 text-dark d-flex align-items-center gap-1">
+                            <CalendarDays size={16} className="text-accent" />
+                            {appt.appointment_date}
+                          </span>
+                          <span className={`badge rounded-pill ${meta.badgeClass} d-inline-flex align-items-center px-2 py-1`} style={{ fontSize: '0.75rem' }}>
+                            {meta.icon}
+                            {meta.label}
+                          </span>
+                        </div>
+                        <div className="text-muted small mb-2 d-flex align-items-center gap-2">
+                          <Clock size={13} />
+                          <span className="fw-medium">{appt.time_slot}</span>
+                          <span>•</span>
+                          <span>{appt.phone}</span>
+                        </div>
+                        {appt.notes && (
+                          <div className="small text-muted fst-italic mb-2 bg-light p-2 rounded">
+                            "{appt.notes}"
+                          </div>
+                        )}
+                      </div>
+                      <div className={`mt-2 p-2 rounded small ${appt.status === 'approved' ? 'bg-success bg-opacity-10 text-success' : appt.status === 'pending' ? 'bg-warning bg-opacity-10 text-dark' : 'bg-light text-muted'}`}>
+                        {meta.desc}
+                        {appt.admin_notes && (
+                          <div className="mt-1 fw-medium">
+                            Note: {appt.admin_notes}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Booking Modal */}
         {showBooking && (
           <div className="th-modal-overlay">
@@ -244,29 +427,56 @@ const Measurements = () => {
               <div className="p-4 pt-2 d-flex flex-column gap-3">
                 <div>
                   <label className="th-label">{t('measurements.appointment.date')}</label>
-                  <input className="th-input" type="date" min={new Date().toISOString().split('T')[0]} />
+                  <input
+                    className="th-input"
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={appointmentForm.date}
+                    onChange={e => setAppointmentForm(prev => ({ ...prev, date: e.target.value }))}
+                  />
                 </div>
                 <div>
                   <label className="th-label">{t('measurements.appointment.time')}</label>
-                  <select className="th-select">
-                    <option value="" disabled>{t('measurements.selectTime', 'Select time slot')}</option>
-                    <option value="10am">10:00 AM - 11:00 AM</option>
-                    <option value="11am">11:00 AM - 12:00 PM</option>
-                    <option value="2pm">2:00 PM - 3:00 PM</option>
-                    <option value="3pm">3:00 PM - 4:00 PM</option>
-                    <option value="5pm">5:00 PM - 6:00 PM</option>
+                  <select
+                    className="th-select"
+                    value={appointmentForm.timeSlot}
+                    onChange={e => setAppointmentForm(prev => ({ ...prev, timeSlot: e.target.value }))}
+                  >
+                    <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
+                    <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
+                    <option value="2:00 PM - 3:00 PM">2:00 PM - 3:00 PM</option>
+                    <option value="3:00 PM - 4:00 PM">3:00 PM - 4:00 PM</option>
+                    <option value="5:00 PM - 6:00 PM">5:00 PM - 6:00 PM</option>
                   </select>
                 </div>
                 <div>
                   <label className="th-label">{t('measurements.appointment.phone')}</label>
-                  <input className="th-input" type="tel" placeholder="+92 300 1234567" />
+                  <input
+                    className="th-input"
+                    type="tel"
+                    placeholder="+92 300 1234567"
+                    value={appointmentForm.phone}
+                    onChange={e => setAppointmentForm(prev => ({ ...prev, phone: e.target.value }))}
+                  />
                 </div>
                 <div>
                   <label className="th-label">{t('measurements.appointment.notes')}</label>
-                  <input className="th-input" placeholder="..." />
+                  <input
+                    className="th-input"
+                    placeholder="e.g. Need measurements for Sherwani / Prince Coat..."
+                    value={appointmentForm.notes}
+                    onChange={e => setAppointmentForm(prev => ({ ...prev, notes: e.target.value }))}
+                  />
                 </div>
-                <Button className="w-100" onClick={() => { toast.success('Appointment request submitted!'); setShowBooking(false); }}>
-                  {t('measurements.appointment.submit')}
+                <Button className="w-100" onClick={handleSubmitAppointment} disabled={isSubmittingAppointment}>
+                  {isSubmittingAppointment ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin me-2" />
+                      Submitting...
+                    </>
+                  ) : (
+                    t('measurements.appointment.submit')
+                  )}
                 </Button>
               </div>
             </div>

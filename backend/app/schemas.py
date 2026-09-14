@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, EmailStr
 
-from .models import OrderStatus, PaymentMethod, PaymentStatus, UserRole, WearType
+from .models import AppointmentStatus, OrderStatus, PaymentMethod, PaymentStatus, UserRole, WearType
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -236,3 +236,33 @@ class ExpenseOut(ExpenseIn):
     model_config = ConfigDict(from_attributes=True)
     id: int
     expense_date: datetime
+
+
+# ── Appointments ─────────────────────────────────────────────────────────────
+
+class AppointmentCreateIn(BaseModel):
+    phone: str
+    appointment_date: str
+    time_slot: str
+    notes: Optional[str] = None
+
+
+class AppointmentStatusUpdateIn(BaseModel):
+    status: AppointmentStatus
+    admin_notes: Optional[str] = None
+
+
+class AppointmentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    user_id: str
+    customer_name: str
+    customer_email: str
+    phone: str
+    appointment_date: str
+    time_slot: str
+    notes: Optional[str] = None
+    status: AppointmentStatus
+    admin_notes: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
