@@ -116,9 +116,14 @@ export const StoreProvider = ({ children }) => {
       if (hasRole('admin')) {
         try {
           const members = await apiRequest('/api/users/team');
-          setTeamMembers(members.map(normalizeTeamMember));
+          setTeamMembers((members || []).map(normalizeTeamMember));
         } catch (err) {
-          console.error('Failed to load team/users:', err);
+          try {
+            const customers = await apiRequest('/api/users/customers');
+            setTeamMembers((customers || []).map(normalizeTeamMember));
+          } catch (innerErr) {
+            console.error('Failed to load team/customers:', innerErr);
+          }
         }
 
         try {
@@ -159,12 +164,19 @@ export const StoreProvider = ({ children }) => {
     refreshTeamMembers: async () => {
       try {
         const members = await apiRequest('/api/users/team');
-        const normalized = members.map(normalizeTeamMember);
+        const normalized = (members || []).map(normalizeTeamMember);
         setTeamMembers(normalized);
         return normalized;
       } catch (e) {
-        console.error('Failed to refresh team members:', e);
-        return [];
+        try {
+          const customers = await apiRequest('/api/users/customers');
+          const normalized = (customers || []).map(normalizeTeamMember);
+          setTeamMembers(normalized);
+          return normalized;
+        } catch (innerErr) {
+          console.error('Failed to refresh team members:', innerErr);
+          throw innerErr;
+        }
       }
     },
     refreshInvoices: async () => {

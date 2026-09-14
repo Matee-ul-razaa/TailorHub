@@ -120,7 +120,9 @@ class Settings(BaseSettings):
     DEFAULT_ADMIN_PASSWORD: str = ""        # REQUIRED — set in .env
     DEFAULT_ADMIN_NAME: str = "Store Admin"
 
-    # ── MySQL ─────────────────────────────────────────────────────────────────
+    # ── Database (MySQL / SQLite / Cloud URL) ──────────────────────────────────
+    DATABASE_URL: str = ""
+    USE_SQLITE: bool = False
     MYSQL_HOST: str = "localhost"
     MYSQL_PORT: int = 3306
     MYSQL_DATABASE: str = "tailorhub"
@@ -133,13 +135,44 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        """Build the SQLAlchemy database URL from individual MySQL settings."""
-        if self.MYSQL_DATABASE:
+        """Build the SQLAlchemy database URL from DATABASE_URL, Railway envs, or MySQL settings."""
+        env_url = self.DATABASE_URL or os.getenv("DATABASE_URL") or os.getenv("MYSQL_URL") or os.getenv("MYSQLPRIVATEURL")
+        if env_url:
+            if env_url.startswith("mysql://"):
+                return env_url.replace("mysql://", "mysql+pymysql://", 1)
+            if env_url.startswith("postgres://"):
+                return env_url.replace("postgres://", "postgresql+psycopg2://", 1)
+            return env_url
+
+        sqlite_path = f"sqlite:///{os.path.join(_BACKEND_DIR, 'tailorhub.db')}"
+        if self.USE_SQLITE:
+            return sqlite_path
+
+        # If a non-default remote MySQL host or password is configured
+        if self.MYSQL_DATABASE and (self.MYSQL_HOST not in ("localhost", "127.0.0.1") or self.MYSQL_PASSWORD):
             return (
                 f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}"
                 f"@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
             )
-        return "sqlite:///./tailorhub.db"
+
+        # If localhost is specified, verify if MySQL is actually listening on port 3306
+        if self.MYSQL_DATABASE and self.MYSQL_HOST in ("localhost", "127.0.0.1"):
+            try:
+                import socket
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(0.3)
+                res = sock.connect_ex((self.MYSQL_HOST, self.MYSQL_PORT))
+                sock.close()
+                if res == 0:
+                    return (
+                        f"mysql+pymysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}"
+                        f"@{self.MYSQL_HOST}:{self.MYSQL_PORT}/{self.MYSQL_DATABASE}"
+                    )
+            except Exception:
+                pass
+            logger.info("Local MySQL server not running on port 3306; falling back to SQLite (tailorhub.db).")
+
+        return sqlite_path
 
     @property
     def cors_origins(self) -> list[str]:
