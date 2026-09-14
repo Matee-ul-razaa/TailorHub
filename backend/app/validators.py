@@ -75,7 +75,7 @@ def validate_email_address(email: str) -> tuple[bool, str]:
     Returns (valid: bool, normalized_email_or_error: str).
     """
     try:
-        result = validate_email(email, check_deliverability=True)
+        result = validate_email(email, check_deliverability=False)
         normalized = result.normalized
     except EmailNotValidError as e:
         return False, str(e)
