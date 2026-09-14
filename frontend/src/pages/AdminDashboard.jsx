@@ -1200,8 +1200,17 @@ const AdminDashboard = () => {
               </div>
 
               <div className="th-card-static p-4">
-                <h5 className="font-playfair fw-semibold mb-3">{t('admin.roleAssignment', 'Role Assignment')}</h5>
-                <div className="d-flex flex-column gap-2">
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                  <h5 className="font-playfair fw-semibold mb-0">{t('admin.roleAssignment', 'Role Assignment')} ({teamMembers.length})</h5>
+                  <Button variant="outline" size="sm" onClick={handleRefreshCustomers} disabled={refreshingCustomers}>
+                    <RefreshCw size={14} className={`me-1.5 ${refreshingCustomers ? 'anim-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
+                {teamMembers.length === 0 ? (
+                  <p className="py-4 text-center text-muted mb-0">No team members loaded yet. Click Refresh or add a member above.</p>
+                ) : (
+                  <div className="d-flex flex-column gap-2">
                   {teamMembers.map(member => (
                     <div key={member.id} className="d-flex align-items-center justify-content-between rounded-3 border p-3">
                       <div>
@@ -1221,7 +1230,8 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
