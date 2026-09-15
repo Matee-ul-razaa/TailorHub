@@ -8,7 +8,7 @@
  *  - 204 No Content support
  */
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3001').replace(/\/$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
 const AUTH_TOKEN_KEY = 'tailorhub-auth-token';
 const SESSION_KEY = 'tailorhub-auth-session';
 
