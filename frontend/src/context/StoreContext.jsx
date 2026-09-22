@@ -406,6 +406,14 @@ export const StoreProvider = ({ children }) => {
       const summary = await apiRequest('/api/khata/summary');
       setKhataSummary(summary);
     },
+    resetDatabase: async () => {
+      const res = await apiRequest('/api/admin/reset-database', { method: 'POST' });
+      setOrders([]);
+      setInvoices([]);
+      setExpenses([]);
+      setKhataSummary({ total_revenue: 0, outstanding_balance: 0, total_expenses: 0, net_profit: 0 });
+      return res;
+    },
     inventory,
     expenses,
     khataSummary,

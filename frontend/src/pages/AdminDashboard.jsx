@@ -78,7 +78,27 @@ const AdminDashboard = () => {
     emailInvoice,
     markInvoicePaid,
     refundOrder,
+    resetDatabase,
   } = useStore();
+
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetDatabase = async () => {
+    const confirmed = window.confirm(
+      '⚠️ KYA AAP SURE HAIN?\n\nDatabase ka sara transactional data (Orders, Khata ledger, Invoices, Expenses, Appointments, Measurements) delete ho jaye ga aur sab 0 ho jaye ga ta k aap bilkul new se start kr sakein.\n\nAdmin aur Delivery Rider accounts mehfooz rahein gy.\n\nKya aap delete krna chahte hain?'
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsResetting(true);
+      await resetDatabase();
+      toast.success('Database successfully reset! Khata aur orders ab 0 ho gaye hain.');
+    } catch (err) {
+      toast.error('Reset failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const [productDraft, setProductDraft] = useState(emptyProduct);
   const [editingProductId, setEditingProductId] = useState(null);
@@ -817,6 +837,22 @@ const AdminDashboard = () => {
 
           {/* ── KHATA (LEDGER) TAB ── */}
           <TabsContent value="khata">
+            <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+              <div>
+                <h5 className="font-playfair fw-semibold mb-0">Khata (Financial Ledger)</h5>
+                <p className="text-muted small mb-0">Track real-time revenues, expenses, and customer balances</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-danger border-danger"
+                onClick={handleResetDatabase}
+                disabled={isResetting}
+              >
+                {isResetting ? <Loader2 size={14} className="anim-spin me-1" /> : <Trash2 size={14} className="me-1" />}
+                Reset to 0 (Fresh Start)
+              </Button>
+            </div>
             <div className="row g-3 mb-4">
               <div className="col-sm-3">
                 <div className="th-card-static p-4" style={{ background: 'rgba(34,197,94,0.04)' }}>
@@ -1533,6 +1569,22 @@ const AdminDashboard = () => {
                   {t('admin.changePasswordBtn')}
                 </Button>
               </form>
+            </div>
+
+            <div className="th-card-static p-4 mt-4 border border-danger-subtle">
+              <h5 className="font-playfair fw-semibold text-danger mb-2">Reset Database to 0 (Fresh Start)</h5>
+              <p className="text-muted small mb-3">
+                Sari test transactions, orders, khata ledger entries, invoices, expenses, appointments aur measurements delete kr k sab 0 ho jaye ga ta k aap bilkul fresh start kr sakein. Admin aur Delivery Rider accounts mehfooz rahein gy.
+              </p>
+              <Button
+                variant="destructive"
+                onClick={handleResetDatabase}
+                disabled={isResetting}
+              >
+                {isResetting && <Loader2 size={16} className="anim-spin me-2" />}
+                <Trash2 size={16} className="me-2" />
+                Reset Everything to 0 (Fresh Start)
+              </Button>
             </div>
           </TabsContent>
 

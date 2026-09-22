@@ -99,6 +99,23 @@ def on_startup():
     """Seed default data and ensure tables exist on startup."""
     try:
         Base.metadata.create_all(bind=engine)
+        if engine.dialect.name == "sqlite":
+            from sqlalchemy import text
+            with engine.begin() as conn:
+                try:
+                    res = conn.execute(text("PRAGMA table_info(orders);")).fetchall()
+                    cols = [r[1] for r in res]
+                    if "signature_image" not in cols:
+                        conn.execute(text("ALTER TABLE orders ADD COLUMN signature_image TEXT;"))
+                except Exception as e:
+                    logger.debug(f"SQLite orders patch skipped: {e}")
+                try:
+                    res = conn.execute(text("PRAGMA table_info(products);")).fetchall()
+                    cols = [r[1] for r in res]
+                    if "is_sold_out" not in cols:
+                        conn.execute(text("ALTER TABLE products ADD COLUMN is_sold_out BOOLEAN DEFAULT 0;"))
+                except Exception as e:
+                    logger.debug(f"SQLite products patch skipped: {e}")
     except Exception as e:
         logger.warning(f"Metadata table creation warning: {e}")
 
