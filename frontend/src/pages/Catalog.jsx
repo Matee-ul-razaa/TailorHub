@@ -89,7 +89,8 @@ const Catalog = () => {
   ];
   const [activeSection, setActiveSection] = useState('all');
 
-  const sectionFiltered = activeSection === 'all' ? filtered : filtered.filter(p => SECTIONS.find(s => s.id === activeSection)?.categories?.includes(p.category));
+  const activeSectionObj = SECTIONS.find(s => s.id === activeSection);
+  const sectionFiltered = activeSection === 'all' || !activeSectionObj ? filtered : filtered.filter(p => activeSectionObj.categories?.includes(p.category));
   const sectionTotalPages = Math.ceil(sectionFiltered.length / PRODUCTS_PER_PAGE);
   const sectionPaginated = sectionFiltered.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE);
 
