@@ -531,7 +531,7 @@ button.bg-gray-100:hover:not(:disabled) {
   background: rgba(0,0,0,0.55);
   backdrop-filter: blur(6px);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   z-index: 1060;
   padding: 2rem 1rem;
