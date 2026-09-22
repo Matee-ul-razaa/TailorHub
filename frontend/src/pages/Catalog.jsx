@@ -94,7 +94,16 @@ const Catalog = () => {
   const sectionTotalPages = Math.ceil(sectionFiltered.length / PRODUCTS_PER_PAGE);
   const sectionPaginated = sectionFiltered.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE);
 
-  const handleCategoryChange = (cat) => { setSelectedCategory(cat); setActiveSection(cat === 'all' ? 'all' : cat); setCurrentPage(1); };
+  const handleCategoryChange = (cat) => { 
+    setSelectedCategory(cat); 
+    setActiveSection(cat === 'all' ? 'all' : cat); 
+    if (cat.startsWith('unstitched-') && selectedStitchType === 'stitched') {
+      setSelectedStitchType('all');
+    } else if (!cat.startsWith('unstitched-') && cat !== 'all' && selectedStitchType === 'unstitched') {
+      setSelectedStitchType('all');
+    }
+    setCurrentPage(1); 
+  };
   const handleSearch = (val) => { setSearch(val); setCurrentPage(1); };
   const clearAllFilters = () => { setSelectedCategory('all'); setSelectedBrand('all'); setSelectedFabric('all'); setSelectedWearType('all'); setSelectedStitchType('all'); setPriceMin(''); setPriceMax(''); setSearch(''); setCurrentPage(1); setActiveSection('all'); };
 
