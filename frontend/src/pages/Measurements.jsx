@@ -36,37 +36,40 @@ const MEASUREMENT_RANGES = {
 const GARMENT_FIELDS = {
   'pent-coat': {
     label: 'Pent Coat',
+    tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w',
     fields: [
-      { key: 'coatLength', label: 'Coat Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
-      { key: 'chest', label: 'Chest', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
-      { key: 'waist', label: 'Waist', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
-      { key: 'hip', label: 'Hip', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
-      { key: 'shoulder', label: 'Shoulder', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
-      { key: 'sleeveLength', label: 'Sleeve Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
-      { key: 'neck', label: 'Neck', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
-      { key: 'pantLength', label: 'Pant Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w' },
+      { key: 'coatLength', label: 'Coat Length', unit: 'in' },
+      { key: 'chest', label: 'Chest', unit: 'in' },
+      { key: 'waist', label: 'Waist', unit: 'in' },
+      { key: 'hip', label: 'Hip', unit: 'in' },
+      { key: 'shoulder', label: 'Shoulder', unit: 'in' },
+      { key: 'sleeveLength', label: 'Sleeve Length', unit: 'in' },
+      { key: 'neck', label: 'Neck', unit: 'in' },
+      { key: 'pantLength', label: 'Pant Length', unit: 'in' },
     ],
   },
   'shalwar-kameez': {
     label: 'Shalwar Kameez',
+    tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4',
     fields: [
-      { key: 'kameezLength', label: 'Kameez / Kurta Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
-      { key: 'chest', label: 'Chest', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
-      { key: 'shoulder', label: 'Shoulder', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
-      { key: 'sleeveLength', label: 'Sleeve Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
-      { key: 'shalwarLength', label: 'Shalwar / Pajama Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
-      { key: 'waist', label: 'Waist', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
-      { key: 'hip', label: 'Hip', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
+      { key: 'kameezLength', label: 'Kameez / Kurta Length', unit: 'in' },
+      { key: 'chest', label: 'Chest', unit: 'in' },
+      { key: 'shoulder', label: 'Shoulder', unit: 'in' },
+      { key: 'sleeveLength', label: 'Sleeve Length', unit: 'in' },
+      { key: 'shalwarLength', label: 'Shalwar / Pajama Length', unit: 'in' },
+      { key: 'waist', label: 'Waist', unit: 'in' },
+      { key: 'hip', label: 'Hip', unit: 'in' },
     ],
   },
   'waistcoat': {
     label: 'Waistcoat',
+    tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k',
     fields: [
-      { key: 'chest', label: 'Chest', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
-      { key: 'waist', label: 'Waist', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
-      { key: 'shoulder', label: 'Shoulder', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
-      { key: 'jacketLength', label: 'Waistcoat Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
-      { key: 'neck', label: 'Neck', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
+      { key: 'chest', label: 'Chest', unit: 'in' },
+      { key: 'waist', label: 'Waist', unit: 'in' },
+      { key: 'shoulder', label: 'Shoulder', unit: 'in' },
+      { key: 'jacketLength', label: 'Waistcoat Length', unit: 'in' },
+      { key: 'neck', label: 'Neck', unit: 'in' },
     ],
   },
 };
@@ -557,7 +560,19 @@ const Measurements = () => {
               <div className="th-card-static p-4 mt-4 anim-fade-up" style={{ borderColor: 'rgba(230,126,34,0.3)' }}>
                 <div className="d-flex align-items-center justify-content-between mb-3">
                   <h5 className="fw-semibold mb-0">{editingId ? t('measurements.edit') : t('measurements.new')} {garment.label} {t('nav.measurements')}</h5>
-                  <Button variant="ghost" size="sm" className="p-0" onClick={() => setShowForm(false)}><X size={20} /></Button>
+                  <div className="d-flex align-items-center gap-3">
+                    {garment.tutorial && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setTutorialUrl(garment.tutorial)}
+                        className="p-0 text-amber-600 d-flex align-items-center gap-1 hover-lift"
+                      >
+                        <PlayCircle size={16} /> <span className="small fw-medium">{t('measurements.howTo', 'How to Measure')}</span>
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm" className="p-0" onClick={() => setShowForm(false)}><X size={20} /></Button>
+                  </div>
                 </div>
                 <div className="d-flex flex-column gap-3">
                   <div>
@@ -576,17 +591,8 @@ const Measurements = () => {
                       
                       return (
                         <div key={field.key} className="col-sm-6">
-                          <div className={`d-flex align-items-center justify-content-between ${isUrdu ? 'flex-row-reverse' : ''}`}>
-                            <label className="th-label small">{field.label} ({field.unit})</label>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setTutorialUrl(field.tutorial)}
-                              className="p-0 text-amber-600 d-flex align-items-center gap-1"
-                              style={{ fontSize: '0.72rem' }}
-                            >
-                              <PlayCircle size={14} /> {t('measurements.howTo')}
-                            </Button>
+                          <div className={`d-flex align-items-center justify-content-between mb-1 ${isUrdu ? 'flex-row-reverse' : ''}`}>
+                            <label className="th-label small mb-0">{field.label} ({field.unit})</label>
                           </div>
                           <div className="position-relative">
                             <input
