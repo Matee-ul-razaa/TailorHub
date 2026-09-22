@@ -23,7 +23,6 @@ const suitOptionLabels = {
   '2-piece': '2-Piece (Blazer + Pants)',
   'blazer-only': 'Blazer / Coat Only',
   'pants-only': 'Pants Only',
-  'vest-only': 'Vest / Waistcoat Only',
   'kameez-shalwar': 'Complete (Kameez + Shalwar)',
   'kameez-only': 'Kameez / Kurta Only',
   'shalwar-only': 'Shalwar / Pajama Only',
