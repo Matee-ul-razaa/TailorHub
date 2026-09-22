@@ -36,11 +36,12 @@ const measurementTemplates = {
       { key: 'kameezLength', en: 'Kameez / Kurta Length', ur: 'قمیض / کرتا لمبائی' },
       { key: 'chest', en: 'Chest', ur: 'چھاتی' },
       { key: 'shoulder', en: 'Shoulder', ur: 'کندھا' },
-      { key: 'sleeve', en: 'Sleeve', ur: 'بازو' },
+      { key: 'sleeveLength', en: 'Sleeve Length', ur: 'بازو' },
       { key: 'neck', en: 'Neck', ur: 'گلا' },
-      { key: 'bottomLength', en: 'Shalwar / Pajama Length', ur: 'شلوار / پاجامہ لمبائی' },
+      { key: 'shalwarLength', en: 'Shalwar / Pajama Length', ur: 'شلوار / پاجامہ لمبائی' },
       { key: 'waist', en: 'Waist', ur: 'کمر' },
       { key: 'hip', en: 'Hip', ur: 'کولہا' },
+      { key: 'inseam', en: 'Inseam', ur: 'اندرونی لمبائی' },
       { key: 'jacketLength', en: 'Waistcoat Length', ur: 'ویسٹ کوٹ لمبائی' },
     ],
   },
@@ -53,7 +54,7 @@ const measurementTemplates = {
       { key: 'waist', en: 'Waist', ur: 'کمر' },
       { key: 'hip', en: 'Hip', ur: 'کولہا' },
       { key: 'shoulder', en: 'Shoulder', ur: 'کندھا' },
-      { key: 'sleeve', en: 'Sleeve', ur: 'بازو' },
+      { key: 'sleeveLength', en: 'Sleeve Length', ur: 'بازو' },
       { key: 'neck', en: 'Neck', ur: 'گلا' },
       { key: 'pantLength', en: 'Pant Length', ur: 'پینٹ لمبائی' },
       { key: 'inseam', en: 'Inseam', ur: 'اندرونی لمبائی' },
@@ -165,14 +166,14 @@ const ProductDetail = () => {
 
   // Filter fields based on suitOption (top-only or bottom-only or vest-only)
   const activeFields = measurementTemplate.fields.filter(field => {
-    if (['blazer-only', 'kameez-only', 'vest-only'].includes(suitOption)) {
-      if (['pantLength', 'inseam', 'bottomLength', 'shalwarLength'].includes(field.key)) return false;
+    if (['blazer-only', 'kameez-only'].includes(suitOption)) {
+      if (['pantLength', 'inseam', 'shalwarLength'].includes(field.key)) return false;
     }
     if (['pants-only', 'shalwar-only'].includes(suitOption)) {
-      if (['coatLength', 'kameezLength', 'chest', 'shoulder', 'sleeve', 'neck', 'vestLength'].includes(field.key)) return false;
+      if (['coatLength', 'kameezLength', 'chest', 'shoulder', 'sleeveLength', 'neck', 'vestLength'].includes(field.key)) return false;
     }
     if (suitOption === 'vest-only') {
-      if (['coatLength', 'sleeve', 'hip', 'kameezLength'].includes(field.key)) return false;
+      if (['coatLength', 'sleeveLength', 'hip', 'kameezLength'].includes(field.key)) return false;
     } else if (suitOption !== '3-piece') {
       if (field.key === 'vestLength') return false;
     }
