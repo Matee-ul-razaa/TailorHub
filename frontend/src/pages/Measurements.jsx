@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Ruler, Plus, Trash2, Edit3, Copy, PlayCircle, Save, X, CalendarDays, Loader2, CheckCircle2, Clock, AlertCircle, CalendarCheck } from 'lucide-react';
 import useScrollAnim from '@/hooks/useScrollAnim';
 import { Button } from '@/components/ui/button';
+import { apiRequest } from '@/lib/api';
 
 const API = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
 
@@ -100,14 +101,10 @@ const Measurements = () => {
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   const fetchMyAppointments = useCallback(async () => {
-    if (!token) return;
     setLoadingAppointments(true);
     try {
-      const res = await fetch(`${API}/api/appointments/my`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await apiRequest('/api/appointments/my');
+      if (Array.isArray(data)) {
         setMyAppointments(data);
       }
     } catch (err) {
@@ -132,45 +129,46 @@ const Measurements = () => {
     }
     setIsSubmittingAppointment(true);
     try {
-      const res = await fetch(`${API}/api/appointments`, {
+      await apiRequest('/api/appointments', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+        body: {
           phone: appointmentForm.phone,
           appointment_date: appointmentForm.date,
           time_slot: appointmentForm.timeSlot,
           notes: appointmentForm.notes,
-        }),
+        },
       });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || 'Failed to submit appointment');
-      }
       toast.success(t('measurements.appointment.submitted', 'Appointment request submitted! Admin will review and approve soon.'));
       setShowBooking(false);
       setAppointmentForm({ date: '', timeSlot: '10:00 AM - 11:00 AM', phone: '', notes: '' });
       fetchMyAppointments();
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || 'Failed to submit appointment');
     } finally {
       setIsSubmittingAppointment(false);
     }
   };
 
   const fetchMeasurements = useCallback(async () => {
+    let localData = [];
     try {
-      const res = await fetch(`${API}/api/measurements`, { headers });
-      if (res.ok) setMeasurements(await res.json());
-    } catch { 
-      try {
-        const local = JSON.parse(localStorage.getItem('tailorhub-mock-measurements') || '[]');
-        setMeasurements(local);
-      } catch(e) { setMeasurements([]); }
+      localData = JSON.parse(localStorage.getItem('tailorhub-measurements') || localStorage.getItem('tailorhub-mock-measurements') || '[]');
+      if (Array.isArray(localData) && localData.length > 0) {
+        setMeasurements(localData);
+      }
+    } catch (_) {}
+
+    try {
+      const data = await apiRequest('/api/measurements');
+      if (Array.isArray(data)) {
+        setMeasurements(data);
+        localStorage.setItem('tailorhub-measurements', JSON.stringify(data));
+      }
+    } catch (err) {
+      console.warn('Using cached measurements:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [token]);
 
   useEffect(() => { fetchMeasurements(); }, [fetchMeasurements]);
@@ -201,77 +199,76 @@ const Measurements = () => {
     }
 
     setSaving(true);
-    const url = editingId ? `${API}/api/measurements/${editingId}` : `${API}/api/measurements`;
+    const url = editingId ? `/api/measurements/${editingId}` : '/api/measurements';
     const method = editingId ? 'PUT' : 'POST';
     const body = editingId
       ? { label: formLabel || undefined, data: formData }
       : { garmentType, label: formLabel || undefined, data: formData };
 
     try {
-      const res = await fetch(url, { method, headers, body: JSON.stringify(body) });
-      if (res.ok) {
-        toast.success(editingId ? t('measurements.success.updated') : t('measurements.success.saved'));
-        setShowForm(false);
-        fetchMeasurements();
-      } else {
-        const err = await res.json();
-        toast.error(err.detail || 'Failed to save');
-      }
-    } catch { 
-      const local = JSON.parse(localStorage.getItem('tailorhub-mock-measurements') || '[]');
+      const saved = await apiRequest(url, { method, body });
+      toast.success(editingId ? t('measurements.success.updated') : t('measurements.success.saved'));
+      setShowForm(false);
+      
+      const local = JSON.parse(localStorage.getItem('tailorhub-measurements') || '[]');
+      const updated = editingId
+        ? local.map(m => String(m.id) === String(editingId) ? saved : m)
+        : [saved, ...local.filter(m => String(m.id) !== String(saved.id))];
+      localStorage.setItem('tailorhub-measurements', JSON.stringify(updated));
+      fetchMeasurements();
+    } catch (err) { 
+      const local = JSON.parse(localStorage.getItem('tailorhub-measurements') || localStorage.getItem('tailorhub-mock-measurements') || '[]');
       if (editingId) {
-        const idx = local.findIndex(m => m.id === editingId);
+        const idx = local.findIndex(m => String(m.id) === String(editingId));
         if (idx !== -1) local[idx] = { ...local[idx], ...body, updatedAt: new Date().toISOString() };
       } else {
-        local.push({
+        local.unshift({
           id: `m-${Date.now()}`,
           uniqueCode: `TH-M-${Math.floor(1000 + Math.random() * 9000)}`,
           garmentType,
-          label: formLabel || undefined,
+          label: formLabel || `${garment.label} Measurements`,
           data: formData,
           updatedAt: new Date().toISOString()
         });
       }
-      localStorage.setItem('tailorhub-mock-measurements', JSON.stringify(local));
+      localStorage.setItem('tailorhub-measurements', JSON.stringify(local));
+      setMeasurements(local);
       toast.success(editingId ? t('measurements.success.updated') : t('measurements.success.saved'));
       setShowForm(false);
-      fetchMeasurements();
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`${API}/api/measurements/${id}`, { method: 'DELETE', headers });
-      toast.success(t('measurements.success.deleted'));
-      fetchMeasurements();
-    } catch { 
-      let local = JSON.parse(localStorage.getItem('tailorhub-mock-measurements') || '[]');
-      local = local.filter(m => m.id !== id);
-      localStorage.setItem('tailorhub-mock-measurements', JSON.stringify(local));
-      toast.success(t('measurements.success.deleted'));
-      fetchMeasurements();
-    }
+      await apiRequest(`/api/measurements/${id}`, { method: 'DELETE' });
+    } catch (_) {}
+    let local = JSON.parse(localStorage.getItem('tailorhub-measurements') || localStorage.getItem('tailorhub-mock-measurements') || '[]');
+    local = local.filter(m => String(m.id) !== String(id));
+    localStorage.setItem('tailorhub-measurements', JSON.stringify(local));
+    setMeasurements(local);
+    toast.success(t('measurements.success.deleted'));
   };
 
   const handleLookup = async () => {
     if (!lookupCode.trim()) return;
     try {
-      const res = await fetch(`${API}/api/measurements/lookup/${lookupCode.trim()}`, { headers });
-      if (res.ok) {
-        const m = await res.json();
-        toast.success(`Found: ${m.garmentType} — ${m.uniqueCode}`);
-        startEdit(m);
-      } else toast.error(t('measurements.error.notFound'));
-    } catch { 
-      const local = JSON.parse(localStorage.getItem('tailorhub-mock-measurements') || '[]');
-      const m = local.find(x => x.uniqueCode === lookupCode.trim());
+      const m = await apiRequest(`/api/measurements/lookup/${lookupCode.trim()}`);
       if (m) {
         toast.success(`Found: ${m.garmentType} — ${m.uniqueCode}`);
         startEdit(m);
-      } else {
-        toast.error(t('measurements.error.notFound'));
+        return;
       }
+    } catch (_) {}
+    
+    const local = JSON.parse(localStorage.getItem('tailorhub-measurements') || localStorage.getItem('tailorhub-mock-measurements') || '[]');
+    const m = local.find(x => x.uniqueCode === lookupCode.trim());
+    if (m) {
+      toast.success(`Found: ${m.garmentType} — ${m.uniqueCode}`);
+      startEdit(m);
+    } else {
+      toast.error(t('measurements.error.notFound'));
     }
   };
 

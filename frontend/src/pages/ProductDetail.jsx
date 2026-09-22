@@ -3,12 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useCart } from '@/context/CartContext';
 
-import { ShoppingBag, Check, ArrowLeft, Plus, Minus } from 'lucide-react';
+import { ShoppingBag, Check, ArrowLeft, Plus, Minus, Ruler } from 'lucide-react';
 import { toast } from 'sonner';
 import { useStore } from '@/context/StoreContext';
 import { useLanguage } from '@/context/LanguageContext';
 import useScrollAnim from '@/hooks/useScrollAnim';
 import { Button } from '@/components/ui/button';
+import { apiRequest } from '@/lib/api';
 const SKIN_PROFILE_KEY = 'tailorhub-skin-profile';
 
 const purchaseModeLabels = {
@@ -133,6 +134,24 @@ const ProductDetail = () => {
       return null;
     }
   });
+
+  const [savedProfiles, setSavedProfiles] = useState([]);
+
+  useEffect(() => {
+    try {
+      const local = JSON.parse(localStorage.getItem('tailorhub-measurements') || localStorage.getItem('tailorhub-mock-measurements') || '[]');
+      if (Array.isArray(local) && local.length > 0) setSavedProfiles(local);
+    } catch (_) {}
+
+    apiRequest('/api/measurements')
+      .then(res => {
+        if (Array.isArray(res) && res.length > 0) {
+          setSavedProfiles(res);
+          localStorage.setItem('tailorhub-measurements', JSON.stringify(res));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const isUnstitched = mode === 'unstitched';
   const isCustomStitching = mode === 'custom-stitching';
@@ -390,8 +409,42 @@ const ProductDetail = () => {
             {isCustomStitching && (
               <div className="th-card-static p-4 mb-4">
                 <div className="mb-4">
-                  <h6 className="fw-medium mb-1">{language === 'ur' ? measurementTemplate.titleUr : measurementTemplate.titleEn}</h6>
+                  <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                    <h6 className="fw-medium mb-0">{language === 'ur' ? measurementTemplate.titleUr : measurementTemplate.titleEn}</h6>
+                  </div>
                   <p className="text-muted small mb-3">{t('product.measurementsSubtitle', 'Required for custom stitching orders')}</p>
+
+                  {/* Quick Load Saved Measurements */}
+                  {savedProfiles.length > 0 && (
+                    <div className="p-3 mb-3 rounded-3 border d-flex align-items-center justify-content-between flex-wrap gap-2" style={{ background: 'var(--th-accent-light, #fdf8f4)', borderColor: 'var(--th-accent)' }}>
+                      <div className="d-flex align-items-center gap-2">
+                        <Ruler size={16} className="text-accent flex-shrink-0" />
+                        <span className="small fw-semibold">
+                          {language === 'ur' ? 'محفوظ شدہ ناپ منتخب کریں:' : 'Use Saved Measurements:'}
+                        </span>
+                      </div>
+                      <select
+                        className="th-select"
+                        style={{ maxWidth: 240, fontSize: '0.82rem', padding: '4px 8px' }}
+                        onChange={e => {
+                          const selected = savedProfiles.find(p => String(p.id) === e.target.value);
+                          if (selected && selected.data) {
+                            setMeasurements(prev => ({ ...prev, ...selected.data }));
+                            toast.success(language === 'ur' ? 'محفوظ شدہ ناپ درج ہو گیا!' : `Applied: ${selected.label || selected.garmentType}`);
+                          }
+                        }}
+                        defaultValue=""
+                      >
+                        <option value="" disabled>{language === 'ur' ? 'ناپ پروفائل منتخب کریں...' : 'Select saved profile...'}</option>
+                        {savedProfiles.map(p => (
+                          <option key={p.id} value={p.id}>
+                            {p.label || p.garmentType} ({p.uniqueCode || 'Saved'})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   <div className="row g-2">
                     {measurementTemplate.fields.map(field => (
                       <div key={field.key} className="col-sm-6">
