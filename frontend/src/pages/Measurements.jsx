@@ -49,13 +49,13 @@ const GARMENT_FIELDS = {
   'shalwar-kameez': {
     label: 'Shalwar Kameez',
     fields: [
-      { key: 'kameezLength', label: 'Kameez / Kurta Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'chest', label: 'Chest', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'shoulder', label: 'Shoulder', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'sleeveLength', label: 'Sleeve Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'shalwarLength', label: 'Shalwar / Pajama Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'waist', label: 'Waist', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
-      { key: 'hip', label: 'Hip', unit: 'in', tutorial: 'https://www.youtube.com/embed/O_gDvfG7iQM' },
+      { key: 'kameezLength', label: 'Kameez / Kurta Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
+      { key: 'chest', label: 'Chest', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
+      { key: 'shoulder', label: 'Shoulder', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
+      { key: 'sleeveLength', label: 'Sleeve Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
+      { key: 'shalwarLength', label: 'Shalwar / Pajama Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
+      { key: 'waist', label: 'Waist', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
+      { key: 'hip', label: 'Hip', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
     ],
   },
 };

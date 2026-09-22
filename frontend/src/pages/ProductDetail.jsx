@@ -78,9 +78,9 @@ const getCategoryTutorial = (category) => {
   }
   // Default / shalwar kameez
   return {
-    title: 'Measurement Guide Tutorial',
-    embedUrl: 'https://www.youtube.com/embed/O_gDvfG7iQM',
-    watchUrl: 'https://www.youtube.com/watch?v=O_gDvfG7iQM',
+    title: 'Shalwar Kameez Measurement Guide',
+    embedUrl: 'https://www.youtube.com/embed/ufQTfjiLtK4',
+    watchUrl: 'https://youtu.be/ufQTfjiLtK4?si=zoxHr67Grk2G63WH',
   };
 };
 
