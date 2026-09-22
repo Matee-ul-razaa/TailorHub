@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 /**
  * Custom hook to add scroll-triggered animations.
@@ -6,71 +6,76 @@ import { useEffect, useRef } from 'react';
  * class `scroll-anim`, `scroll-anim-left`, `scroll-anim-right`, or `scroll-anim-scale`
  * will animate into view on scroll.
  *
- * Elements that are already inside the viewport on mount (e.g. after a
- * hard refresh) are revealed immediately so they don't stay invisible.
+ * Uses a **callback ref** so the observer is created when the container
+ * DOM node is actually attached (even after a loading spinner).
  */
 export function useScrollAnim() {
-  const containerRef = useRef(null);
+  const observerRef = useRef(null);
+  const mutationRef = useRef(null);
 
-  useEffect(() => {
-    const container = containerRef.current;
+  const callbackRef = useCallback((container) => {
+    // ── Clean up previous observers when the node changes ──
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+    if (mutationRef.current) {
+      mutationRef.current.disconnect();
+      mutationRef.current = null;
+    }
+
     if (!container) return;
 
     const SELECTOR =
       '.scroll-anim, .scroll-anim-left, .scroll-anim-right, .scroll-anim-scale';
 
-    // ── 1. Immediately reveal any element that is already in the viewport ──
-    // This prevents the "invisible after refresh" bug: useEffect fires after
-    // the first paint, so IntersectionObserver may never fire for elements
-    // that were already fully in view.
+    // ── 1. Immediately reveal elements already in the viewport ──
     const revealIfInView = (el) => {
       if (el.classList.contains('visible')) return;
       const rect = el.getBoundingClientRect();
-      const inViewport =
-        rect.top < window.innerHeight + 60 && rect.bottom > -60;
-      if (inViewport) {
+      if (rect.top < window.innerHeight + 80 && rect.bottom > -80) {
         el.classList.add('visible');
       }
     };
 
-    const allAnimEls = container.querySelectorAll(SELECTOR);
-    // Use rAF to ensure layout has settled before checking positions
+    // Reveal in-viewport elements on next frame (after layout settles)
     requestAnimationFrame(() => {
-      allAnimEls.forEach(revealIfInView);
       if (container.matches?.(SELECTOR)) revealIfInView(container);
+      container.querySelectorAll(SELECTOR).forEach(revealIfInView);
     });
 
-    // ── 2. IntersectionObserver handles elements below the fold ──
-    const observer = new IntersectionObserver(
+    // ── 2. IntersectionObserver for elements below the fold ──
+    const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
+            io.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.08, rootMargin: '60px 0px -20px 0px' }
+      { threshold: 0.08, rootMargin: '80px 0px -10px 0px' }
     );
+    observerRef.current = io;
 
     const observeWithin = (root) => {
       if (root.nodeType !== 1) return;
       if (root.matches?.(SELECTOR) && !root.classList.contains('visible')) {
-        observer.observe(root);
+        io.observe(root);
       }
       root.querySelectorAll?.(SELECTOR).forEach((el) => {
-        if (!el.classList.contains('visible')) observer.observe(el);
+        if (!el.classList.contains('visible')) io.observe(el);
       });
     };
 
     observeWithin(container);
 
-    // Re-observe elements added after mount (pagination, filter changes, etc.)
-    const mutationObserver = new MutationObserver((mutations) => {
+    // ── 3. MutationObserver for dynamically added elements ──
+    const mo = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType !== 1) return;
-          // For dynamically added nodes, check if they are already in view
+          // Reveal immediately if already in viewport, else observe
           requestAnimationFrame(() => {
             if (node.matches?.(SELECTOR)) revealIfInView(node);
             node.querySelectorAll?.(SELECTOR).forEach(revealIfInView);
@@ -79,15 +84,11 @@ export function useScrollAnim() {
         });
       });
     });
-    mutationObserver.observe(container, { childList: true, subtree: true });
-
-    return () => {
-      observer.disconnect();
-      mutationObserver.disconnect();
-    };
+    mo.observe(container, { childList: true, subtree: true });
+    mutationRef.current = mo;
   }, []);
 
-  return containerRef;
+  return callbackRef;
 }
 
 export default useScrollAnim;
