@@ -37,6 +37,8 @@ const GARMENT_FIELDS = {
   'pent-coat': {
     label: 'Pent Coat',
     tutorial: 'https://www.youtube.com/embed/_8CsQNTHN5w',
+    tutorial2: 'https://www.youtube.com/embed/g5amsADsayo',
+    tutorial2Label: 'Vest Tutorial',
     fields: [
       { key: 'coatLength', label: 'Coat Length', unit: 'in' },
       { key: 'chest', label: 'Chest', unit: 'in' },
@@ -47,11 +49,14 @@ const GARMENT_FIELDS = {
       { key: 'neck', label: 'Neck', unit: 'in' },
       { key: 'pantLength', label: 'Pant Length', unit: 'in' },
       { key: 'inseam', label: 'Inseam', unit: 'in' },
+      { key: 'vestLength', label: 'Vest Length', unit: 'in' },
     ],
   },
   'shalwar-kameez': {
     label: 'Shalwar Kameez',
     tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4',
+    tutorial2: 'https://www.youtube.com/embed/u5xUA-gn17k',
+    tutorial2Label: 'Waistcoat Tutorial',
     fields: [
       { key: 'kameezLength', label: 'Kameez / Kurta Length', unit: 'in' },
       { key: 'chest', label: 'Chest', unit: 'in' },
@@ -61,28 +66,7 @@ const GARMENT_FIELDS = {
       { key: 'waist', label: 'Waist', unit: 'in' },
       { key: 'hip', label: 'Hip', unit: 'in' },
       { key: 'inseam', label: 'Inseam', unit: 'in' },
-    ],
-  },
-  'pent-coat-vest': {
-    label: 'Pent Coat Vest',
-    tutorial: 'https://www.youtube.com/embed/g5amsADsayo',
-    fields: [
-      { key: 'chest', label: 'Chest', unit: 'in' },
-      { key: 'waist', label: 'Waist', unit: 'in' },
-      { key: 'shoulder', label: 'Shoulder', unit: 'in' },
-      { key: 'vestLength', label: 'Vest Length', unit: 'in' },
-      { key: 'neck', label: 'Neck', unit: 'in' },
-    ],
-  },
-  'waistcoat': {
-    label: 'Waistcoat',
-    tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k',
-    fields: [
-      { key: 'chest', label: 'Chest', unit: 'in' },
-      { key: 'waist', label: 'Waist', unit: 'in' },
-      { key: 'shoulder', label: 'Shoulder', unit: 'in' },
       { key: 'jacketLength', label: 'Waistcoat Length', unit: 'in' },
-      { key: 'neck', label: 'Neck', unit: 'in' },
     ],
   },
 };
@@ -584,7 +568,17 @@ const Measurements = () => {
                         <PlayCircle size={16} /> <span className="small fw-medium">{t('measurements.howTo', 'How to Measure')}</span>
                       </Button>
                     )}
-                    <Button variant="ghost" size="sm" className="p-0" onClick={() => setShowForm(false)}><X size={20} /></Button>
+                    {garment.tutorial2 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setTutorialUrl(garment.tutorial2)}
+                        className="p-0 text-amber-600 d-flex align-items-center gap-1 hover-lift"
+                      >
+                        <PlayCircle size={16} /> <span className="small fw-medium">{garment.tutorial2Label}</span>
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm" className="p-0 ms-2" onClick={() => setShowForm(false)}><X size={20} /></Button>
                   </div>
                 </div>
                 <div className="d-flex flex-column gap-3">

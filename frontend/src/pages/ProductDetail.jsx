@@ -41,6 +41,7 @@ const measurementTemplates = {
       { key: 'bottomLength', en: 'Shalwar / Pajama Length', ur: 'شلوار / پاجامہ لمبائی' },
       { key: 'waist', en: 'Waist', ur: 'کمر' },
       { key: 'hip', en: 'Hip', ur: 'کولہا' },
+      { key: 'jacketLength', en: 'Waistcoat Length', ur: 'ویسٹ کوٹ لمبائی' },
     ],
   },
   'pent-coat': {
@@ -174,6 +175,9 @@ const ProductDetail = () => {
       if (['coatLength', 'sleeve', 'hip', 'kameezLength'].includes(field.key)) return false;
     } else if (suitOption !== '3-piece') {
       if (field.key === 'vestLength') return false;
+    }
+    if (!addWaistcoat && field.key === 'jacketLength') {
+      return false;
     }
     return true;
   });
