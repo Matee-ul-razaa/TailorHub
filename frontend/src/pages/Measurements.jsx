@@ -58,6 +58,16 @@ const GARMENT_FIELDS = {
       { key: 'hip', label: 'Hip', unit: 'in', tutorial: 'https://www.youtube.com/embed/ufQTfjiLtK4' },
     ],
   },
+  'waistcoat': {
+    label: 'Waistcoat',
+    fields: [
+      { key: 'chest', label: 'Chest', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
+      { key: 'waist', label: 'Waist', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
+      { key: 'shoulder', label: 'Shoulder', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
+      { key: 'jacketLength', label: 'Waistcoat Length', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
+      { key: 'neck', label: 'Neck', unit: 'in', tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k' },
+    ],
+  },
 };
 
 const Measurements = () => {

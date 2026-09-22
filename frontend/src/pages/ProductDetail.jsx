@@ -283,24 +283,55 @@ const ProductDetail = () => {
 
             {/* Waistcoat Option (traditional) */}
             {product.hasWaistcoatOption && (
-              <div className="th-card-static p-3 d-flex align-items-center justify-content-between mb-4">
-                <div>
-                  <div className="fw-medium">{t('product.addWaistcoat', 'Add Waistcoat')}</div>
-                  <div className="text-muted small">Matching embroidered waistcoat (+Rs. 3,000)</div>
+              <div className="th-card-static p-3 mb-4">
+                <div className="d-flex align-items-center justify-content-between">
+                  <div>
+                    <div className="fw-medium">{t('product.addWaistcoat', 'Add Waistcoat')}</div>
+                    <div className="text-muted small">Matching embroidered waistcoat (+Rs. 3,000)</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAddWaistcoat(!addWaistcoat)}
+                    className="d-flex align-items-center justify-content-center rounded-2 border flex-shrink-0"
+                    style={{
+                      width: 32, height: 32, cursor: 'pointer',
+                      background: addWaistcoat ? 'var(--th-accent)' : 'white',
+                      borderColor: addWaistcoat ? 'var(--th-accent)' : 'var(--th-border)',
+                      color: addWaistcoat ? 'white' : 'transparent',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {addWaistcoat && <Check size={16} />}
+                  </button>
                 </div>
-                <button
-                  onClick={() => setAddWaistcoat(!addWaistcoat)}
-                  className="d-flex align-items-center justify-content-center rounded-2 border flex-shrink-0"
-                  style={{
-                    width: 32, height: 32, cursor: 'pointer',
-                    background: addWaistcoat ? 'var(--th-accent)' : 'white',
-                    borderColor: addWaistcoat ? 'var(--th-accent)' : 'var(--th-border)',
-                    color: addWaistcoat ? 'white' : 'transparent',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  {addWaistcoat && <Check size={16} />}
-                </button>
+
+                {/* Waistcoat measurement video tutorial — ONLY shown when user clicks / selects waistcoat */}
+                {addWaistcoat && (
+                  <div className="mt-3 pt-3 border-top">
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <h6 className="fw-medium small mb-0 text-accent">
+                        {language === 'ur' ? 'واسکٹ کی پیمائش کا طریقہ کار' : 'Waistcoat Measurement Guide'}
+                      </h6>
+                      <a
+                        href="https://youtu.be/u5xUA-gn17k?si=7cRTvq3C0LaehGK0"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-accent small text-decoration-none fw-medium"
+                      >
+                        Watch on YouTube ↗
+                      </a>
+                    </div>
+                    <div className="rounded-3 overflow-hidden border shadow-sm" style={{ aspectRatio: '16/9', background: '#000', maxWidth: 440 }}>
+                      <iframe
+                        src="https://www.youtube.com/embed/u5xUA-gn17k"
+                        title="Waistcoat Measurement Guide"
+                        className="w-100 h-100"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -408,6 +439,33 @@ const ProductDetail = () => {
                       </a>
                     </div>
                   </div>
+
+                  {addWaistcoat && (
+                    <div className="mt-3 pt-3 border-top" style={{ maxWidth: 440 }}>
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                        <h6 className="fw-medium small mb-0 text-accent">
+                          {language === 'ur' ? 'واسکٹ کی پیمائش کا طریقہ کار' : 'Waistcoat Measurement Guide'}
+                        </h6>
+                        <a
+                          href="https://youtu.be/u5xUA-gn17k?si=7cRTvq3C0LaehGK0"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-accent small text-decoration-none fw-medium"
+                        >
+                          Watch on YouTube ↗
+                        </a>
+                      </div>
+                      <div className="rounded-3 overflow-hidden border shadow-sm" style={{ aspectRatio: '16/9', background: '#000' }}>
+                        <iframe
+                          src="https://www.youtube.com/embed/u5xUA-gn17k"
+                          title="Waistcoat Measurement Guide"
+                          className="w-100 h-100"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
