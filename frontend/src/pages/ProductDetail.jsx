@@ -21,8 +21,11 @@ const purchaseModeLabels = {
 const suitOptionLabels = {
   '3-piece': '3-Piece (Blazer + Vest + Pants)',
   '2-piece': '2-Piece (Blazer + Pants)',
-  'blazer-only': 'Blazer Only',
+  'blazer-only': 'Blazer / Coat Only',
   'pants-only': 'Pants Only',
+  'kameez-shalwar': 'Complete (Kameez + Shalwar)',
+  'kameez-only': 'Kameez / Kurta Only',
+  'shalwar-only': 'Shalwar / Pajama Only',
 };
 
 const measurementTemplates = {
@@ -157,7 +160,19 @@ const ProductDetail = () => {
   const isCustomStitching = mode === 'custom-stitching';
   const measurementTemplate =
     measurementTemplates[product?.category] || measurementTemplates.default;
-  const hasMeasurementData = measurementTemplate.fields.every(field => Number(measurements[field.key] || 0) > 0);
+
+  // Filter fields based on suitOption (top-only or bottom-only)
+  const activeFields = measurementTemplate.fields.filter(field => {
+    if (suitOption === 'blazer-only' || suitOption === 'kameez-only') {
+      return !['pantLength', 'inseam', 'bottomLength', 'shalwarLength'].includes(field.key);
+    }
+    if (suitOption === 'pants-only' || suitOption === 'shalwar-only') {
+      return !['coatLength', 'kameezLength', 'chest', 'shoulder', 'sleeve', 'neck'].includes(field.key);
+    }
+    return true;
+  });
+
+  const hasMeasurementData = activeFields.every(field => Number(measurements[field.key] || 0) > 0);
   const translateWear = (wearType) => t(`catalog.${wearType}`, wearType);
 
   // Get the image for the selected color or unstitched fabric
@@ -209,8 +224,10 @@ const ProductDetail = () => {
     let price = product.price;
     if (addWaistcoat) price += 3000;
     if (suitOption === '2-piece') price *= 0.75;
-    if (suitOption === 'blazer-only') price *= 0.5;
-    if (suitOption === 'pants-only') price *= 0.3;
+    if (suitOption === 'blazer-only') price *= 0.6;
+    if (suitOption === 'pants-only') price *= 0.4;
+    if (suitOption === 'kameez-only') price *= 0.6;
+    if (suitOption === 'shalwar-only') price *= 0.4;
     if (mode === 'unstitched') price *= 0.6;
     return price;
   };
@@ -445,9 +462,9 @@ const ProductDetail = () => {
                     </div>
                   )}
 
-                  <div className="row g-2">
-                    {measurementTemplate.fields.map(field => (
-                      <div key={field.key} className="col-sm-6">
+                  <div className="row g-3">
+                    {activeFields.map(field => (
+                      <div key={field.key} className="col-sm-6 col-md-4">
                         <label className="th-label" style={{ fontSize: '0.72rem' }}>
                           {language === 'ur' ? field.ur : field.en} (inches)
                         </label>

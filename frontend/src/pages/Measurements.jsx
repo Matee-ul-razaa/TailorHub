@@ -46,6 +46,7 @@ const GARMENT_FIELDS = {
       { key: 'sleeveLength', label: 'Sleeve Length', unit: 'in' },
       { key: 'neck', label: 'Neck', unit: 'in' },
       { key: 'pantLength', label: 'Pant Length', unit: 'in' },
+      { key: 'inseam', label: 'Inseam', unit: 'in' },
     ],
   },
   'shalwar-kameez': {
@@ -59,6 +60,7 @@ const GARMENT_FIELDS = {
       { key: 'shalwarLength', label: 'Shalwar / Pajama Length', unit: 'in' },
       { key: 'waist', label: 'Waist', unit: 'in' },
       { key: 'hip', label: 'Hip', unit: 'in' },
+      { key: 'inseam', label: 'Inseam', unit: 'in' },
     ],
   },
   'waistcoat': {
