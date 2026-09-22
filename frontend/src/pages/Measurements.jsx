@@ -63,6 +63,17 @@ const GARMENT_FIELDS = {
       { key: 'inseam', label: 'Inseam', unit: 'in' },
     ],
   },
+  'pent-coat-vest': {
+    label: 'Pent Coat Vest',
+    tutorial: 'https://www.youtube.com/embed/g5amsADsayo',
+    fields: [
+      { key: 'chest', label: 'Chest', unit: 'in' },
+      { key: 'waist', label: 'Waist', unit: 'in' },
+      { key: 'shoulder', label: 'Shoulder', unit: 'in' },
+      { key: 'vestLength', label: 'Vest Length', unit: 'in' },
+      { key: 'neck', label: 'Neck', unit: 'in' },
+    ],
+  },
   'waistcoat': {
     label: 'Waistcoat',
     tutorial: 'https://www.youtube.com/embed/u5xUA-gn17k',

@@ -53,7 +53,7 @@ const categorySeeds = {
     basePrice: 8500,
     step: 600,
     hasWaistcoatOption: false,
-    suitOptions: ['2-piece', '3-piece', 'blazer-only', 'pants-only'],
+    suitOptions: ['2-piece', '3-piece', 'blazer-only', 'pants-only', 'vest-only'],
     description: 'Premium men\'s pent coat (prince coat) with elegant tailoring, perfect for formal events.',
   },
   'shalwar-kameez': {

@@ -23,6 +23,7 @@ const suitOptionLabels = {
   '2-piece': '2-Piece (Blazer + Pants)',
   'blazer-only': 'Blazer / Coat Only',
   'pants-only': 'Pants Only',
+  'vest-only': 'Vest / Waistcoat Only',
   'kameez-shalwar': 'Complete (Kameez + Shalwar)',
   'kameez-only': 'Kameez / Kurta Only',
   'shalwar-only': 'Shalwar / Pajama Only',
@@ -56,6 +57,7 @@ const measurementTemplates = {
       { key: 'neck', en: 'Neck', ur: 'گلا' },
       { key: 'pantLength', en: 'Pant Length', ur: 'پینٹ لمبائی' },
       { key: 'inseam', en: 'Inseam', ur: 'اندرونی لمبائی' },
+      { key: 'vestLength', en: 'Vest Length', ur: 'ویسٹ لمبائی' },
     ],
   },
   default: {
@@ -161,13 +163,18 @@ const ProductDetail = () => {
   const measurementTemplate =
     measurementTemplates[product?.category] || measurementTemplates.default;
 
-  // Filter fields based on suitOption (top-only or bottom-only)
+  // Filter fields based on suitOption (top-only or bottom-only or vest-only)
   const activeFields = measurementTemplate.fields.filter(field => {
-    if (suitOption === 'blazer-only' || suitOption === 'kameez-only') {
-      return !['pantLength', 'inseam', 'bottomLength', 'shalwarLength'].includes(field.key);
+    if (['blazer-only', 'kameez-only', 'vest-only'].includes(suitOption)) {
+      if (['pantLength', 'inseam', 'bottomLength', 'shalwarLength'].includes(field.key)) return false;
     }
-    if (suitOption === 'pants-only' || suitOption === 'shalwar-only') {
-      return !['coatLength', 'kameezLength', 'chest', 'shoulder', 'sleeve', 'neck'].includes(field.key);
+    if (['pants-only', 'shalwar-only'].includes(suitOption)) {
+      if (['coatLength', 'kameezLength', 'chest', 'shoulder', 'sleeve', 'neck', 'vestLength'].includes(field.key)) return false;
+    }
+    if (suitOption === 'vest-only') {
+      if (['coatLength', 'sleeve', 'hip', 'kameezLength'].includes(field.key)) return false;
+    } else if (suitOption !== '3-piece') {
+      if (field.key === 'vestLength') return false;
     }
     return true;
   });
@@ -226,6 +233,7 @@ const ProductDetail = () => {
     if (suitOption === '2-piece') price *= 0.75;
     if (suitOption === 'blazer-only') price *= 0.6;
     if (suitOption === 'pants-only') price *= 0.4;
+    if (suitOption === 'vest-only') price *= 0.3;
     if (suitOption === 'kameez-only') price *= 0.6;
     if (suitOption === 'shalwar-only') price *= 0.4;
     if (mode === 'unstitched') price *= 0.6;
