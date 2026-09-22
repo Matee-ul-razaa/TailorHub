@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { useStore, getOrderProgress, getDaysRemaining, getExpectedCompletion } from '@/context/StoreContext';
@@ -46,6 +46,9 @@ const Tracking = () => {
     ? orders.filter(o => o.assignedTo === user.id || o.status === 'delivered')
     : orders.filter(order => order.customerEmail === user.email);
 
+  const { orderId } = useParams();
+  const displayOrders = orderId ? visibleOrders.filter(o => o.id === orderId) : visibleOrders;
+
   if (!user) {
     return (
       <Layout>
@@ -70,28 +73,27 @@ const Tracking = () => {
         </div>
 
         <div className="d-flex flex-column gap-3">
-          {visibleOrders.length === 0 && (
-            <div className="d-flex flex-column align-items-center justify-content-center gap-3 py-5 text-center scroll-anim">
-              <Package size={64} className="text-muted" style={{ opacity: 0.25 }} />
-              <p className="fw-medium fs-5">{t('tracking.noOrders')}</p>
-              <p className="text-muted small">{t('tracking.placeOrderTip')}</p>
+          {displayOrders.length === 0 ? (
+            <div className="text-center py-5 anim-fade-up">
+              <Package size={48} className="text-muted mx-auto mb-3" style={{ opacity: 0.2 }} />
+              <h5 className="fw-medium">{t('tracking.noOrders', 'No Active Orders')}</h5>
+              <p className="text-muted small">{t('tracking.noOrdersDesc', 'You don\'t have any active orders right now.')}</p>
               <Link to="/catalog">
-                <Button variant="outline">{t('catalog.allProducts')}</Button>
+                <Button variant="outline" className="mt-2">{t('nav.catalog', 'Browse Catalog')}</Button>
               </Link>
             </div>
-          )}
-
-          {visibleOrders.map((order, i) => {
-            const progress = getOrderProgress(order.status);
-            const statusStyle = STATUS_COLORS[order.status] || { bg: '#f1f3f5', color: 'var(--th-primary)', border: 'var(--th-border)' };
-            const daysRemaining = getDaysRemaining(order.status);
-            const expected = getExpectedCompletion(order.status);
-            const weekdayLabel = expected
-              ? expected.toLocaleDateString(isUrdu ? 'ur-PK' : 'en-US', { weekday: 'long' })
-              : null;
-            const showEta = order.status !== 'delivered' && order.status !== 'cancelled';
-            return (
-              <div key={order.id} className="th-card-static p-4 scroll-anim" style={{ transitionDelay: `${i * 0.08}s` }}>
+          ) : (
+            displayOrders.map((order, i) => {
+              const progress = getOrderProgress(order.status);
+              const statusStyle = STATUS_COLORS[order.status] || { bg: '#f1f3f5', color: 'var(--th-primary)', border: 'var(--th-border)' };
+              const daysRemaining = getDaysRemaining(order.status);
+              const expected = getExpectedCompletion(order.status);
+              const weekdayLabel = expected
+                ? expected.toLocaleDateString(isUrdu ? 'ur-PK' : 'en-US', { weekday: 'long' })
+                : null;
+              const showEta = order.status !== 'delivered' && order.status !== 'cancelled';
+              return (
+                <div key={order.id} className="th-card-static p-4 scroll-anim" style={{ transitionDelay: `${i * 0.08}s` }}>
                 <div className={`d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 ${isUrdu ? 'flex-row-reverse' : ''}`}>
                   <div className={`d-flex align-items-center gap-2 ${isUrdu ? 'flex-row-reverse' : ''}`}>
                     <Package size={16} className="text-accent" />
@@ -201,7 +203,8 @@ const Tracking = () => {
                 )}
               </div>
             );
-          })}
+            })
+          )}
         </div>
       </div>
     </Layout>

@@ -1,7 +1,9 @@
 import React from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
-const Button = React.forwardRef(({ className, variant = "default", size = "default", children, ...props }, ref) => {
+const Button = React.forwardRef(({ className, variant = "default", size = "default", asChild = false, children, ...props }, ref) => {
+  const Comp = asChild ? Slot : "button";
   const baseClass = "inline-flex items-center justify-center gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
 
   const variants = {
@@ -20,13 +22,13 @@ const Button = React.forwardRef(({ className, variant = "default", size = "defau
   };
 
   return (
-    <button
+    <Comp
       ref={ref}
       className={cn(baseClass, variants[variant] || variants.default, sizes[size] || sizes.default, className)}
       {...props}
     >
       {children}
-    </button>
+    </Comp>
   );
 });
 Button.displayName = "Button";

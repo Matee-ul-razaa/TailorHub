@@ -74,6 +74,7 @@ const App = () => (
                       <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
                       <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
                       <Route path="/tracking" element={<ProtectedRoute><Tracking /></ProtectedRoute>} />
+                      <Route path="/tracking/:orderId" element={<ProtectedRoute><Tracking /></ProtectedRoute>} />
                       <Route path="/virtual-try-on" element={<ProtectedRoute><VirtualTryOn /></ProtectedRoute>} />
                       <Route path="/skin-tone" element={<ProtectedRoute><SkinToneAnalysis /></ProtectedRoute>} />
                       <Route path="/measurements" element={<ProtectedRoute><Measurements /></ProtectedRoute>} />
