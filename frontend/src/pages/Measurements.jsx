@@ -429,7 +429,7 @@ const Measurements = () => {
         {/* Booking Modal */}
         {showBooking && (
           <div className="th-modal-overlay">
-            <div className="th-card-static p-0 anim-scale-in" style={{ maxWidth: 440, width: '100%' }} dir={isUrdu ? 'rtl' : 'ltr'}>
+            <div className="th-card-static p-0 anim-scale-in" style={{ maxWidth: 440, width: '100%', backgroundColor: 'var(--th-bg)' }} dir={isUrdu ? 'rtl' : 'ltr'}>
               <div className="p-4 pb-2 d-flex align-items-center justify-content-between">
                 <h5 className="font-playfair fw-semibold mb-0">{t('measurements.appointment.title')}</h5>
                 <Button variant="ghost" size="sm" className="p-0" onClick={() => setShowBooking(false)}><X size={20} /></Button>
@@ -496,7 +496,7 @@ const Measurements = () => {
         {/* Tutorial Modal */}
         {tutorialUrl && (
           <div className="th-modal-overlay">
-            <div className="th-card-static p-4 anim-scale-in" style={{ maxWidth: 640, width: '100%' }}>
+            <div className="th-card-static p-4 anim-scale-in" style={{ maxWidth: 640, width: '100%', backgroundColor: 'var(--th-bg)' }}>
               <div className="d-flex align-items-center justify-content-between mb-3">
                 <h5 className="fw-semibold mb-0">{t('measurements.tutorial.title')}</h5>
                 <Button variant="ghost" size="sm" className="p-0" onClick={() => setTutorialUrl(null)}><X size={20} /></Button>
