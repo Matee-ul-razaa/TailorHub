@@ -86,78 +86,100 @@ const VirtualTryOn = () => {
     return stitchedProducts.filter(p => p.category === garmentCategory);
   }, [garmentCategory]);
 
-  // Auto-load the photo + skin tone results saved by the Skin Tone Analyzer
-  // so the user doesn't have to upload again if they did skin tone first.
-  useEffect(() => {
-    const savedImage = localStorage.getItem('tailorhub-vto-image');
-    const savedProfile = localStorage.getItem(SKIN_PROFILE_KEY);
+    // Auto-load the photo + skin tone results saved by the Skin Tone Analyzer
+    // so the user doesn't have to upload again if they did skin tone first.
+    useEffect(() => {
+      let savedImage = localStorage.getItem('tailorhub-vto-image');
+      const savedProfile = localStorage.getItem(SKIN_PROFILE_KEY);
 
-    if (savedImage) setPhoto(savedImage);
-
-    if (savedProfile) {
-      try {
-        const profile = JSON.parse(savedProfile);
-        setSkinProfile(profile);
-        if (profile.tone) setTone(profile.tone);
-        if (profile.rgb) setAvgRgb(profile.rgb);
-      } catch (e) {
-        console.warn('Could not parse saved skin profile', e);
+      // Dead blob: URLs from previous sessions expire on reload and trigger ERR_FILE_NOT_FOUND
+      if (savedImage && savedImage.startsWith('blob:')) {
+        localStorage.removeItem('tailorhub-vto-image');
+        savedImage = null;
       }
-    } else if (savedImage) {
-      // No saved results but we have an image — analyze it locally.
-      (async () => {
-        setAnalyzing(true);
+
+      if (savedImage) setPhoto(savedImage);
+
+      if (savedProfile) {
         try {
-          const sampled = await sampleSkinTone(savedImage);
-          const detectedTone = getSkinTone(sampled);
-          setAvgRgb(sampled);
-          setTone(detectedTone);
+          const profile = JSON.parse(savedProfile);
+          setSkinProfile(profile);
+          if (profile.tone) setTone(profile.tone);
+          if (profile.rgb) setAvgRgb(profile.rgb);
         } catch (e) {
-          console.error('Failed to analyze saved image', e);
-          setPhoto('');
-          localStorage.removeItem('tailorhub-vto-image');
-        } finally {
-          setAnalyzing(false);
+          console.warn('Could not parse saved skin profile', e);
         }
-      })();
-    }
-  }, []);
+      } else if (savedImage) {
+        // No saved results but we have an image — analyze it locally.
+        (async () => {
+          setAnalyzing(true);
+          try {
+            const sampled = await sampleSkinTone(savedImage);
+            const detectedTone = getSkinTone(sampled);
+            setAvgRgb(sampled);
+            setTone(detectedTone);
+          } catch (e) {
+            console.error('Failed to analyze saved image', e);
+            setPhoto('');
+            localStorage.removeItem('tailorhub-vto-image');
+          } finally {
+            setAnalyzing(false);
+          }
+        })();
+      }
+    }, []);
 
   const onFileChange = async event => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setPhoto(url);
-    setTone('');
-    setAvgRgb(null);
-    setSkinProfile(null);
-    setResultImage(null);
 
-    // Auto-analyze tone purely from the VTO upload
-    setAnalyzing(true);
-    try {
-      localStorage.setItem('tailorhub-vto-image', url);
-      const sampled = await sampleSkinTone(url);
-      const detectedTone = getSkinTone(sampled);
-      setAvgRgb(sampled);
-      setTone(detectedTone);
-      localStorage.setItem(
-        SKIN_PROFILE_KEY,
-        JSON.stringify({ tone: detectedTone, rgb: sampled, recommendedColors: tonePalette[detectedTone] || [] }),
-      );
-    } finally {
-      setAnalyzing(false);
-    }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result;
+      setPhoto(dataUrl);
+      setTone('');
+      setAvgRgb(null);
+      setSkinProfile(null);
+      setResultImage(null);
+
+      try {
+        localStorage.setItem('tailorhub-vto-image', dataUrl);
+      } catch (err) {
+        console.warn('Image too large for localStorage', err);
+      }
+
+      // Auto-analyze tone purely from the VTO upload
+      setAnalyzing(true);
+      try {
+        const sampled = await sampleSkinTone(dataUrl);
+        const detectedTone = getSkinTone(sampled);
+        setAvgRgb(sampled);
+        setTone(detectedTone);
+        localStorage.setItem(
+          SKIN_PROFILE_KEY,
+          JSON.stringify({ tone: detectedTone, rgb: sampled, recommendedColors: tonePalette[detectedTone] || [] }),
+        );
+      } catch (err) {
+        console.error('Failed to sample skin tone', err);
+      } finally {
+        setAnalyzing(false);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const onGarmentUpload = event => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setGarmentImage(url);
-    setGarmentName(file.name.replace(/\.[^.]+$/, ''));
-    setGarmentDescription('custom uploaded garment');
-    setResultImage(null);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setGarmentImage(reader.result);
+      setGarmentName(file.name.replace(/\.[^.]+$/, ''));
+      setGarmentDescription('custom uploaded garment');
+      setResultImage(null);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleVto = async () => {
@@ -165,14 +187,10 @@ const VirtualTryOn = () => {
     setVtoLoading(true);
     setResultImage(null);
     try {
-      const personB64 = await toBase64(photo);
-      const garmentBlob = await fetch(garmentImage).then(r => r.blob());
-      const garmentB64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(garmentBlob);
-      });
+      const personB64 = photo.startsWith('data:') ? photo : await toBase64(photo);
+      const garmentB64 = garmentImage.startsWith('data:') 
+        ? garmentImage 
+        : await toBase64(garmentImage);
 
       toast.info('Generating AI Try-On... This may take 15-30 seconds.');
       const response = await apiRequest('/api/vto/tryon', {
