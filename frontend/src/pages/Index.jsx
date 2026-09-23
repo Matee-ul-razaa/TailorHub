@@ -11,6 +11,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import GlassCard from '@/components/ui/GlassCard';
 import GradientButton from '@/components/ui/GradientButton';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Palette, ShoppingBag, Ruler, Sparkles, ArrowRight, X } from 'lucide-react';
 
 const SKIN_PROFILE_KEY = 'tailorhub-skin-profile';
@@ -43,14 +44,15 @@ const Index = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (showOnboarding) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [showOnboarding]);
+  // Dialog automatically handles body overflow, so we can remove the manual overflow logic
+  // useEffect(() => {
+  //   if (showOnboarding) {
+  //     document.body.style.overflow = 'hidden';
+  //   } else {
+  //     document.body.style.overflow = '';
+  //   }
+  //   return () => { document.body.style.overflow = ''; };
+  // }, [showOnboarding]);
 
   const dismissOnboarding = () => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
@@ -71,9 +73,9 @@ const Index = () => {
   return (
     <Layout>
       {/* Post-Signup Choice Screen */}
-      {showOnboarding && (
-        <div className="th-modal-overlay">
-          <GlassCard className="p-4 p-md-5 anim-scale-in" style={{ maxWidth: 520, width: '100%' }} dir={isUrdu ? 'rtl' : 'ltr'}>
+      <Dialog open={showOnboarding} onOpenChange={setShowOnboarding}>
+        <DialogContent className="sm:max-w-[520px] p-0 bg-transparent border-0 shadow-none [&>button]:hidden">
+          <GlassCard className="p-4 p-md-5 w-100" dir={isUrdu ? 'rtl' : 'ltr'}>
             <div className="text-center mb-4">
               <div className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style={{ width: 56, height: 56, background: 'var(--th-accent-light)' }}>
                 <Sparkles size={28} className="text-accent" />
@@ -99,12 +101,12 @@ const Index = () => {
                 </button>
               ))}
             </div>
-            <Button variant="ghost" onClick={dismissOnboarding} className="w-full mt-3 text-muted">
-              <X size={14} /> {t('onboarding.skip')}
+            <Button variant="ghost" onClick={dismissOnboarding} className="w-100 mt-3 text-muted">
+              <X size={14} className="me-2" /> {t('onboarding.skip')}
             </Button>
           </GlassCard>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       <Hero />
       <WhyChooseUs />
