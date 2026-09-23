@@ -198,6 +198,24 @@ const ProductDetail = () => {
     return true;
   });
 
+  const isPentCoat = product?.category === 'pent-coat' || product?.category === 'unstitched-pent-coat';
+  const hasPentCoatVest = isPentCoat && ['3-piece', 'vest-only'].includes(suitOption);
+  const showSecondaryTutorial = addWaistcoat || hasPentCoatVest;
+
+  const secondaryTutorial = hasPentCoatVest
+    ? {
+        titleEn: 'Vest Measurement Guide',
+        titleUr: 'ویسٹ کوٹ کی پیمائش کا طریقہ کار',
+        embedUrl: 'https://www.youtube.com/embed/g5amsADsayo',
+        watchUrl: 'https://youtu.be/g5amsADsayo',
+      }
+    : {
+        titleEn: 'Waistcoat Measurement Guide',
+        titleUr: 'واسکٹ کی پیمائش کا طریقہ کار',
+        embedUrl: 'https://www.youtube.com/embed/u5xUA-gn17k',
+        watchUrl: 'https://youtu.be/u5xUA-gn17k?si=7cRTvq3C0LaehGK0',
+      };
+
   const hasMeasurementData = activeFields.every(field => Number(measurements[field.key] || 0) > 0);
   const translateWear = (wearType) => t(`catalog.${wearType}`, wearType);
 
@@ -367,34 +385,6 @@ const ProductDetail = () => {
                     {addWaistcoat && <Check size={16} />}
                   </button>
                 </div>
-
-                {/* Waistcoat measurement video tutorial — ONLY shown when user clicks / selects waistcoat */}
-                {addWaistcoat && (
-                  <div className="mt-3 pt-3 border-top">
-                    <div className="d-flex align-items-center justify-content-between mb-2">
-                      <h6 className="fw-medium small mb-0 text-accent">
-                        {language === 'ur' ? 'واسکٹ کی پیمائش کا طریقہ کار' : 'Waistcoat Measurement Guide'}
-                      </h6>
-                      <a
-                        href="https://youtu.be/u5xUA-gn17k?si=7cRTvq3C0LaehGK0"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-accent small text-decoration-none fw-medium"
-                      >
-                        Watch on YouTube ↗
-                      </a>
-                    </div>
-                    <div className="rounded-3 overflow-hidden border shadow-sm" style={{ aspectRatio: '16/9', background: '#000', maxWidth: 440 }}>
-                      <iframe
-                        src="https://www.youtube.com/embed/u5xUA-gn17k"
-                        title="Waistcoat Measurement Guide"
-                        className="w-100 h-100"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -537,14 +527,14 @@ const ProductDetail = () => {
                     </div>
                   </div>
 
-                  {addWaistcoat && (
+                  {showSecondaryTutorial && (
                     <div className="mt-3 pt-3 border-top" style={{ maxWidth: 440 }}>
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <h6 className="fw-medium small mb-0 text-accent">
-                          {language === 'ur' ? 'واسکٹ کی پیمائش کا طریقہ کار' : 'Waistcoat Measurement Guide'}
+                          {language === 'ur' ? secondaryTutorial.titleUr : secondaryTutorial.titleEn}
                         </h6>
                         <a
-                          href="https://youtu.be/u5xUA-gn17k?si=7cRTvq3C0LaehGK0"
+                          href={secondaryTutorial.watchUrl}
                           target="_blank"
                           rel="noreferrer"
                           className="text-accent small text-decoration-none fw-medium"
@@ -554,8 +544,8 @@ const ProductDetail = () => {
                       </div>
                       <div className="rounded-3 overflow-hidden border shadow-sm" style={{ aspectRatio: '16/9', background: '#000' }}>
                         <iframe
-                          src="https://www.youtube.com/embed/u5xUA-gn17k"
-                          title="Waistcoat Measurement Guide"
+                          src={secondaryTutorial.embedUrl}
+                          title={language === 'ur' ? secondaryTutorial.titleUr : secondaryTutorial.titleEn}
                           className="w-100 h-100"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
