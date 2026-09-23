@@ -259,199 +259,382 @@ const ChatAssistant = () => {
 
   return (
     <>
+      {/* ── Keyframe Animations ── */}
+      <style>{`
+        @keyframes chatBotPulse {
+          0%, 100% { transform: scale(1); opacity: 0.9; }
+          50% { transform: scale(1.15); opacity: 1; }
+        }
+        @keyframes chatTypingBounce {
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+          40% { transform: translateY(-5px); opacity: 1; }
+        }
+        .chat-chip-btn {
+          padding: 6px 14px;
+          border-radius: 9999px;
+          border: 1px solid rgba(197, 160, 89, 0.35);
+          background: #ffffff;
+          color: #7d591b;
+          font-size: 0.76rem;
+          font-weight: 500;
+          white-space: nowrap;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+          flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+        }
+        .chat-chip-btn:hover {
+          background: #fcf7ed;
+          border-color: #c5a059;
+          color: #553b0e;
+          transform: translateY(-1px);
+          box-shadow: 0 3px 8px rgba(197, 160, 89, 0.18);
+        }
+        .chat-action-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px 14px;
+          border-radius: 12px;
+          border: 1.5px solid rgba(197, 160, 89, 0.4);
+          background: linear-gradient(135deg, #ffffff 0%, #fdfbf7 100%);
+          color: #8c671a;
+          font-size: 0.8rem;
+          font-weight: 600;
+          text-decoration: none;
+          cursor: pointer;
+          transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 2px 6px rgba(197, 160, 89, 0.08);
+          gap: 8px;
+        }
+        .chat-action-btn:hover {
+          background: linear-gradient(135deg, #c5a059 0%, #aa8033 100%);
+          color: #ffffff !important;
+          border-color: #aa8033;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 14px rgba(197, 160, 89, 0.35);
+        }
+        .chat-action-btn:hover svg {
+          transform: translateX(2px);
+          color: #ffffff;
+        }
+        .chat-scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .chat-messages-area::-webkit-scrollbar {
+          width: 5px;
+        }
+        .chat-messages-area::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .chat-messages-area::-webkit-scrollbar-thumb {
+          background: rgba(197, 160, 89, 0.25);
+          border-radius: 10px;
+        }
+        .chat-messages-area::-webkit-scrollbar-thumb:hover {
+          background: rgba(197, 160, 89, 0.45);
+        }
+      `}</style>
+
       {/* Floating Action Button */}
       <button
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label="Open TailorHub AI Assistant"
-        className="rounded-circle shadow-lg d-flex align-items-center justify-content-center position-fixed"
+        className="rounded-circle d-flex align-items-center justify-content-center position-fixed"
         style={{
           bottom: '24px',
           right: '24px',
-          width: '62px',
-          height: '62px',
+          width: '60px',
+          height: '60px',
           zIndex: 1050,
-          background: 'linear-gradient(135deg, #c5a059 0%, #aa8033 100%)',
-          color: '#fff',
-          border: '2px solid rgba(255, 255, 255, 0.4)',
-          boxShadow: '0 8px 28px rgba(197, 160, 89, 0.45)',
+          background: 'linear-gradient(135deg, #d4af37 0%, #b88a44 100%)',
+          color: '#ffffff',
+          border: '2px solid rgba(255, 255, 255, 0.6)',
+          boxShadow: '0 8px 24px rgba(184, 138, 68, 0.45)',
           cursor: 'pointer',
           transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           transform: isOpen ? 'scale(0)' : 'scale(1)',
           pointerEvents: isOpen ? 'none' : 'auto'
         }}
-        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1) translateY(-2px)'; }}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08) translateY(-2px)'; }}
         onMouseLeave={e => { e.currentTarget.style.transform = isOpen ? 'scale(0)' : 'scale(1)'; }}
       >
-        <MessageCircle size={28} strokeWidth={2.3} />
+        <MessageCircle size={28} strokeWidth={2.2} />
         {/* Unread indicator */}
         {hasUnread && (
           <span
-            className="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle"
+            className="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-white rounded-circle shadow-sm"
             style={{ width: 14, height: 14 }}
           />
         )}
       </button>
 
-      {/* Chat Window */}
+      {/* Chat Window Container */}
       <div 
-        className="shadow-2xl d-flex flex-column position-fixed"
+        className="position-fixed d-flex flex-column"
         dir={isUrdu ? 'rtl' : 'ltr'}
         style={{
           bottom: '24px',
           right: '24px',
-          width: '380px',
-          height: '560px',
+          width: '390px',
+          height: '590px',
           maxWidth: 'calc(100vw - 32px)',
-          maxHeight: 'calc(100vh - 48px)',
+          maxHeight: 'calc(100vh - 40px)',
           zIndex: 1060,
-          borderRadius: '20px',
-          transform: isOpen ? 'translateY(0) scale(1)' : 'translateY(25px) scale(0.9)',
+          borderRadius: '22px',
+          transform: isOpen ? 'translateY(0) scale(1)' : 'translateY(25px) scale(0.92)',
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? 'auto' : 'none',
           transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           overflow: 'hidden',
           background: '#ffffff',
-          border: '1px solid rgba(197, 160, 89, 0.35)',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)'
+          border: '1px solid rgba(197, 160, 89, 0.3)',
+          boxShadow: '0 20px 50px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(197, 160, 89, 0.15)'
         }}
       >
-        {/* Header */}
+        {/* ── 1. Luxury Dark & Gold Header ── */}
         <div 
-          className="p-3 text-white d-flex align-items-center justify-content-between"
-          style={{ background: 'linear-gradient(135deg, #c5a059 0%, #8e6c27 100%)' }}
+          className="px-3 py-3 text-white d-flex align-items-center justify-content-between flex-shrink-0"
+          style={{ 
+            background: 'linear-gradient(135deg, #18191d 0%, #101114 100%)',
+            borderBottom: '1px solid rgba(197, 160, 89, 0.25)'
+          }}
         >
           <div className="d-flex align-items-center gap-2">
-            <div className="rounded-circle p-2 d-flex align-items-center justify-content-center" style={{ background: 'rgba(255,255,255,0.2)', width: 36, height: 36 }}>
-              <Scissors size={18} className="text-white" />
+            <div 
+              className="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+              style={{ 
+                width: 38, 
+                height: 38,
+                background: 'linear-gradient(135deg, #d4af37 0%, #aa8033 100%)',
+                color: '#fff',
+                border: '1.5px solid rgba(255, 255, 255, 0.4)'
+              }}
+            >
+              <Scissors size={18} strokeWidth={2.4} />
             </div>
             <div>
-              <h6 className="mb-0 fw-bold" style={{ fontSize: '0.95rem' }}>
-                {isUrdu ? 'ٹیلر ہب اسسٹنٹ' : 'TailorHub Assistant'}
-              </h6>
-              <div className="d-flex align-items-center gap-1 small" style={{ fontSize: '0.72rem', opacity: 0.9 }}>
-                <span className="rounded-circle bg-success d-inline-block" style={{ width: 7, height: 7 }} />
-                <span>{isUrdu ? 'آن لائن • فوری جواب' : 'Online • Instant Support'}</span>
+              <div className="d-flex align-items-center gap-1">
+                <span className="fw-bold" style={{ fontSize: '0.94rem', letterSpacing: '0.01em', color: '#f8fafc' }}>
+                  {isUrdu ? 'ٹیلر ہب اسسٹنٹ' : 'TailorHub Assistant'}
+                </span>
+                <Sparkles size={13} style={{ color: '#d4af37' }} />
+              </div>
+              <div className="d-flex align-items-center gap-1 mt-0" style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                <span 
+                  className="rounded-circle d-inline-block" 
+                  style={{ 
+                    width: 7, 
+                    height: 7, 
+                    backgroundColor: '#10b981',
+                    boxShadow: '0 0 8px #10b981'
+                  }} 
+                />
+                <span>{isUrdu ? 'آن لائن • فوری رہنمائی' : 'Online • Instant Support'}</span>
               </div>
             </div>
           </div>
+
           <div className="d-flex align-items-center gap-1">
             <button
               type="button"
-              className="btn btn-sm btn-link text-white p-1 text-decoration-none"
+              className="btn btn-sm text-white p-1 d-flex align-items-center justify-content-center rounded-circle"
               onClick={handleClearHistory}
               title={isUrdu ? 'ہسٹری صاف کریں' : 'Clear Chat'}
-              style={{ opacity: 0.8 }}
+              style={{ width: 32, height: 32, background: 'rgba(255, 255, 255, 0.08)', border: 'none', transition: 'background 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.18)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
             >
-              <Trash2 size={16} />
+              <Trash2 size={15} style={{ opacity: 0.85 }} />
             </button>
             <button 
               type="button" 
-              className="btn btn-sm btn-link text-white p-1 text-decoration-none" 
+              className="btn btn-sm text-white p-1 d-flex align-items-center justify-content-center rounded-circle"
               onClick={() => setIsOpen(false)}
+              aria-label="Close Chat"
+              style={{ width: 32, height: 32, background: 'rgba(255, 255, 255, 0.08)', border: 'none', transition: 'background 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.18)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
         </div>
 
-        {/* Quick FAQ Chips Bar */}
+        {/* ── 2. Quick FAQ Chips Bar (No Clipping, Comfortable Scrolling) ── */}
         <div 
-          className="px-3 py-2 border-bottom d-flex gap-2 overflow-auto"
-          style={{ background: '#fcfaf5', scrollbarWidth: 'none' }}
+          className="px-3 py-2 border-bottom d-flex align-items-center gap-2 overflow-auto flex-shrink-0 chat-scrollbar-hide"
+          style={{ 
+            background: '#ffffff',
+            scrollbarWidth: 'none',
+            minHeight: '48px',
+            WebkitOverflowScrolling: 'touch'
+          }}
         >
           {quickQuestions.map((q) => (
             <button
               key={q.id}
               type="button"
               onClick={() => processQuery(q.query)}
-              className="btn btn-sm rounded-pill flex-shrink-0 text-nowrap py-1 px-3"
-              style={{
-                fontSize: '0.75rem',
-                border: '1px solid rgba(197, 160, 89, 0.4)',
-                background: '#ffffff',
-                color: '#8e6c27',
-                fontWeight: 500,
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = '#c5a059';
-                e.currentTarget.style.color = '#fff';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = '#ffffff';
-                e.currentTarget.style.color = '#8e6c27';
-              }}
+              className="chat-chip-btn"
             >
-              {q.label}
+              <span>{q.label}</span>
             </button>
           ))}
         </div>
 
-        {/* Messages Scroll Area */}
+        {/* ── 3. Messages Scroll Area ── */}
         <div 
-          className="flex-grow-1 p-3 overflow-auto d-flex flex-column gap-3" 
-          style={{ background: '#f8f9fa' }}
+          className="flex-grow-1 p-3 overflow-auto d-flex flex-column gap-3 chat-messages-area" 
+          style={{ 
+            background: '#f8fafc',
+            minHeight: 0
+          }}
         >
           {messages.map((msg, idx) => (
-            <div key={idx} className={`d-flex flex-column ${msg.isBot ? 'align-items-start' : 'align-items-end'}`}>
+            <div 
+              key={idx} 
+              className={`d-flex ${msg.isBot ? 'justify-content-start' : 'justify-content-end'}`}
+            >
               <div 
-                className={`p-3 rounded-4 position-relative ${
-                  msg.isBot 
-                    ? 'bg-white border text-dark shadow-xs' 
-                    : 'text-white shadow-sm'
-                }`}
-                style={{
-                  maxWidth: '85%',
-                  fontSize: '0.86rem',
-                  lineHeight: 1.5,
-                  background: msg.isBot ? '#ffffff' : 'linear-gradient(135deg, #c5a059 0%, #aa8033 100%)',
-                  borderColor: msg.isBot ? 'rgba(0,0,0,0.08)' : 'transparent',
-                  borderBottomLeftRadius: msg.isBot ? '4px' : '16px',
-                  borderBottomRightRadius: msg.isBot ? '16px' : '4px',
-                  whiteSpace: 'pre-line'
+                className="d-flex gap-2"
+                style={{ 
+                  maxWidth: '88%',
+                  flexDirection: msg.isBot ? 'row' : 'row-reverse'
                 }}
               >
-                {msg.text}
-
-                {/* Render interactive action buttons if present */}
-                {msg.isBot && msg.actions && msg.actions.length > 0 && (
-                  <div className="mt-3 pt-2 border-top d-flex flex-wrap gap-2" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
-                    {msg.actions.map((act, aIdx) => (
-                      <button
-                        key={aIdx}
-                        type="button"
-                        onClick={() => handleActionClick(act)}
-                        className="btn btn-sm rounded-pill d-inline-flex align-items-center gap-1 px-3 py-1"
-                        style={{
-                          fontSize: '0.78rem',
-                          background: 'rgba(197, 160, 89, 0.12)',
-                          color: '#9d7c36',
-                          border: '1px solid rgba(197, 160, 89, 0.35)',
-                          fontWeight: 600,
-                        }}
-                      >
-                        <span>{act.label}</span>
-                        {act.link?.startsWith('http') ? <ExternalLink size={12} /> : <ArrowRight size={12} />}
-                      </button>
-                    ))}
+                {/* Bot Avatar Icon */}
+                {msg.isBot && (
+                  <div 
+                    className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1 shadow-xs"
+                    style={{ 
+                      width: 28, 
+                      height: 28, 
+                      background: 'linear-gradient(135deg, #d4af37 0%, #aa8033 100%)',
+                      color: '#ffffff'
+                    }}
+                  >
+                    <Sparkles size={14} />
                   </div>
                 )}
+
+                {/* Message Bubble + Action Buttons + Timestamp */}
+                <div className={`d-flex flex-column ${msg.isBot ? 'align-items-start' : 'align-items-end'}`}>
+                  <div 
+                    className="p-3 position-relative"
+                    style={{
+                      borderRadius: msg.isBot ? '4px 18px 18px 18px' : '18px 18px 4px 18px',
+                      background: msg.isBot 
+                        ? '#ffffff' 
+                        : 'linear-gradient(135deg, #c5a059 0%, #9e792b 100%)',
+                      color: msg.isBot ? '#1e293b' : '#ffffff',
+                      border: msg.isBot ? '1px solid rgba(226, 232, 240, 0.9)' : 'none',
+                      boxShadow: msg.isBot 
+                        ? '0 2px 10px rgba(0, 0, 0, 0.04)' 
+                        : '0 4px 14px rgba(197, 160, 89, 0.3)',
+                      fontSize: '0.865rem',
+                      lineHeight: 1.58,
+                      whiteSpace: 'pre-line',
+                      wordBreak: 'break-word'
+                    }}
+                  >
+                    {msg.text}
+
+                    {/* Interactive Action Buttons */}
+                    {msg.isBot && msg.actions && msg.actions.length > 0 && (
+                      <div 
+                        className="mt-3 pt-2 d-flex flex-column gap-2" 
+                        style={{ borderTop: '1px solid #f1f5f9' }}
+                      >
+                        {msg.actions.map((act, aIdx) => (
+                          <button
+                            key={aIdx}
+                            type="button"
+                            onClick={() => handleActionClick(act)}
+                            className="chat-action-btn"
+                          >
+                            <span>{act.label}</span>
+                            {act.link?.startsWith('http') ? (
+                              <ExternalLink size={13} style={{ flexShrink: 0, opacity: 0.8 }} />
+                            ) : (
+                              <ArrowRight size={13} style={{ flexShrink: 0, opacity: 0.8, transition: 'transform 0.2s' }} />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Message Timestamp */}
+                  <span 
+                    className="small mt-1 px-1" 
+                    style={{ 
+                      fontSize: '0.68rem', 
+                      color: '#94a3b8',
+                      letterSpacing: '0.02em'
+                    }}
+                  >
+                    {msg.time}
+                  </span>
+                </div>
               </div>
-              <span className="small text-muted mt-1 px-1" style={{ fontSize: '0.68rem', opacity: 0.7 }}>
-                {msg.time}
-              </span>
             </div>
           ))}
 
           {/* Typing Indicator */}
           {isTyping && (
-            <div className="d-flex align-items-center gap-2 p-2 px-3 rounded-4 bg-white border" style={{ width: 'fit-content', borderColor: 'rgba(0,0,0,0.08)' }}>
-              <Scissors size={14} className="text-accent anim-spin" />
-              <div className="d-flex gap-1">
-                <span className="bg-secondary rounded-circle" style={{ width: 6, height: 6, animation: 'pulse 1s infinite' }} />
-                <span className="bg-secondary rounded-circle" style={{ width: 6, height: 6, animation: 'pulse 1s infinite 0.2s' }} />
-                <span className="bg-secondary rounded-circle" style={{ width: 6, height: 6, animation: 'pulse 1s infinite 0.4s' }} />
+            <div className="d-flex align-items-center gap-2">
+              <div 
+                className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-xs"
+                style={{ 
+                  width: 28, 
+                  height: 28, 
+                  background: 'linear-gradient(135deg, #d4af37 0%, #aa8033 100%)',
+                  color: '#ffffff'
+                }}
+              >
+                <Sparkles size={14} />
+              </div>
+              <div 
+                className="p-3 bg-white border d-flex align-items-center gap-1"
+                style={{ 
+                  borderRadius: '4px 18px 18px 18px',
+                  borderColor: 'rgba(226, 232, 240, 0.9)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                  height: '38px'
+                }}
+              >
+                <span 
+                  className="rounded-circle d-inline-block" 
+                  style={{ 
+                    width: 6, 
+                    height: 6, 
+                    background: '#c5a059', 
+                    animation: 'chatTypingBounce 1.2s infinite ease-in-out' 
+                  }} 
+                />
+                <span 
+                  className="rounded-circle d-inline-block" 
+                  style={{ 
+                    width: 6, 
+                    height: 6, 
+                    background: '#c5a059', 
+                    animation: 'chatTypingBounce 1.2s infinite ease-in-out 0.2s' 
+                  }} 
+                />
+                <span 
+                  className="rounded-circle d-inline-block" 
+                  style={{ 
+                    width: 6, 
+                    height: 6, 
+                    background: '#c5a059', 
+                    animation: 'chatTypingBounce 1.2s infinite ease-in-out 0.4s' 
+                  }} 
+                />
               </div>
             </div>
           )}
@@ -459,31 +642,60 @@ const ChatAssistant = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Bar */}
-        <form onSubmit={handleSend} className="p-3 bg-white border-top d-flex gap-2 align-items-center">
+        {/* ── 4. Input Bar (Fixed at bottom) ── */}
+        <form 
+          onSubmit={handleSend} 
+          className="p-3 bg-white border-top d-flex gap-2 align-items-center flex-shrink-0"
+          style={{ borderColor: 'rgba(226, 232, 240, 0.8)' }}
+        >
           <input 
             type="text" 
-            className="form-control rounded-pill px-3 py-2 bg-light border-0" 
+            className="form-control rounded-pill px-3 py-2 border" 
             placeholder={isUrdu ? "اپنا سوال یہاں لکھیں..." : "Type your question here..."} 
             value={input}
             onChange={e => setInput(e.target.value)}
-            style={{ fontSize: '0.85rem' }}
+            style={{ 
+              fontSize: '0.86rem',
+              background: '#f8fafc',
+              borderColor: '#e2e8f0',
+              outline: 'none',
+              boxShadow: 'none'
+            }}
+            onFocus={e => {
+              e.currentTarget.style.background = '#ffffff';
+              e.currentTarget.style.borderColor = '#c5a059';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(197, 160, 89, 0.15)';
+            }}
+            onBlur={e => {
+              e.currentTarget.style.background = '#f8fafc';
+              e.currentTarget.style.borderColor = '#e2e8f0';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           />
           <button 
             type="submit" 
             disabled={!input.trim()}
             className="btn rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
             style={{
-              width: '40px',
-              height: '40px',
-              background: input.trim() ? 'linear-gradient(135deg, #c5a059 0%, #aa8033 100%)' : '#e5e7eb',
+              width: '42px',
+              height: '42px',
+              background: input.trim() 
+                ? 'linear-gradient(135deg, #c5a059 0%, #9e792b 100%)' 
+                : '#e2e8f0',
               color: '#ffffff',
               border: 'none',
               cursor: input.trim() ? 'pointer' : 'default',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: input.trim() ? '0 4px 12px rgba(197, 160, 89, 0.35)' : 'none'
+            }}
+            onMouseEnter={e => {
+              if (input.trim()) e.currentTarget.style.transform = 'scale(1.06)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'scale(1)';
             }}
           >
-            <Send size={16} />
+            <Send size={17} style={{ transform: isUrdu ? 'scaleX(-1)' : 'none' }} />
           </button>
         </form>
       </div>
