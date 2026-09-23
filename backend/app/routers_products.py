@@ -11,6 +11,15 @@ from .schemas import ProductIn, ProductOut
 router = APIRouter(prefix="/api/products", tags=["products"])
 
 
+def _safe_json_load(s, default):
+    if not s:
+        return default
+    try:
+        import json
+        return json.loads(s)
+    except:
+        return default
+
 def _to_product_out(item: Product) -> ProductOut:
     return ProductOut(
         id=item.id,
@@ -20,13 +29,13 @@ def _to_product_out(item: Product) -> ProductOut:
         category=item.category,
         wearType=item.wear_type,
         image=item.image,
-        availableModes=json.loads(item.available_modes),
+        availableModes=_safe_json_load(item.available_modes, ["standard"]),
         fabric=item.fabric,
-        colors=json.loads(item.colors),
-        sizes=json.loads(item.sizes),
+        colors=_safe_json_load(item.colors, []),
+        sizes=_safe_json_load(item.sizes, []),
         featured=item.featured,
         hasWaistcoatOption=item.has_waistcoat_option,
-        suitOptions=json.loads(item.suit_options) if item.suit_options else None,
+        suitOptions=_safe_json_load(item.suit_options, None),
         brand=item.brand,
         isSoldOut=item.is_sold_out,
     )
