@@ -210,6 +210,74 @@ def force_update_passwords(db: Session = Depends(get_db)):
     return {"message": "Admin and Rider passwords have been successfully updated on the live database."}
 
 
+@app.get("/api/debug-smtp-test-xyz")
+def debug_smtp_test():
+    """Temporary diagnostic endpoint to test SMTP from Railway. DELETE after debugging."""
+    import smtplib
+    import socket
+    import traceback
+
+    result = {
+        "smtp_host": settings.SMTP_HOST,
+        "smtp_port": settings.SMTP_PORT,
+        "smtp_user": settings.SMTP_USER[:5] + "***" if settings.SMTP_USER else "(empty)",
+        "smtp_password_set": bool(settings.SMTP_PASSWORD),
+        "smtp_from": settings.SMTP_FROM_EMAIL,
+        "smtp_use_tls": settings.SMTP_USE_TLS,
+    }
+
+    # Step 1: DNS resolution
+    try:
+        addrs = socket.getaddrinfo(settings.SMTP_HOST, settings.SMTP_PORT, socket.AF_INET, socket.SOCK_STREAM)
+        result["dns_ipv4"] = [a[4][0] for a in addrs]
+    except Exception as e:
+        result["dns_error"] = str(e)
+        return result
+
+    # Step 2: Raw TCP connection
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(10)
+        sock.connect((result["dns_ipv4"][0], settings.SMTP_PORT))
+        sock.close()
+        result["tcp_connect"] = "OK"
+    except Exception as e:
+        result["tcp_connect_error"] = str(e)
+        return result
+
+    # Step 3: SMTP connection + login
+    try:
+        if settings.SMTP_USE_TLS:
+            server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
+            server.ehlo()
+            server.starttls()
+        else:
+            server = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
+
+        result["smtp_connect"] = "OK"
+
+        if settings.SMTP_USER:
+            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            result["smtp_login"] = "OK"
+
+        # Step 4: Actually send a test email
+        from email.mime.text import MIMEText
+        msg = MIMEText("SMTP test from Railway debug endpoint")
+        msg["Subject"] = "TailorHub SMTP Debug Test"
+        msg["From"] = settings.SMTP_FROM_EMAIL
+        msg["To"] = settings.SMTP_USER
+
+        server.sendmail(settings.SMTP_FROM_EMAIL, settings.SMTP_USER, msg.as_string())
+        result["send_test_email"] = "OK - sent to " + settings.SMTP_USER
+        server.quit()
+
+    except Exception as e:
+        result["smtp_error"] = str(e)
+        result["smtp_traceback"] = traceback.format_exc()
+
+    return result
+
+
 app.include_router(auth_router)
 app.include_router(oauth_router)
 app.include_router(products_router)
