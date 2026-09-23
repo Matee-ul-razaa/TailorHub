@@ -114,13 +114,13 @@ def _send_via_smtp(to_email: str, subject: str, text: str, html: str,
 
 def _send_email(to_email: str, subject: str, text: str, html: str,
                 pdf_bytes: Optional[bytes] = None, pdf_name: Optional[str] = None) -> bool:
-    """Try Resend first (HTTP, works on Railway), then fall back to SMTP (local dev)."""
+    """Try Resend first (HTTP, works on Railway). If RESEND_API_KEY is missing, fall back to SMTP."""
     # 1. Try Resend (HTTP API — port 443, never blocked)
     if settings.RESEND_API_KEY:
         success = _send_via_resend(to_email, subject, html, text, pdf_bytes, pdf_name)
-        if success:
-            return True
-        logger.warning("[EMAIL SERVICE] Resend failed, trying SMTP fallback...")
+        if not success:
+            logger.warning("[EMAIL SERVICE] Resend failed. (Skipping SMTP fallback to prevent Railway hang)")
+        return success
 
     # 2. Fallback to SMTP (works on local dev)
     return _send_via_smtp(to_email, subject, text, html, pdf_bytes, pdf_name)
