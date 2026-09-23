@@ -5,6 +5,7 @@ Uses Python stdlib libraries to compose and send emails via SMTP.
 """
 
 import smtplib
+import socket
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -32,6 +33,28 @@ def _send_via_smtp(to_email: str, subject: str, text: str, html: str, pdf_bytes:
         part['Content-Disposition'] = f'attachment; filename="{pdf_name}"'
         msg.attach(part)
 
+    # Force IPv4 to prevent hanging on Railway (Gmail IPv6 issues)
+    _orig_create_connection = socket.create_connection
+    def create_connection_ipv4(address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT, source_address=None):
+        host, port = address
+        for res in socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM):
+            af, socktype, proto, canonname, sa = res
+            sock = None
+            try:
+                sock = socket.socket(af, socktype, proto)
+                if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
+                    sock.settimeout(timeout)
+                if source_address:
+                    sock.bind(source_address)
+                sock.connect(sa)
+                return sock
+            except OSError:
+                if sock is not None:
+                    sock.close()
+        raise OSError("Could not connect using IPv4")
+        
+    socket.create_connection = create_connection_ipv4
+
     try:
         if settings.SMTP_USE_TLS:
             server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
@@ -51,6 +74,8 @@ def _send_via_smtp(to_email: str, subject: str, text: str, html: str, pdf_bytes:
     except Exception as e:
         logger.error(f"[EMAIL SERVICE] SMTP Error: {e}")
         return False
+    finally:
+        socket.create_connection = _orig_create_connection
 
 
 def send_otp_email(to_email: str, otp_code: str) -> bool:
