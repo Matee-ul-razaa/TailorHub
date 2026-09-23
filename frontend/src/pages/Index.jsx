@@ -23,7 +23,6 @@ const Index = () => {
   const isUrdu = language === 'ur';
   const navigate = useNavigate();
   const [showSkinPrompt, setShowSkinPrompt] = useState(false);
-  const [showSkinPrompt, setShowSkinPrompt] = useState(false);
 
   useEffect(() => {
     try {
