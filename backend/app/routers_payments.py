@@ -31,7 +31,12 @@ class CreateStripeSessionIn(BaseModel):
     paymentType: str # "advance" or "full"
 
 @router.post("/create-checkout-session")
-def create_checkout_session(payload: CreateStripeSessionIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_checkout_session(
+    payload: CreateStripeSessionIn,
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     order = db.get(Order, payload.orderId)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -47,6 +52,22 @@ def create_checkout_session(payload: CreateStripeSessionIn, user: User = Depends
 
     if amount_due <= 0:
         raise HTTPException(status_code=400, detail="No remaining balance.")
+
+    # Determine base frontend URL dynamically from the request, bypassing protected Vercel previews
+    origin = request.headers.get("origin")
+    referer = request.headers.get("referer")
+    frontend_base = settings.public_frontend_url
+    if origin and ("vercel.app" in origin or "localhost" in origin or origin in settings.cors_origins):
+        frontend_base = origin.rstrip("/")
+    elif referer and ("vercel.app" in referer or "localhost" in referer):
+        from urllib.parse import urlparse
+        p = urlparse(referer)
+        frontend_base = f"{p.scheme}://{p.netloc}"
+
+    if "frontend-hvg2vxuru" in frontend_base:
+        frontend_base = "https://frontend-omega-six-42.vercel.app"
+
+    frontend_base = frontend_base.rstrip("/")
 
     _stripe = _get_stripe()
     try:
@@ -64,8 +85,8 @@ def create_checkout_session(payload: CreateStripeSessionIn, user: User = Depends
                 'quantity': 1,
             }],
             mode='payment',
-            success_url=f"{settings.FRONTEND_URL}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{settings.FRONTEND_URL}/cart",
+            success_url=f"{frontend_base}/payment-success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{frontend_base}/cart",
             client_reference_id=order.id,
             metadata={
                 "order_id": order.id,

@@ -180,6 +180,14 @@ class Settings(BaseSettings):
         return sqlite_path
 
     @property
+    def public_frontend_url(self) -> str:
+        """Returns the public production frontend URL, bypassing private preview deployments."""
+        url = (self.FRONTEND_URL or "https://frontend-omega-six-42.vercel.app").rstrip("/")
+        if "frontend-hvg2vxuru" in url:
+            return "https://frontend-omega-six-42.vercel.app"
+        return url
+
+    @property
     def cors_origins(self) -> list[str]:
         """Parse the comma-separated CORS_ORIGINS string into a list and include FRONTEND_URL."""
         origins = [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]

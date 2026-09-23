@@ -270,7 +270,7 @@ def render_invoice_pdf(invoice: Invoice, order: Order, customer: User, lang: str
         pdf.set_text_color(0, 0, 0)
         
     # QR Code Generation
-    qr_url = f"{settings.FRONTEND_URL}/tracking?orderId={order.id}"
+    qr_url = f"{settings.public_frontend_url}/tracking?orderId={order.id}"
     qr = qrcode.make(qr_url)
     qr_path = os.path.join(tempfile.gettempdir(), f"qr_temp_{invoice.invoice_number}.png")
     qr.save(qr_path, format="PNG")

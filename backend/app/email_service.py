@@ -234,7 +234,7 @@ Dear {customer_name},
 Thank you for your order! Your invoice ({invoice_number}) is attached to this email.
 Total: Rs. {int(total):,}
 
-View your order tracking here: {settings.FRONTEND_URL}/tracking?orderId={order_id}
+View your order tracking here: {settings.public_frontend_url}/tracking?orderId={order_id}
 
 – TailorHub Team
 """
@@ -256,7 +256,7 @@ View your order tracking here: {settings.FRONTEND_URL}/tracking?orderId={order_i
     </div>
 
     <div style="text-align: center;">
-        <a href="{settings.FRONTEND_URL}/tracking?orderId={order_id}" style="display: inline-block; background: #9333ea; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600;">View Order Tracking</a>
+        <a href="{settings.public_frontend_url}/tracking?orderId={order_id}" style="display: inline-block; background: #9333ea; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600;">View Order Tracking</a>
     </div>
   </div>
   <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 16px;">
