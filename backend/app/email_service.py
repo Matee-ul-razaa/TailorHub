@@ -70,6 +70,41 @@ def _send_via_resend(to_email: str, subject: str, html: str, text: str = "",
         logger.error(f"[EMAIL SERVICE] Resend Error: {e}")
         return False
 
+# ── Brevo HTTP API Transport ──────────────────────────────────────────────────
+
+def _send_via_brevo(to_email: str, subject: str, html: str, text: str = "") -> bool:
+    """Send email using Brevo (Sendinblue) HTTP API. Great because it allows sending to any email."""
+    if not settings.BREVO_API_KEY:
+        return False
+
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "accept": "application/json",
+        "api-key": settings.BREVO_API_KEY,
+        "content-type": "application/json"
+    }
+    
+    payload = {
+        "sender": {"email": settings.SMTP_FROM_EMAIL or "noreply@tailorhub.pk", "name": "TailorHub"},
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "htmlContent": html,
+        "textContent": text
+    }
+    
+    req = Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req) as response:
+            logger.info(f"[EMAIL SERVICE] Brevo Success: {response.read()}")
+            return True
+    except HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        logger.error(f"[EMAIL SERVICE] Brevo HTTP {e.code}: {body}")
+        return False
+    except Exception as e:
+        logger.error(f"[EMAIL SERVICE] Brevo Error: {str(e)}")
+        return False
+
 
 # ── SMTP Transport (fallback for local dev) ───────────────────────────────────
 
