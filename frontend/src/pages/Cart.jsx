@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, isUrdu } = useLanguage();
   const { items, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
   const { placeOrder } = useStore();
   const { fullName, user, session } = useAuth();
@@ -93,7 +93,7 @@ const Cart = () => {
 
   return (
     <Layout>
-      <div className="container py-4">
+      <div className={`container py-4 ${isUrdu ? 'text-end' : ''}`} dir={isUrdu ? 'rtl' : 'ltr'}>
         <div className="d-flex align-items-center justify-content-between mb-4">
           <h2 className="font-playfair fw-bold mb-0">{t('cart.title')}</h2>
           <Button variant="ghost" className="text-danger" onClick={() => { clearCart(); toast.info(t('cart.cartCleared')); }}>{t('cart.clearCart')}</Button>
@@ -224,7 +224,7 @@ const Cart = () => {
 
               {!isCheckingOut && (
                 <Link to="/catalog" className="d-flex align-items-center justify-content-center gap-1 mt-3 text-muted small text-decoration-none">
-                  <ArrowLeft size={14} /> {t('cart.continueShopping')}
+                  <ArrowLeft size={14} className={isUrdu ? 'rotate-180' : ''} /> {t('cart.continueShopping')}
                 </Link>
               )}
             </div>

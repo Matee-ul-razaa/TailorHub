@@ -10,17 +10,46 @@ import { Button } from '@/components/ui/button';
 const SKIN_PROFILE_KEY = 'tailorhub-skin-profile';
 
 const TONE_DATA = {
-  fair: { label: 'Fair', hex: '#F5D5C8', colors: ['Pastels', 'Navy', 'Burgundy', 'Olive'], hexColors: ['#E8D5E0', '#1B2A4A', '#800020', '#556B2F'] },
-  light: { label: 'Light', hex: '#E8C4A0', colors: ['Earth Tones', 'Teal', 'Charcoal', 'Forest Green'], hexColors: ['#D2B48C', '#008080', '#36454F', '#228B22'] },
-  medium: { label: 'Medium', hex: '#C8A07A', colors: ['Royal Blue', 'Gold', 'Maroon', 'Cream'], hexColors: ['#002366', '#FFD700', '#800000', '#FFFDD0'] },
-  olive: { label: 'Olive', hex: '#B08D5B', colors: ['Rust', 'Mustard', 'Deep Purple', 'Ivory'], hexColors: ['#B7410E', '#FFDB58', '#301934', '#FFFFF0'] },
-  brown: { label: 'Brown', hex: '#8D6E4A', colors: ['Bright Blue', 'White', 'Orange', 'Yellow'], hexColors: ['#0066FF', '#FFFFFF', '#FF6600', '#FFD700'] },
-  dark: { label: 'Dark', hex: '#5C3D2E', colors: ['Emerald', 'Silver', 'Hot Pink', 'Bright White'], hexColors: ['#50C878', '#C0C0C0', '#FF69B4', '#F8F8FF'] },
+  fair: { 
+    labelEn: 'Fair', labelUr: 'گورا (Fair)', hex: '#F5D5C8', 
+    colorsEn: ['Pastels', 'Navy', 'Burgundy', 'Olive'], 
+    colorsUr: ['ہلکے رنگ (Pastels)', 'نیوی بلیو', 'برگنڈی (Burgundy)', 'زیتونی (Olive)'], 
+    hexColors: ['#E8D5E0', '#1B2A4A', '#800020', '#556B2F'] 
+  },
+  light: { 
+    labelEn: 'Light', labelUr: 'ہلکا گندمی (Light)', hex: '#E8C4A0', 
+    colorsEn: ['Earth Tones', 'Teal', 'Charcoal', 'Forest Green'], 
+    colorsUr: ['قدرتی رنگ (Earth)', 'ٹیل (Teal)', 'چارکول (سرمئی)', 'گہرا سبز (Forest)'], 
+    hexColors: ['#D2B48C', '#008080', '#36454F', '#228B22'] 
+  },
+  medium: { 
+    labelEn: 'Medium', labelUr: 'گندمی (Medium)', hex: '#C8A07A', 
+    colorsEn: ['Royal Blue', 'Gold', 'Maroon', 'Cream'], 
+    colorsUr: ['رائل بلیو', 'سنہری (Gold)', 'مہرون (Maroon)', 'کریم (Cream)'], 
+    hexColors: ['#002366', '#FFD700', '#800000', '#FFFDD0'] 
+  },
+  olive: { 
+    labelEn: 'Olive', labelUr: 'زیتونی گندمی (Olive)', hex: '#B08D5B', 
+    colorsEn: ['Rust', 'Mustard', 'Deep Purple', 'Ivory'], 
+    colorsUr: ['رسٹ (Rust)', 'سرسوں (Mustard)', 'گہرا جامنی', 'آئیوری (سفید نما)'], 
+    hexColors: ['#B7410E', '#FFDB58', '#301934', '#FFFFF0'] 
+  },
+  brown: { 
+    labelEn: 'Brown', labelUr: 'سانولا (Brown)', hex: '#8D6E4A', 
+    colorsEn: ['Bright Blue', 'White', 'Orange', 'Yellow'], 
+    colorsUr: ['روشن نیلا', 'سفید (White)', 'نارنجی (Orange)', 'پیلا (Yellow)'], 
+    hexColors: ['#0066FF', '#FFFFFF', '#FF6600', '#FFD700'] 
+  },
+  dark: { 
+    labelEn: 'Dark', labelUr: 'گہرا سانولا (Dark)', hex: '#5C3D2E', 
+    colorsEn: ['Emerald', 'Silver', 'Hot Pink', 'Bright White'], 
+    colorsUr: ['زمردی سبز', 'چاندی (Silver)', 'شوخ گلابی', 'روشن سفید'], 
+    hexColors: ['#50C878', '#C0C0C0', '#FF69B4', '#F8F8FF'] 
+  },
 };
 
 const SkinToneAnalysis = () => {
-  const { t, language } = useLanguage();
-  const isUrdu = language === 'ur';
+  const { t, language, isUrdu } = useLanguage();
   const [photo, setPhoto] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -48,7 +77,7 @@ const SkinToneAnalysis = () => {
   };
 
   const analyzeTone = async () => {
-    if (!photo) { toast.error('Please upload a photo first'); return; }
+    if (!photo) { toast.error(t('skintone.uploadRequired')); return; }
     setAnalyzing(true);
 
     // Simulate AI skin tone analysis
@@ -63,8 +92,8 @@ const SkinToneAnalysis = () => {
     setResult({ tone: detected, ...data });
 
     // Save to localStorage
-    localStorage.setItem(SKIN_PROFILE_KEY, JSON.stringify({ tone: detected, label: data.label, hex: data.hex, recommendedColors: data.colors, hexColors: data.hexColors }));
-    toast.success('Skin tone analyzed successfully!');
+    localStorage.setItem(SKIN_PROFILE_KEY, JSON.stringify({ tone: detected, label: data.labelEn, hex: data.hex, recommendedColors: data.colorsEn, hexColors: data.hexColors }));
+    toast.success(t('skintone.success'));
     setAnalyzing(false);
   };
 
@@ -139,7 +168,7 @@ const SkinToneAnalysis = () => {
                       <div className="rounded-circle border border-4 border-white shadow" style={{ width: 64, height: 64, backgroundColor: result.hex, flexShrink: 0 }} />
                       <div className={`flex-grow-1 ${isUrdu ? 'text-end' : ''}`}>
                         <p className="text-muted text-uppercase small mb-0" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>{t('skintone.result')}</p>
-                        <p className="fw-bold fs-5 mb-0">{result.label}</p>
+                        <p className="fw-bold fs-5 mb-0">{isUrdu ? result.labelUr : result.labelEn}</p>
                         <p className="text-muted small mb-0">{result.hex}</p>
                       </div>
                       <CheckCircle2 size={24} style={{ color: '#22c55e' }} />
@@ -149,7 +178,7 @@ const SkinToneAnalysis = () => {
                     <div>
                       <h6 className={`th-label mb-2 ${isUrdu ? 'text-end' : ''}`}>{t('skintone.recommendations')}</h6>
                       <div className="row g-2">
-                        {result.colors.map((color, i) => (
+                        {(isUrdu ? result.colorsUr : result.colorsEn).map((color, i) => (
                           <div key={color} className="col-6">
                             <div className={`d-flex align-items-center gap-3 rounded-3 border p-3 ${isUrdu ? 'flex-row-reverse' : ''}`}>
                               <div className="rounded-circle shadow-sm" style={{ width: 32, height: 32, backgroundColor: result.hexColors[i], flexShrink: 0 }} />
@@ -159,7 +188,7 @@ const SkinToneAnalysis = () => {
                         ))}
                       </div>
                       <p className={`text-muted mt-2 mb-0 ${isUrdu ? 'text-end' : ''}`} style={{ fontSize: '0.78rem' }}>
-                        {t('skintone.recommendNote', 'These are recommended colors — you can still select your own color.')}
+                        {t('skintone.recommendNote')}
                       </p>
                     </div>
 

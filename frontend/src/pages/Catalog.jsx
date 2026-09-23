@@ -240,25 +240,25 @@ const Catalog = () => {
                   onClick={() => { setPriceMin('0'); setPriceMax('5000'); setCurrentPage(1); }}
                   className={`th-filter-box ${priceMin === '0' && priceMax === '5000' ? 'active' : ''}`}
                 >
-                  Under 5K
+                  {t('catalog.under5k')}
                 </button>
                 <button
                   onClick={() => { setPriceMin('5000'); setPriceMax('10000'); setCurrentPage(1); }}
                   className={`th-filter-box ${priceMin === '5000' && priceMax === '10000' ? 'active' : ''}`}
                 >
-                  5K - 10K
+                  {t('catalog.5kTo10k')}
                 </button>
                 <button
                   onClick={() => { setPriceMin('10000'); setPriceMax('15000'); setCurrentPage(1); }}
                   className={`th-filter-box ${priceMin === '10000' && priceMax === '15000' ? 'active' : ''}`}
                 >
-                  10K - 15K
+                  {t('catalog.10kTo15k')}
                 </button>
                 <button
                   onClick={() => { setPriceMin('15000'); setPriceMax('999999'); setCurrentPage(1); }}
                   className={`th-filter-box ${priceMin === '15000' && priceMax === '999999' ? 'active' : ''}`}
                 >
-                  15K+
+                  {t('catalog.15kPlus')}
                 </button>
               </div>
             </div>
@@ -306,7 +306,7 @@ const Catalog = () => {
                         <img src={product.image} alt={product.name} loading="lazy" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/placeholder.svg'; }} />
                         {product.isSoldOut && (
                           <div className="position-absolute top-50 start-50 translate-middle" style={{ zIndex: 10 }}>
-                            <span className="badge bg-danger px-3 py-2 fs-6 shadow-sm" style={{ letterSpacing: '1px' }}>SOLD OUT</span>
+                            <span className="badge bg-danger px-3 py-2 fs-6 shadow-sm" style={{ letterSpacing: '1px' }}>{t('catalog.soldOut')}</span>
                           </div>
                         )}
                         <div className="th-product-badges">

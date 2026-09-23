@@ -60,7 +60,8 @@ const toBase64 = (blobUrl) => new Promise((resolve, reject) => {
 });
 
 const VirtualTryOn = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isUrdu = language === 'ur';
   const ref = useScrollAnim();
   const [photo, setPhoto] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
@@ -192,7 +193,7 @@ const VirtualTryOn = () => {
         ? garmentImage 
         : await toBase64(garmentImage);
 
-      toast.info('Generating AI Try-On... This may take 15-30 seconds.');
+      toast.info(isUrdu ? 'AI ٹرائی آن تیار ہو رہا ہے... اس میں ۱۵ سے ۳۰ سیکنڈ لگ سکتے ہیں۔' : 'Generating AI Try-On... This may take 15-30 seconds.');
       const response = await apiRequest('/api/vto/tryon', {
         method: 'POST',
         body: {
@@ -202,11 +203,10 @@ const VirtualTryOn = () => {
         }
       });
       setResultImage(response.result_image_base64);
-      toast.success('Try-On generated successfully!');
+      toast.success(isUrdu ? 'ٹرائی آن کامیابی سے مکمل ہو گیا!' : 'Try-On generated successfully!');
     } catch (e) {
       console.error(e);
-      // Backend returns user-friendly messages (out of credits, rate-limited, etc.)
-      toast.error(e.message || 'AI Try-On failed. Please try again.', { duration: 6000 });
+      toast.error(e.message || (isUrdu ? 'AI ٹرائی آن میں خرابی۔ براہِ کرم دوبارہ کوشش کریں۔' : 'AI Try-On failed. Please try again.'), { duration: 6000 });
     } finally {
       setVtoLoading(false);
     }
@@ -214,7 +214,7 @@ const VirtualTryOn = () => {
 
   return (
     <Layout>
-      <div className="container py-4 py-md-5" ref={ref}>
+      <div className={`container py-4 py-md-5 ${isUrdu ? 'text-end' : ''}`} ref={ref} dir={isUrdu ? 'rtl' : 'ltr'}>
         <div className="text-center mx-auto mb-5 scroll-anim" style={{ maxWidth: 720 }}>
           <span className="th-badge th-badge-soft mb-3 d-inline-flex align-items-center gap-1">
             <Sparkles size={12} /> {t('tryon.aiAssisted', 'AI Assisted')}
@@ -232,16 +232,18 @@ const VirtualTryOn = () => {
               <h5 className="font-playfair fw-semibold mb-1">
                 {t('tryon.title', 'Virtual Try-On')} <span className="text-accent">{t('vto.aiPowered', 'AI Powered')}</span>
               </h5>
-              <p className="text-muted small mb-0">Upload your photo and pick a garment to preview how it looks on you.</p>
+              <p className="text-muted small mb-0">{t('vto.tipSubtitle')}</p>
               <p className="text-muted mt-2 mb-0" style={{ fontSize: '0.72rem' }}>
-                Photorealistic AI generation. Handles traditional &amp; long garments accurately (takes ~10-20s).
+                {t('vto.tipDetail')}
               </p>
             </div>
 
             <div className="row g-4">
               <div className="col-lg-6">
                 <p className="text-muted mb-2" style={{ fontSize: '0.72rem' }}>
-                  Tip: AI Try-On generates a photorealistic image and works great with traditional &amp; long garments. Use a clear, front-facing photo for best results (~10-20s).
+                  {isUrdu 
+                    ? 'مشورہ: بہترین نتائج کے لیے سامنے سے کھنچی گئی واضح تصویر استعمال کریں جس میں جسم اور روشنی صاف ہو۔'
+                    : 'Tip: AI Try-On generates a photorealistic image and works great with traditional & long garments. Use a clear, front-facing photo for best results (~10-20s).'}
                 </p>
                 {/* Category filter tabs */}
                 <div className="d-flex flex-wrap gap-1 mb-2">
@@ -251,7 +253,7 @@ const VirtualTryOn = () => {
                     className={`th-filter-btn ${garmentCategory === 'all' ? 'active' : ''}`}
                     style={{ fontSize: '0.72rem', padding: '2px 8px' }}
                   >
-                    All
+                    {isUrdu ? 'تمام' : 'All'}
                   </button>
                   {categories.filter(cat => !cat.id.startsWith('unstitched-')).map(cat => (
                     <button
@@ -261,7 +263,7 @@ const VirtualTryOn = () => {
                       className={`th-filter-btn ${garmentCategory === cat.id ? 'active' : ''}`}
                       style={{ fontSize: '0.72rem', padding: '2px 8px' }}
                     >
-                      {cat.label}
+                      {isUrdu ? (cat.id === 'pent-coat' ? 'پینٹ کوٹ' : cat.id === 'shalwar-kameez' ? 'شلوار قمیض' : cat.label) : cat.label}
                     </button>
                   ))}
                 </div>
@@ -280,7 +282,7 @@ const VirtualTryOn = () => {
                       }}
                     >
                       <Upload size={18} />
-                      <span style={{ fontSize: '0.62rem', marginTop: 2 }}>Upload</span>
+                      <span style={{ fontSize: '0.62rem', marginTop: 2 }}>{t('vto.uploadPhoto', 'Upload')}</span>
                       <input type="file" accept="image/*" onChange={onGarmentUpload} className="d-none" />
                     </label>
                   </div>
@@ -306,7 +308,7 @@ const VirtualTryOn = () => {
                     </div>
                   ))}
                 </div>
-                {garmentName && <p className="small fw-medium mb-3">Selected: <span className="text-accent">{garmentName}</span></p>}
+                {garmentName && <p className="small fw-medium mb-3">{t('vto.selected')} <span className="text-accent">{garmentName}</span></p>}
 
                 <Button
                   size="lg"
@@ -315,7 +317,7 @@ const VirtualTryOn = () => {
                   disabled={!garmentImage || !photo || vtoLoading}
                 >
                   {vtoLoading ? <Loader2 size={20} className="anim-spin" /> : <ImageIcon size={20} />}
-                  {vtoLoading ? 'AI is generating...' : 'Generate AI Try-On'}
+                  {vtoLoading ? t('vto.generating') : t('vto.generateBtn')}
                 </Button>
               </div>
 
@@ -330,12 +332,12 @@ const VirtualTryOn = () => {
                     <div className="col-4 d-flex flex-column align-items-center text-center p-2 rounded-2" style={{ background: 'rgba(255,255,255,0.6)' }}>
                       <PersonStanding size={20} className="text-muted mb-1" />
                       <p className="m-0 fw-medium" style={{ fontSize: '0.65rem', lineHeight: 1.4 }}>{t('vto.straightPosture', 'Straight Posture')}</p>
-                      <p className="m-0 text-muted" style={{ fontSize: '0.58rem', lineHeight: 1.3 }}>Stand tall, arms by side</p>
+                      <p className="m-0 text-muted" style={{ fontSize: '0.58rem', lineHeight: 1.3 }}>{t('vto.standTall')}</p>
                     </div>
                     <div className="col-4 d-flex flex-column align-items-center text-center p-2 rounded-2" style={{ background: 'rgba(255,255,255,0.6)' }}>
                       <Camera size={20} className="text-muted mb-1" />
-                      <p className="m-0 fw-medium" style={{ fontSize: '0.65rem', lineHeight: 1.4 }}>Front-Facing</p>
-                      <p className="m-0 text-muted" style={{ fontSize: '0.58rem', lineHeight: 1.3 }}>Full body, eye level</p>
+                      <p className="m-0 fw-medium" style={{ fontSize: '0.65rem', lineHeight: 1.4 }}>{t('vto.frontFacing')}</p>
+                      <p className="m-0 text-muted" style={{ fontSize: '0.58rem', lineHeight: 1.3 }}>{t('vto.fullBody')}</p>
                     </div>
                     <div className="col-4 d-flex flex-column align-items-center text-center p-2 rounded-2" style={{ background: 'rgba(255,255,255,0.6)' }}>
                       <Sun size={20} className="text-muted mb-1" />
@@ -348,7 +350,7 @@ const VirtualTryOn = () => {
                 <div className="d-flex align-items-center justify-content-center gap-3 w-100">
                   {/* Garment Frame */}
                   <div className="d-flex align-items-center justify-content-center rounded-3 border border-2 border-dashed overflow-hidden" style={{ aspectRatio: '3 / 4', width: '100%', maxWidth: 200, background: '#f5f5f5' }}>
-                    {garmentImage ? <img src={garmentImage} className="w-100 h-100" style={{ objectFit: 'contain' }} /> : <span className="text-muted small">Garment</span>}
+                    {garmentImage ? <img src={garmentImage} className="w-100 h-100" style={{ objectFit: 'contain' }} /> : <span className="text-muted small">{isUrdu ? 'لباس' : 'Garment'}</span>}
                   </div>
                   <span className="text-muted fs-4 flex-shrink-0">+</span>
                   {/* Photo Upload Frame */}
@@ -358,7 +360,7 @@ const VirtualTryOn = () => {
                     ) : (
                       <span className="text-muted small d-flex flex-column align-items-center">
                         <Upload className="mb-2" size={24} />
-                        Upload Photo
+                        {t('vto.uploadPhoto', 'Upload Photo')}
                       </span>
                     )}
                     <input type="file" accept="image/*" onChange={onFileChange} className="d-none" />
@@ -367,12 +369,12 @@ const VirtualTryOn = () => {
 
                 {/* Embedded Tone Results */}
                 <div className="w-100">
-                  {analyzing && <p className="text-muted small d-flex align-items-center gap-2"><Loader2 size={16} className="anim-spin" /> Analyzing skin tone...</p>}
+                  {analyzing && <p className="text-muted small d-flex align-items-center gap-2"><Loader2 size={16} className="anim-spin" /> {isUrdu ? 'جلد کی رنگت کا تجزیہ ہو رہا ہے...' : 'Analyzing skin tone...'}</p>}
                   {tone && (
                     <div className="mt-2 rounded-3 border p-3 small w-100">
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <p className="fw-medium text-capitalize mb-0 d-flex align-items-center gap-2">
-                          Detected Tone: <span className="th-badge th-badge-soft text-uppercase" style={{ letterSpacing: '0.05em' }}>{skinProfile?.label || tone}</span>
+                          {t('vto.detectedTone')} <span className="th-badge th-badge-soft text-uppercase" style={{ letterSpacing: '0.05em' }}>{skinProfile?.label || tone}</span>
                         </p>
                         {avgRgb && (
                           <div className="d-flex align-items-center gap-2">
@@ -386,7 +388,7 @@ const VirtualTryOn = () => {
                           {recommendedColors.map(color => <span key={color} className="th-badge th-badge-outline">{color}</span>)}
                         </div>
                         <p className="text-muted mb-0 mt-2" style={{ fontSize: '0.68rem' }}>
-                          These are recommended colors — you can still select your own color.
+                          {t('vto.recommendedNote')}
                         </p>
                       </div>
                     </div>
@@ -404,8 +406,8 @@ const VirtualTryOn = () => {
                   {vtoLoading && !resultImage && (
                     <div className="d-flex flex-column align-items-center gap-2 text-muted text-center p-5">
                       <Loader2 size={32} className="text-accent anim-spin" />
-                      <p className="mb-0">AI is processing your try-on...</p>
-                      <p className="small mb-0">This usually takes 15-30 seconds.</p>
+                      <p className="mb-0">{t('vto.processingMsg')}</p>
+                      <p className="small mb-0">{t('vto.processingDesc')}</p>
                     </div>
                   )}
                   {resultImage && <img src={resultImage} alt="VTO Result" className="w-100 h-100" style={{ objectFit: 'contain' }} />}

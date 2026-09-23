@@ -2,24 +2,26 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Check } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useLanguage } from '@/context/LanguageContext';
 
-const formatTime = (iso) => {
+const formatTime = (iso, isUrdu) => {
   if (!iso) return '';
   const date = new Date(iso);
   const diffMs = Date.now() - date.getTime();
   const m = Math.floor(diffMs / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m}m ago`;
+  if (m < 1) return isUrdu ? 'ابھی ابھی' : 'just now';
+  if (m < 60) return isUrdu ? `${m} منٹ پہلے` : `${m}m ago`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
+  if (h < 24) return isUrdu ? `${h} گھنٹے پہلے` : `${h}h ago`;
   const d = Math.floor(h / 24);
-  if (d < 7) return `${d}d ago`;
-  return date.toLocaleDateString();
+  if (d < 7) return isUrdu ? `${d} دن پہلے` : `${d}d ago`;
+  return isUrdu ? date.toLocaleDateString('ur-PK') : date.toLocaleDateString();
 };
 
 const NotificationBell = () => {
   const navigate = useNavigate();
   const { items, unreadCount, markRead, markAllRead } = useNotifications();
+  const { t, isUrdu } = useLanguage();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -59,25 +61,26 @@ const NotificationBell = () => {
 
       {open && (
         <div
-          className="position-absolute end-0 mt-2 shadow-lg border rounded-3 bg-white"
+          className={`position-absolute ${isUrdu ? 'start-0' : 'end-0'} mt-2 shadow-lg border rounded-3 bg-white`}
           style={{ width: 340, maxHeight: 420, overflowY: 'auto', zIndex: 1050 }}
+          dir={isUrdu ? 'rtl' : 'ltr'}
         >
           <div className="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
-            <strong className="small">Notifications</strong>
+            <strong className="small">{t('notifications.title')}</strong>
             {unreadCount > 0 && (
               <button
-                className="p-0 border-0 bg-transparent text-amber-600 small"
+                className="p-0 border-0 bg-transparent text-amber-600 small d-flex align-items-center gap-1"
                 onClick={markAllRead}
                 style={{ cursor: 'pointer' }}
               >
-                <Check size={14} className="me-1" />
-                Mark all read
+                <Check size={14} />
+                {t('notifications.markAllRead')}
               </button>
             )}
           </div>
 
           {items.length === 0 ? (
-            <div className="text-center text-muted small py-4">No notifications yet</div>
+            <div className="text-center text-muted small py-4">{t('notifications.empty')}</div>
           ) : (
             <ul className="list-unstyled mb-0">
               {items.map((n) => (
@@ -92,7 +95,7 @@ const NotificationBell = () => {
                       <div className="fw-semibold small">{n.title}</div>
                       {n.body && <div className="text-muted small">{n.body}</div>}
                       <div className="text-muted" style={{ fontSize: 11 }}>
-                        {formatTime(n.created_at)}
+                        {formatTime(n.created_at, isUrdu)}
                       </div>
                     </div>
                     {!n.read_at && (

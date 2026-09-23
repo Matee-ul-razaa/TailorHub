@@ -9,14 +9,14 @@ import useScrollAnim from '@/hooks/useScrollAnim';
 import { Button } from '@/components/ui/button';
 
 const TRACKING_STEPS = [
-  { id: 'pending', label: 'Order Placed', icon: Package },
-  { id: 'confirmed', label: 'Confirmed', icon: CheckCircle2 },
-  { id: 'cutting', label: 'Cutting', icon: Scissors },
-  { id: 'stitching', label: 'Stitching', icon: Shirt },
-  { id: 'processing', label: 'Processing', icon: Box },
-  { id: 'ready', label: 'Ready', icon: Box },
-  { id: 'out_for_delivery', label: 'Out for Delivery', icon: Truck },
-  { id: 'delivered', label: 'Delivered', icon: Package },
+  { id: 'pending', label: 'Order Placed', labelUr: 'آرڈر موصول', icon: Package },
+  { id: 'confirmed', label: 'Confirmed', labelUr: 'تصدیق شدہ', icon: CheckCircle2 },
+  { id: 'cutting', label: 'Cutting', labelUr: 'کٹنگ جاری', icon: Scissors },
+  { id: 'stitching', label: 'Stitching', labelUr: 'سلائی جاری', icon: Shirt },
+  { id: 'processing', label: 'Processing', labelUr: 'پراسیسنگ', icon: Box },
+  { id: 'ready', label: 'Ready', labelUr: 'تیار ہے', icon: Box },
+  { id: 'out_for_delivery', label: 'Out for Delivery', labelUr: 'ڈیلیوری کے لیے روانہ', icon: Truck },
+  { id: 'delivered', label: 'Delivered', labelUr: 'پہنچ گیا', icon: Package },
 ];
 
 const STATUS_COLORS = {
@@ -170,7 +170,7 @@ const Tracking = () => {
                                 <Icon size={16} />
                               </div>
                               <span className={`small text-center ${isCompleted ? 'fw-bold text-dark' : 'text-muted'}`} style={{ fontSize: '0.65rem', lineHeight: '1.2' }}>
-                                {step.label}
+                                {isUrdu ? step.labelUr : step.label}
                               </span>
                             </div>
                           )

@@ -451,12 +451,6 @@ const dictionary = {
   
   // ── Other Customer Pages ────────────────────────────────────────────────
   'vto.aiPowered': { en: 'AI Powered', ur: 'اے آئی کی طاقت سے' },
-  'vto.proTip': { en: 'Pro Tip for Best Results', ur: 'بہترین نتائج کے لیے مفید مشورہ' },
-  'vto.straightPosture': { en: 'Straight Posture', ur: 'سیدھی حالت میں کھڑے ہوں' },
-  'vto.evenLighting': { en: 'Even Lighting', ur: 'برابر روشنی' },
-  'vto.avoidShadows': { en: 'Avoid harsh shadows', ur: 'گہرے سائے سے بچیں' },
-  'vto.recommendedColors': { en: 'Recommended Fabric Colors', ur: 'تجویز کردہ کپڑوں کے رنگ' },
-  'vto.aiResult': { en: 'AI Result', ur: 'اے آئی نتیجہ' },
   
   'product.hoverZoom': { en: 'Hover to zoom', ur: 'زوم کرنے کے لیے اوپر لائیں' },
   'product.suitConfig': { en: 'Suit Configuration', ur: 'سوٹ کی ترتیب' },
@@ -480,6 +474,67 @@ const dictionary = {
   'home.featuredSubtitle': { en: 'Handpicked pieces for the discerning gentleman', ur: 'بہترین ذوق رکھنے والوں کے لیے منتخب ملبوسات' },
   'home.viewAll': { en: 'View All', ur: 'سب دیکھیں' },
   'home.viewAllCollection': { en: 'View All Collection', ur: 'تمام کلیکشن دیکھیں' },
+
+  // ── Virtual Try-On & AI Extras ──────────────────────────────────────────
+  'vto.proTip': { en: 'Pro Tip for Best Results', ur: 'بہترین نتائج کے لیے اہم مشورہ' },
+  'vto.straightPosture': { en: 'Straight Posture', ur: 'سیدھی پوزیشن' },
+  'vto.standTall': { en: 'Stand tall, arms by side', ur: 'سیدھے کھڑے ہوں، ہاتھ ساتھ' },
+  'vto.frontFacing': { en: 'Front-Facing', ur: 'سامنے کا رخ' },
+  'vto.fullBody': { en: 'Full body, eye level', ur: 'مکمل جسم، آنکھوں کی سطح' },
+  'vto.evenLighting': { en: 'Even Lighting', ur: 'مناسب روشنی' },
+  'vto.avoidShadows': { en: 'Avoid harsh shadows', ur: 'سائے اور اندھیرے سے بچیں' },
+  'vto.uploadPhoto': { en: 'Upload Photo', ur: 'تصویر اپلوڈ کریں' },
+  'vto.selected': { en: 'Selected:', ur: 'منتخب شدہ:' },
+  'vto.generating': { en: 'AI is generating...', ur: 'AI تصویر تیار کر رہا ہے...' },
+  'vto.generateBtn': { en: 'Generate AI Try-On', ur: 'ورچوئل ٹرائی آن شروع کریں' },
+  'vto.processingDesc': { en: 'This usually takes 15-30 seconds.', ur: 'اس میں عموماً ۱۵ سے ۳۰ سیکنڈ لگتے ہیں۔' },
+  'vto.detectedTone': { en: 'Detected Tone:', ur: 'تشخیص شدہ رنگت:' },
+  'vto.recommendedColors': { en: 'Recommended Fabric Colors', ur: 'تجویز کردہ فیبرک رنگ' },
+  'vto.recommendedNote': { en: 'These are recommended colors — you can still select your own color.', ur: 'یہ تجویز کردہ رنگ ہیں — آپ اپنی مرضی کا کوئی بھی رنگ منتخب کر سکتے ہیں۔' },
+  'vto.aiResult': { en: 'AI Result', ur: 'AI ٹرائی آن کا نتیجہ' },
+  'vto.tipSubtitle': { en: 'Upload your photo and pick a garment to preview how it looks on you.', ur: 'اپنی تصویر اپلوڈ کریں اور لباس منتخب کریں تاکہ معلوم ہو سکے کہ یہ آپ پر کیسا لگے گا۔' },
+  'vto.tipDetail': { en: 'Photorealistic AI generation. Handles traditional & long garments accurately (takes ~10-20s).', ur: 'فوٹو ریئلسٹک AI جنریشن۔ روایتی اور لمبے ملبوسات کے لیے بالکل درست (صرف ۱۰ تا ۲۰ سیکنڈ)۔' },
+  'vto.processingMsg': { en: 'AI is processing your try-on...', ur: 'AI آپ کا ٹرائی آن تیار کر رہا ہے...' },
+
+  // ── Skin Tone Analysis Extras ──────────────────────────────────────────
+  'skintone.uploadHint': { en: 'JPG, PNG — clear face photo works best', ur: 'JPG, PNG — چہرے کی واضح تصویر بہترین نتائج دیتی ہے' },
+  'skintone.uploadRequired': { en: 'Please upload a photo first', ur: 'براہِ کرم پہلے تصویر اپلوڈ کریں' },
+  'skintone.success': { en: 'Skin tone analyzed successfully!', ur: 'رنگت کا کامیابی سے تجزیہ ہو گیا!' },
+  'skintone.recommendNote': { en: 'These are recommended colors — you can still select your own color.', ur: 'یہ تجویز کردہ رنگ ہیں — آپ اپنی مرضی کا کوئی بھی رنگ بھی منتخب کر سکتے ہیں۔' },
+
+  // ── Catalog Extras ─────────────────────────────────────────────────────
+  'catalog.under5k': { en: 'Under 5K', ur: '۵ ہزار سے کم' },
+  'catalog.5kTo10k': { en: '5K - 10K', ur: '۵ تا ۱۰ ہزار' },
+  'catalog.10kTo15k': { en: '10K - 15K', ur: '۱۰ تا ۱۵ ہزار' },
+  'catalog.15kPlus': { en: '15K+', ur: '۱۵ ہزار سے زائد' },
+  'catalog.soldOut': { en: 'SOLD OUT', ur: 'اسٹاک ختم' },
+  'catalog.loadingProducts': { en: 'Loading products...', ur: 'مصنوعات لوڈ ہو رہی ہیں...' },
+
+  // ── Product Detail Extras ──────────────────────────────────────────────
+  'product.matchingWaistcoat': { en: 'Matching embroidered waistcoat (+Rs. 3,000)', ur: 'مماثل کڑھائی والی واسکٹ (+3,000 روپے)' },
+  'product.watchOnYoutube': { en: 'Watch on YouTube ↗', ur: 'یوٹیوب پر دیکھیں ↗' },
+  'product.inches': { en: '(inches)', ur: '(انچ)' },
+  'product.outOfStockAlert': { en: 'This product is currently out of stock.', ur: 'یہ پروڈکٹ فی الوقت دستیاب نہیں ہے۔' },
+  'product.outOfStock': { en: 'Out of Stock', ur: 'اسٹاک ختم ہے' },
+  'product.selectSavedProfile': { en: 'Select saved profile...', ur: 'محفوظ شدہ ناپ منتخب کریں...' },
+  'product.useSavedMeasurements': { en: 'Use Saved Measurements:', ur: 'محفوظ شدہ ناپ استعمال کریں:' },
+
+  // ── Measurements Extras ────────────────────────────────────────────────
+  'measurements.submitting': { en: 'Submitting...', ur: 'درج ہو رہا ہے...' },
+  'measurements.loadingAppointments': { en: 'Loading appointments...', ur: 'اپائنٹمنٹس لوڈ ہو رہی ہیں...' },
+  'measurements.note': { en: 'Note:', ur: 'نوٹ:' },
+
+  // ── 404 Not Found ──────────────────────────────────────────────────────
+  'notfound.title': { en: 'Page Not Found', ur: 'صفحہ نہیں ملا' },
+  'notfound.desc': { en: "The page you're looking for doesn't exist or has been moved.", ur: 'جس صفحے کو آپ تلاش کر رہے ہیں وہ موجود نہیں ہے یا منتقل ہو چکا ہے۔' },
+  'notfound.home': { en: 'Go to Home', ur: 'مرکزی صفحہ پر جائیں' },
+  'notfound.catalog': { en: 'Browse Catalog', ur: 'کیٹلاگ دیکھیں' },
+
+  // ── Notifications ──────────────────────────────────────────────────────
+  'notifications.title': { en: 'Notifications', ur: 'اطلاعات' },
+  'notifications.markAllRead': { en: 'Mark all read', ur: 'سب پڑھ لیے' },
+  'notifications.empty': { en: 'No notifications yet', ur: 'ابھی کوئی اطلاع نہیں ہے' },
+  'notifications.justNow': { en: 'just now', ur: 'ابھی ابھی' },
 };
 
 const LanguageContext = createContext(undefined);
@@ -515,6 +570,7 @@ export const LanguageProvider = ({ children }) => {
 
   const value = useMemo(() => ({
     language,
+    isUrdu: language === 'ur',
     setLanguage: changeLanguage,
     toggleLanguage: () => changeLanguage(language === 'en' ? 'ur' : 'en'),
     t,

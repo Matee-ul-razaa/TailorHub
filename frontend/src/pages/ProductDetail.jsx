@@ -13,19 +13,34 @@ import { apiRequest } from '@/lib/api';
 const SKIN_PROFILE_KEY = 'tailorhub-skin-profile';
 
 const purchaseModeLabels = {
-  'unstitched': { label: 'Unstitched Fabric', desc: 'Buy premium fabric by the meter' },
-  'ready-to-wear': { label: 'Ready to Wear', desc: 'Standard sized, ready to ship' },
-  'custom-stitching': { label: 'Custom Stitching', desc: 'Tailored to your measurements' },
+  'unstitched': {
+    labelEn: 'Unstitched Fabric',
+    labelUr: 'بغیر سلا کپڑا',
+    descEn: 'Buy premium fabric by the meter',
+    descUr: 'پریمیم فیبرک فی میٹر خریدیں'
+  },
+  'ready-to-wear': {
+    labelEn: 'Ready to Wear',
+    labelUr: 'تیار شدہ لباس',
+    descEn: 'Standard sized, ready to ship',
+    descUr: 'اسٹینڈرڈ سائز، فوری ڈیلیوری'
+  },
+  'custom-stitching': {
+    labelEn: 'Custom Stitching',
+    labelUr: 'کسٹم سلائی',
+    descEn: 'Tailored to your measurements',
+    descUr: 'آپ کی پیمائش کے مطابق سلے'
+  },
 };
 
 const suitOptionLabels = {
-  '3-piece': '3-Piece (Blazer + Vest + Pants)',
-  '2-piece': '2-Piece (Blazer + Pants)',
-  'blazer-only': 'Blazer / Coat Only',
-  'pants-only': 'Pants Only',
-  'kameez-shalwar': 'Complete (Kameez + Shalwar)',
-  'kameez-only': 'Kameez / Kurta Only',
-  'shalwar-only': 'Shalwar / Pajama Only',
+  '3-piece': { en: '3-Piece (Blazer + Vest + Pants)', ur: '۳ پیس (کوٹ + واسکٹ + پینٹ)' },
+  '2-piece': { en: '2-Piece (Blazer + Pants)', ur: '۲ پیس (کوٹ + پینٹ)' },
+  'blazer-only': { en: 'Blazer / Coat Only', ur: 'صرف بلیزر / کوٹ' },
+  'pants-only': { en: 'Pants Only', ur: 'صرف پینٹ' },
+  'kameez-shalwar': { en: 'Complete (Kameez + Shalwar)', ur: 'مکمل سوٹ (قمیض + شلوار)' },
+  'kameez-only': { en: 'Kameez / Kurta Only', ur: 'صرف قمیض / کرتا' },
+  'shalwar-only': { en: 'Shalwar / Pajama Only', ur: 'صرف شلوار / پاجامہ' },
 };
 
 const measurementTemplates = {
@@ -302,8 +317,8 @@ const ProductDetail = () => {
                       onClick={() => setMode(m)}
                       className={`th-select-btn w-100 text-start ${mode === m ? 'selected' : ''}`}
                     >
-                      <div className="fw-medium small">{purchaseModeLabels[m].label}</div>
-                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>{purchaseModeLabels[m].desc}</div>
+                      <div className="fw-medium small">{language === 'ur' ? purchaseModeLabels[m].labelUr : purchaseModeLabels[m].labelEn}</div>
+                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>{language === 'ur' ? purchaseModeLabels[m].descUr : purchaseModeLabels[m].descEn}</div>
                     </button>
                   </div>
                 ))}
@@ -321,7 +336,7 @@ const ProductDetail = () => {
                         onClick={() => setSuitOption(opt)}
                         className={`th-select-btn w-100 text-start small ${suitOption === opt ? 'selected' : ''}`}
                       >
-                        {suitOptionLabels[opt]}
+                        {language === 'ur' ? suitOptionLabels[opt]?.ur || opt : suitOptionLabels[opt]?.en || opt}
                       </button>
                     </div>
                   ))}
@@ -335,7 +350,7 @@ const ProductDetail = () => {
                 <div className="d-flex align-items-center justify-content-between">
                   <div>
                     <div className="fw-medium">{t('product.addWaistcoat', 'Add Waistcoat')}</div>
-                    <div className="text-muted small">Matching embroidered waistcoat (+Rs. 3,000)</div>
+                    <div className="text-muted small">{t('product.matchingWaistcoat')}</div>
                   </div>
                   <button
                     type="button"
@@ -564,12 +579,12 @@ const ProductDetail = () => {
                 </button>
               </div>
               <Button size="lg" className="flex-grow-1 d-flex align-items-center justify-content-center gap-2" onClick={handleAddToCart} disabled={product.isSoldOut}>
-                <ShoppingBag size={18} /> {product.isSoldOut ? 'Out of Stock' : t('product.addToCart', 'Add to Cart')}
+                <ShoppingBag size={18} /> {product.isSoldOut ? t('product.outOfStock') : t('product.addToCart', 'Add to Cart')}
               </Button>
             </div>
             {product.isSoldOut && (
               <div className="alert alert-danger mt-3 d-flex align-items-center gap-2" role="alert">
-                <strong>SOLD OUT:</strong> This product is currently out of stock.
+                <strong>{t('catalog.soldOut')}:</strong> {t('product.outOfStockAlert')}
               </div>
             )}
           </div>

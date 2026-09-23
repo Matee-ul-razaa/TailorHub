@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  MessageCircle, X, Send, Sparkles, Scissors, Trash2, 
-  ArrowRight, ExternalLink, Package, Ruler, Truck, 
-  CreditCard, RefreshCw, PhoneCall, HelpCircle, Bot 
+import {
+  MessageCircle, X, Send, Sparkles, Scissors, Trash2,
+  ArrowRight, ExternalLink, Package, Ruler, Truck,
+  CreditCard, RefreshCw, PhoneCall, HelpCircle, Bot
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { apiRequest } from '@/lib/api';
@@ -68,7 +68,7 @@ const CLIENT_KNOWLEDGE_BASE = [
     replyEn: "We offer a 100% 7-Day Free Alteration Guarantee!\nIf your bespoke garment needs minor adjustments (tight, loose, or length tweaks), contact us within 7 days of delivery. Our rider will pick it up and our Master Tailor will alter it for free.",
     replyUr: "ہم ۷ دن کی مفت فٹنگ الٹریشن گارنٹی فراہم کرتے ہیں!\nاگر سوٹ کی فٹنگ میں کوئی بھی فرق ہو تو ڈیلیوری کے ۷ دن کے اندر بتائیں۔ ہمارا رائیڈر سوٹ لے کر جائے گا اور ماسٹر درزی مفت میں الٹریشن کر کے واپس پہنچائے گا۔",
     actions: [
-      { label: "💬 WhatsApp Alteration Help", link: "https://wa.me/923157855767?text=Hi%20TailorHub%2C%20I%20need%20assistance%20with%20alteration" }
+      { label: "💬 WhatsApp Alteration Help", link: "https://wa.me/923284630780?text=Hi%20TailorHub%2C%20I%20need%20assistance%20with%20alteration" }
     ]
   },
   {
@@ -116,7 +116,7 @@ const ChatAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
-      text: isUrdu 
+      text: isUrdu
         ? "خوش آمدید! میں ٹیلر ہب اسسٹنٹ ہوں۔ میں آپ کی کسٹم سلائی، آرڈر ٹریکنگ یا ناپ میں کس طرح مدد کر سکتا ہوں؟"
         : "Hello! I'm your TailorHub Assistant. How can I help you with your tailoring, orders, or measurements today?",
       isBot: true,
@@ -153,7 +153,7 @@ const ChatAssistant = () => {
     if (!queryText.trim()) return;
 
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
+
     // 1. Append user message
     const userMsg = { text: queryText, isBot: false, time: timeStr };
     setMessages(prev => [...prev, userMsg]);
@@ -192,7 +192,7 @@ const ChatAssistant = () => {
       setMessages(prev => [
         ...prev,
         {
-          text: data?.reply || (isUrdu 
+          text: data?.reply || (isUrdu
             ? "آپ کے سوال کا شکریہ! اگر آپ کو فوری مدد درکار ہے تو آپ ہمارے واٹس ایپ نمبر پر بھی براہ راست رابطہ کر سکتے ہیں۔"
             : "Thank you for reaching out! For immediate personal guidance, our master tailoring team is also available via WhatsApp."),
           isBot: true,
@@ -244,7 +244,7 @@ const ChatAssistant = () => {
   const handleClearHistory = () => {
     setMessages([
       {
-        text: isUrdu 
+        text: isUrdu
           ? "چیٹ ہسٹری صاف کر دی گئی ہے۔ میں آپ کی کیا مدد کر سکتا ہوں؟"
           : "Chat history cleared. How can I assist you with your bespoke tailoring today?",
         isBot: true,
@@ -374,7 +374,7 @@ const ChatAssistant = () => {
       </button>
 
       {/* Chat Window Container */}
-      <div 
+      <div
         className="position-fixed d-flex flex-column"
         dir={isUrdu ? 'rtl' : 'ltr'}
         style={{
@@ -397,18 +397,18 @@ const ChatAssistant = () => {
         }}
       >
         {/* ── 1. Luxury Dark & Gold Header ── */}
-        <div 
+        <div
           className="px-3 py-3 text-white d-flex align-items-center justify-content-between flex-shrink-0"
-          style={{ 
+          style={{
             background: 'linear-gradient(135deg, #18191d 0%, #101114 100%)',
             borderBottom: '1px solid rgba(197, 160, 89, 0.25)'
           }}
         >
           <div className="d-flex align-items-center gap-2">
-            <div 
-              className="rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-              style={{ 
-                width: 38, 
+            <div
+              className="rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+              style={{
+                width: 38,
                 height: 38,
                 background: 'linear-gradient(135deg, #d4af37 0%, #aa8033 100%)',
                 color: '#fff',
@@ -425,14 +425,14 @@ const ChatAssistant = () => {
                 <Sparkles size={13} style={{ color: '#d4af37' }} />
               </div>
               <div className="d-flex align-items-center gap-1 mt-0" style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
-                <span 
-                  className="rounded-circle d-inline-block" 
-                  style={{ 
-                    width: 7, 
-                    height: 7, 
+                <span
+                  className="rounded-circle d-inline-block"
+                  style={{
+                    width: 7,
+                    height: 7,
                     backgroundColor: '#10b981',
                     boxShadow: '0 0 8px #10b981'
-                  }} 
+                  }}
                 />
                 <span>{isUrdu ? 'آن لائن • فوری رہنمائی' : 'Online • Instant Support'}</span>
               </div>
@@ -451,8 +451,8 @@ const ChatAssistant = () => {
             >
               <Trash2 size={15} style={{ opacity: 0.85 }} />
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="btn btn-sm text-white p-1 d-flex align-items-center justify-content-center rounded-circle"
               onClick={() => setIsOpen(false)}
               aria-label="Close Chat"
@@ -466,9 +466,9 @@ const ChatAssistant = () => {
         </div>
 
         {/* ── 2. Quick FAQ Chips Bar (No Clipping, Comfortable Scrolling) ── */}
-        <div 
+        <div
           className="px-3 py-2 border-bottom d-flex align-items-center gap-2 overflow-auto flex-shrink-0 chat-scrollbar-hide"
-          style={{ 
+          style={{
             background: '#ffffff',
             scrollbarWidth: 'none',
             minHeight: '48px',
@@ -488,32 +488,32 @@ const ChatAssistant = () => {
         </div>
 
         {/* ── 3. Messages Scroll Area ── */}
-        <div 
-          className="flex-grow-1 p-3 overflow-auto d-flex flex-column gap-3 chat-messages-area" 
-          style={{ 
+        <div
+          className="flex-grow-1 p-3 overflow-auto d-flex flex-column gap-3 chat-messages-area"
+          style={{
             background: '#f8fafc',
             minHeight: 0
           }}
         >
           {messages.map((msg, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className={`d-flex ${msg.isBot ? 'justify-content-start' : 'justify-content-end'}`}
             >
-              <div 
+              <div
                 className="d-flex gap-2"
-                style={{ 
+                style={{
                   maxWidth: '88%',
                   flexDirection: msg.isBot ? 'row' : 'row-reverse'
                 }}
               >
                 {/* Bot Avatar Icon */}
                 {msg.isBot && (
-                  <div 
+                  <div
                     className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1 shadow-xs"
-                    style={{ 
-                      width: 28, 
-                      height: 28, 
+                    style={{
+                      width: 28,
+                      height: 28,
                       background: 'linear-gradient(135deg, #d4af37 0%, #aa8033 100%)',
                       color: '#ffffff'
                     }}
@@ -524,17 +524,17 @@ const ChatAssistant = () => {
 
                 {/* Message Bubble + Action Buttons + Timestamp */}
                 <div className={`d-flex flex-column ${msg.isBot ? 'align-items-start' : 'align-items-end'}`}>
-                  <div 
+                  <div
                     className="p-3 position-relative"
                     style={{
                       borderRadius: msg.isBot ? '4px 18px 18px 18px' : '18px 18px 4px 18px',
-                      background: msg.isBot 
-                        ? '#ffffff' 
+                      background: msg.isBot
+                        ? '#ffffff'
                         : 'linear-gradient(135deg, #c5a059 0%, #9e792b 100%)',
                       color: msg.isBot ? '#1e293b' : '#ffffff',
                       border: msg.isBot ? '1px solid rgba(226, 232, 240, 0.9)' : 'none',
-                      boxShadow: msg.isBot 
-                        ? '0 2px 10px rgba(0, 0, 0, 0.04)' 
+                      boxShadow: msg.isBot
+                        ? '0 2px 10px rgba(0, 0, 0, 0.04)'
                         : '0 4px 14px rgba(197, 160, 89, 0.3)',
                       fontSize: '0.865rem',
                       lineHeight: 1.58,
@@ -546,8 +546,8 @@ const ChatAssistant = () => {
 
                     {/* Interactive Action Buttons */}
                     {msg.isBot && msg.actions && msg.actions.length > 0 && (
-                      <div 
-                        className="mt-3 pt-2 d-flex flex-column gap-2" 
+                      <div
+                        className="mt-3 pt-2 d-flex flex-column gap-2"
                         style={{ borderTop: '1px solid #f1f5f9' }}
                       >
                         {msg.actions.map((act, aIdx) => (
@@ -570,10 +570,10 @@ const ChatAssistant = () => {
                   </div>
 
                   {/* Message Timestamp */}
-                  <span 
-                    className="small mt-1 px-1" 
-                    style={{ 
-                      fontSize: '0.68rem', 
+                  <span
+                    className="small mt-1 px-1"
+                    style={{
+                      fontSize: '0.68rem',
                       color: '#94a3b8',
                       letterSpacing: '0.02em'
                     }}
@@ -588,52 +588,52 @@ const ChatAssistant = () => {
           {/* Typing Indicator */}
           {isTyping && (
             <div className="d-flex align-items-center gap-2">
-              <div 
+              <div
                 className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-xs"
-                style={{ 
-                  width: 28, 
-                  height: 28, 
+                style={{
+                  width: 28,
+                  height: 28,
                   background: 'linear-gradient(135deg, #d4af37 0%, #aa8033 100%)',
                   color: '#ffffff'
                 }}
               >
                 <Sparkles size={14} />
               </div>
-              <div 
+              <div
                 className="p-3 bg-white border d-flex align-items-center gap-1"
-                style={{ 
+                style={{
                   borderRadius: '4px 18px 18px 18px',
                   borderColor: 'rgba(226, 232, 240, 0.9)',
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
                   height: '38px'
                 }}
               >
-                <span 
-                  className="rounded-circle d-inline-block" 
-                  style={{ 
-                    width: 6, 
-                    height: 6, 
-                    background: '#c5a059', 
-                    animation: 'chatTypingBounce 1.2s infinite ease-in-out' 
-                  }} 
+                <span
+                  className="rounded-circle d-inline-block"
+                  style={{
+                    width: 6,
+                    height: 6,
+                    background: '#c5a059',
+                    animation: 'chatTypingBounce 1.2s infinite ease-in-out'
+                  }}
                 />
-                <span 
-                  className="rounded-circle d-inline-block" 
-                  style={{ 
-                    width: 6, 
-                    height: 6, 
-                    background: '#c5a059', 
-                    animation: 'chatTypingBounce 1.2s infinite ease-in-out 0.2s' 
-                  }} 
+                <span
+                  className="rounded-circle d-inline-block"
+                  style={{
+                    width: 6,
+                    height: 6,
+                    background: '#c5a059',
+                    animation: 'chatTypingBounce 1.2s infinite ease-in-out 0.2s'
+                  }}
                 />
-                <span 
-                  className="rounded-circle d-inline-block" 
-                  style={{ 
-                    width: 6, 
-                    height: 6, 
-                    background: '#c5a059', 
-                    animation: 'chatTypingBounce 1.2s infinite ease-in-out 0.4s' 
-                  }} 
+                <span
+                  className="rounded-circle d-inline-block"
+                  style={{
+                    width: 6,
+                    height: 6,
+                    background: '#c5a059',
+                    animation: 'chatTypingBounce 1.2s infinite ease-in-out 0.4s'
+                  }}
                 />
               </div>
             </div>
@@ -643,18 +643,18 @@ const ChatAssistant = () => {
         </div>
 
         {/* ── 4. Input Bar (Fixed at bottom) ── */}
-        <form 
-          onSubmit={handleSend} 
+        <form
+          onSubmit={handleSend}
           className="p-3 bg-white border-top d-flex gap-2 align-items-center flex-shrink-0"
           style={{ borderColor: 'rgba(226, 232, 240, 0.8)' }}
         >
-          <input 
-            type="text" 
-            className="form-control rounded-pill px-3 py-2 border" 
-            placeholder={isUrdu ? "اپنا سوال یہاں لکھیں..." : "Type your question here..."} 
+          <input
+            type="text"
+            className="form-control rounded-pill px-3 py-2 border"
+            placeholder={isUrdu ? "اپنا سوال یہاں لکھیں..." : "Type your question here..."}
             value={input}
             onChange={e => setInput(e.target.value)}
-            style={{ 
+            style={{
               fontSize: '0.86rem',
               background: '#f8fafc',
               borderColor: '#e2e8f0',
@@ -672,15 +672,15 @@ const ChatAssistant = () => {
               e.currentTarget.style.boxShadow = 'none';
             }}
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={!input.trim()}
             className="btn rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
             style={{
               width: '42px',
               height: '42px',
-              background: input.trim() 
-                ? 'linear-gradient(135deg, #c5a059 0%, #9e792b 100%)' 
+              background: input.trim()
+                ? 'linear-gradient(135deg, #c5a059 0%, #9e792b 100%)'
                 : '#e2e8f0',
               color: '#ffffff',
               border: 'none',
