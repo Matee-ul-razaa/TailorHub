@@ -64,12 +64,12 @@ def resolve_frontend_url(request: Request) -> str:
         request.session.get("oauth_origin")
         or request.query_params.get("origin")
         or settings.FRONTEND_URL
-        or "https://frontend-omega-six-42.vercel.app"
+        or "https://tailorhub-pk.vercel.app"
     ).rstrip("/")
 
     # If the URL is an internal/protected Vercel preview deployment, automatically use the public production domain
     if "frontend-hvg2vxuru" in origin:
-        return "https://frontend-omega-six-42.vercel.app"
+        return "https://tailorhub-pk.vercel.app"
 
     return origin
 

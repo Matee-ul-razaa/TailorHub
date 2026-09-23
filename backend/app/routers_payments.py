@@ -65,7 +65,7 @@ def create_checkout_session(
         frontend_base = f"{p.scheme}://{p.netloc}"
 
     if "frontend-hvg2vxuru" in frontend_base:
-        frontend_base = "https://frontend-omega-six-42.vercel.app"
+        frontend_base = "https://tailorhub-pk.vercel.app"
 
     frontend_base = frontend_base.rstrip("/")
 

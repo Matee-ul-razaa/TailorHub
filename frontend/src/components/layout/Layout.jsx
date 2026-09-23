@@ -50,6 +50,7 @@ const Layout = ({ children }) => {
           <main className="flex-grow-1 anim-page-enter">
             {children}
           </main>
+          <Footer />
           {/* Hide ChatAssistant for delivery riders */}
           {!hasRole('delivery') && <ChatAssistant />}
         </div>

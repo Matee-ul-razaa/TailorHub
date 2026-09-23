@@ -111,7 +111,7 @@ class Settings(BaseSettings):
 
     # ── Application ───────────────────────────────────────────────────────────
     FRONTEND_URL: str = "http://localhost:8080"
-    CORS_ORIGINS: str = "http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,https://frontend-omega-six-42.vercel.app"
+    CORS_ORIGINS: str = "http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,https://tailorhub-pk.vercel.app,https://frontend-omega-six-42.vercel.app"
 
     # ── Sentry Error Tracking ───────────────────────────────────────────────
     SENTRY_DSN: str = ""  # Leave empty to disable Sentry
@@ -182,9 +182,9 @@ class Settings(BaseSettings):
     @property
     def public_frontend_url(self) -> str:
         """Returns the public production frontend URL, bypassing private preview deployments."""
-        url = (self.FRONTEND_URL or "https://frontend-omega-six-42.vercel.app").rstrip("/")
+        url = (self.FRONTEND_URL or "https://tailorhub-pk.vercel.app").rstrip("/")
         if "frontend-hvg2vxuru" in url:
-            return "https://frontend-omega-six-42.vercel.app"
+            return "https://tailorhub-pk.vercel.app"
         return url
 
     @property
@@ -195,8 +195,9 @@ class Settings(BaseSettings):
             clean_front = self.FRONTEND_URL.rstrip("/")
             if clean_front not in origins:
                 origins.append(clean_front)
-        if "https://frontend-omega-six-42.vercel.app" not in origins:
-            origins.append("https://frontend-omega-six-42.vercel.app")
+        for default_domain in ("https://tailorhub-pk.vercel.app", "https://frontend-omega-six-42.vercel.app"):
+            if default_domain not in origins:
+                origins.append(default_domain)
         return origins
 
     @property

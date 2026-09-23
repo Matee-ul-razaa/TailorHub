@@ -2,10 +2,20 @@ import React from "react";
 import { Link } from 'react-router-dom';
 import { Scissors, Mail, Phone, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 
 const Footer = () => {
   const { language, t } = useLanguage();
+  const { user, hasRole } = useAuth();
   const isUrdu = language === 'ur';
+
+  const accountLink = !user
+    ? '/login'
+    : hasRole('admin')
+    ? '/admin'
+    : hasRole('delivery')
+    ? '/delivery'
+    : '/tracking';
 
   return (
     <footer className="th-footer py-5 mt-auto border-top">
@@ -42,7 +52,7 @@ const Footer = () => {
               <Link to="/" className="text-decoration-none text-white-50 hover-lift">{t('footer.aboutUs', 'About Us')}</Link>
               <Link to="/catalog" className="text-decoration-none text-white-50 hover-lift">{t('nav.catalog')}</Link>
               <Link to="/virtual-try-on" className="text-decoration-none text-white-50 hover-lift">{t('nav.tryOn')}</Link>
-              <Link to="/login" className="text-decoration-none text-white-50 hover-lift">{isUrdu ? 'میرا اکاؤنٹ' : 'My Account'}</Link>
+              <Link to={accountLink} className="text-decoration-none text-white-50 hover-lift">{isUrdu ? 'میرا اکاؤنٹ' : 'My Account'}</Link>
             </div>
           </div>
 
