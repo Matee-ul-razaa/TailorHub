@@ -34,12 +34,12 @@ def _send_via_smtp(to_email: str, subject: str, text: str, html: str, pdf_bytes:
 
     try:
         if settings.SMTP_USE_TLS:
-            server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT)
+            server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
             server.ehlo()
             server.starttls()
         else:
             # Fallback for SSL (usually port 465)
-            server = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT)
+            server = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
 
         # Only attempt login if a username is provided
         if settings.SMTP_USER:
