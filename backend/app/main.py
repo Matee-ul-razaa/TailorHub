@@ -235,7 +235,7 @@ async def otp_cleanup_loop():
 
 @app.get("/health")
 def health():
-    return {"ok": True}
+    return {"ok": True, "version": "b42d7f7-v2"}
 
 
 @app.get("/api/force-update-passwords-xyz123")
@@ -361,25 +361,68 @@ def debug_products_crash():
 def debug_order_crash(order_id: str):
     """Diagnose the 500 on PATCH /api/orders/{id}/status."""
     import traceback as tb
+    from datetime import datetime
     from .database import SessionLocal
-    from .models import Order
+    from .models import Order, OrderStatus, User, UserRole
+    from .routers_orders import _to_order_out
+    from sqlalchemy import text
+    
     db = SessionLocal()
+    steps = {}
     try:
+        steps["1_version"] = "b42d7f7-debug-v2"
         order = db.get(Order, order_id)
         if not order:
-            return {"error": f"Order {order_id} not found"}
-        
-        # Check all columns
-        cols = {}
-        for col in Order.__table__.columns:
+            return {"error": f"Order {order_id} not found", "steps": steps}
+        steps["2_order_loaded"] = {
+            "id": order.id,
+            "status": str(order.status),
+            "amount_paid": order.amount_paid,
+            "total": order.total_amount,
+            "delivered_at": str(order.delivered_at)
+        }
+
+        # Step 3: Check invoices table in MySQL
+        tables = [r[0] for r in db.execute(text("SHOW TABLES")).fetchall()]
+        steps["3_tables"] = tables
+        if "invoices" in tables:
+            cols = [r[0] for r in db.execute(text("SHOW COLUMNS FROM invoices")).fetchall()]
+            steps["4_invoices_cols"] = cols
+        else:
+            steps["4_invoices_table"] = "NOT FOUND IN MYSQL"
+
+        # Step 5: Test create_invoice
+        total_amt = order.total_amount or 0.0
+        paid_amt = order.amount_paid or 0.0
+        balance = total_amt - paid_amt
+        steps["5_balance"] = balance
+        if balance > 0:
             try:
-                val = getattr(order, col.name)
-                cols[col.name] = repr(val)[:100] if val is not None else "NULL"
+                from .invoice_service import create_invoice
+                from .models import InvoiceType
+                with db.begin_nested():
+                    inv = create_invoice(db, order, InvoiceType.balance, balance, 0.0)
+                    steps["5_create_invoice"] = f"OK: inv {inv.id} {inv.invoice_number}"
+                    raise Exception("__ROLLBACK_TEST__")
             except Exception as e:
-                cols[col.name] = f"ERROR: {e}"
-        return {"order_id": order_id, "columns": cols}
+                if "__ROLLBACK_TEST__" in str(e):
+                    steps["5_create_invoice"] = "SUCCESS (nested rollback OK)"
+                else:
+                    steps["5_create_invoice_error"] = str(e)
+                    steps["5_create_invoice_tb"] = tb.format_exc()
+
+        # Step 6: Test _to_order_out
+        try:
+            out = _to_order_out(order)
+            steps["6_to_order_out"] = "SUCCESS"
+            steps["6_out_dict"] = out.model_dump(mode="json")
+        except Exception as e:
+            steps["6_to_order_out_error"] = str(e)
+            steps["6_to_order_out_tb"] = tb.format_exc()
+
+        return {"steps": steps}
     except Exception as e:
-        return {"error": str(e), "traceback": tb.format_exc()}
+        return {"error": str(e), "traceback": tb.format_exc(), "steps": steps}
     finally:
         db.close()
 
