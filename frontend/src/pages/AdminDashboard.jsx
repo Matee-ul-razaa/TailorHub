@@ -1283,12 +1283,12 @@ const AdminDashboard = () => {
                 ) : (
                   <div className="d-flex flex-column gap-2">
                   {teamMembers.map(member => (
-                    <div key={member.id} className="d-flex align-items-center justify-content-between rounded-3 border p-3">
-                      <div>
-                        <p className="fw-medium mb-0">{member.fullName}</p>
-                        <p className="text-muted small mb-0">{member.email}</p>
+                    <div key={member.id} className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between rounded-3 border p-3 gap-3">
+                      <div className="w-100 overflow-hidden" style={{ minWidth: 0 }}>
+                        <p className="fw-medium mb-0 text-truncate">{member.fullName}</p>
+                        <p className="text-muted small mb-0 text-truncate">{member.email}</p>
                       </div>
-                      <div className="d-flex align-items-center gap-2">
+                      <div className="d-flex align-items-center gap-2 flex-shrink-0 w-100 w-sm-auto justify-content-end">
                         <select className="th-select" style={{ width: 140 }} value={member.role}
                           onChange={async e => { try { await updateTeamMemberRole(member.id, e.target.value); } catch (error) { toast.error(error.message || 'Unable to update role'); } }}>
                           <option value="customer">Customer</option>
