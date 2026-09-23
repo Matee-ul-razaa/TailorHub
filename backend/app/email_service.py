@@ -114,15 +114,20 @@ def _send_via_smtp(to_email: str, subject: str, text: str, html: str,
 
 def _send_email(to_email: str, subject: str, text: str, html: str,
                 pdf_bytes: Optional[bytes] = None, pdf_name: Optional[str] = None) -> bool:
-    """Try Resend first (HTTP, works on Railway). If RESEND_API_KEY is missing, fall back to SMTP."""
-    # 1. Try Resend (HTTP API — port 443, never blocked)
+    """Try Brevo first, then Resend (HTTP, works on Railway). If both missing, fall back to SMTP."""
+    # 1. Try Brevo (Highly Recommended - allows sending to any email)
+    if getattr(settings, 'BREVO_API_KEY', None):
+        success = _send_via_brevo(to_email, subject, html, text)
+        if success: return True
+        
+    # 2. Try Resend (Only works for the verified email in free tier)
     if settings.RESEND_API_KEY:
         success = _send_via_resend(to_email, subject, html, text, pdf_bytes, pdf_name)
         if not success:
-            logger.warning("[EMAIL SERVICE] Resend failed. (Skipping SMTP fallback to prevent Railway hang)")
+            logger.warning("[EMAIL SERVICE] API failed. (Skipping SMTP fallback to prevent Railway hang)")
         return success
 
-    # 2. Fallback to SMTP (works on local dev)
+    # 3. Fallback to SMTP (works on local dev)
     return _send_via_smtp(to_email, subject, text, html, pdf_bytes, pdf_name)
 
 

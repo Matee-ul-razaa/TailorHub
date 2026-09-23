@@ -107,6 +107,7 @@ class Settings(BaseSettings):
     # ── Resend (HTTP-based email — works on Railway where SMTP ports are blocked)
     # Sign up at https://resend.com and get an API key
     RESEND_API_KEY: str = ""
+    BREVO_API_KEY: str = ""
 
     # ── Application ───────────────────────────────────────────────────────────
     FRONTEND_URL: str = "http://localhost:8080"
