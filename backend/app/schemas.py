@@ -124,6 +124,7 @@ class OrderOut(BaseModel):
     deliveryCity: Optional[str]= None
     signatureImage: Optional[str]= None
     createdAt: datetime
+    deliveredAt: Optional[datetime] = None
     items: list[OrderItemOut]
     payment: "PaymentOut" = None
 

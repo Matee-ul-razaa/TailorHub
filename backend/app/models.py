@@ -161,6 +161,7 @@ class Order(Base):
     signature_image: Mapped[str] = mapped_column(Text(length=4294967295), nullable=True)
     inventory_consumed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)  # set once when stock is decremented (idempotency guard)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    delivered_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
     payment: Mapped["Payment"] = relationship("Payment", back_populates="order", uselist=False, cascade="all, delete-orphan")

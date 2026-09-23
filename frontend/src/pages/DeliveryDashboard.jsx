@@ -254,9 +254,11 @@ const DeliveryDashboard = () => {
     // Today's deliveries (for stat card)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayDelivered = myOrders.filter(o =>
-      o.status === 'delivered' && new Date(o.createdAt) >= today
-    ).length;
+    const todayDelivered = myOrders.filter(o => {
+      if (o.status !== 'delivered') return false;
+      const d = o.deliveredAt ? new Date(o.deliveredAt) : new Date(o.createdAt);
+      return d >= today;
+    }).length;
 
     // Total cash to collect across active deliveries
     const cashToCollect = [...pickups, ...onRoute].reduce((sum, o) => {

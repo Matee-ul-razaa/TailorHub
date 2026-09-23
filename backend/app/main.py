@@ -107,6 +107,8 @@ def on_startup():
                     cols = [r[1] for r in res]
                     if "signature_image" not in cols:
                         conn.execute(text("ALTER TABLE orders ADD COLUMN signature_image TEXT;"))
+                    if "delivered_at" not in cols:
+                        conn.execute(text("ALTER TABLE orders ADD COLUMN delivered_at DATETIME;"))
                 except Exception as e:
                     logger.debug(f"SQLite orders patch skipped: {e}")
                 try:
@@ -123,6 +125,16 @@ def on_startup():
                         conn.execute(text("ALTER TABLE inventory_items ADD COLUMN is_sold_out BOOLEAN DEFAULT 0;"))
                 except Exception as e:
                     logger.debug(f"SQLite inventory_items patch skipped: {e}")
+        else:
+            # MySQL fallback schema patches
+            from sqlalchemy import text
+            with engine.begin() as conn:
+                try:
+                    res = conn.execute(text("SHOW COLUMNS FROM orders LIKE 'delivered_at';")).fetchall()
+                    if not res:
+                        conn.execute(text("ALTER TABLE orders ADD COLUMN delivered_at DATETIME NULL;"))
+                except Exception as e:
+                    logger.debug(f"MySQL orders delivered_at patch skipped: {e}")
     except Exception as e:
         logger.warning(f"Metadata table creation warning: {e}")
 

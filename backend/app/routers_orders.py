@@ -180,6 +180,7 @@ def update_order_status(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Order not assigned to you")
 
     if payload.status == OrderStatus.delivered and order.status != OrderStatus.delivered:
+        order.delivered_at = datetime.utcnow()
         balance = order.total_amount - order.amount_paid
         if balance > 0:
             from .invoice_service import create_invoice
