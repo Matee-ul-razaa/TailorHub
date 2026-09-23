@@ -36,8 +36,14 @@ body {
   background-color: var(--th-body-bg);
   background-attachment: fixed;
   color: var(--th-primary);
+  min-height: 100vh;
+}
+
+#root {
   overflow-x: hidden;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 h1, h2, h3, h4, h5, h6, .font-playfair {
