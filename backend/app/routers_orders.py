@@ -1,6 +1,7 @@
 import json
 import random
 import uuid
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
@@ -45,6 +46,7 @@ def _to_order_out(order: Order) -> OrderOut:
         deliveryCity=order.delivery_city,
         signatureImage=order.signature_image,
         createdAt=order.created_at,
+        deliveredAt=order.delivered_at,
         items=[
             OrderItemOut(
                 productId=item.product_id,
@@ -185,9 +187,13 @@ def update_order_status(
         paid_amt = order.amount_paid or 0.0
         balance = total_amt - paid_amt
         if balance > 0:
-            from .invoice_service import create_invoice
-            from .models import InvoiceType
-            create_invoice(db, order, InvoiceType.balance, balance, 0.0)
+            try:
+                from .invoice_service import create_invoice
+                from .models import InvoiceType
+                create_invoice(db, order, InvoiceType.balance, balance, 0.0)
+            except Exception as e:
+                from .config import logger
+                logger.error(f"[ORDER DELIVERY] Failed to create balance invoice for {order.id}: {e}")
 
     previous_status = order.status.value
     order.status = payload.status

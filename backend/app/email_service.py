@@ -94,7 +94,7 @@ def _send_via_brevo(to_email: str, subject: str, html: str, text: str = "") -> b
     
     req = Request(url, data=json.dumps(payload).encode('utf-8'), headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req) as response:
+        with urlopen(req) as response:
             logger.info(f"[EMAIL SERVICE] Brevo Success: {response.read()}")
             return True
     except HTTPError as e:

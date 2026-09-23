@@ -1,7 +1,8 @@
 import json
 import asyncio
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
+from fastapi.responses import JSONResponse
 try:
     import sentry_sdk
     from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -63,6 +64,17 @@ app.add_middleware(
 )
 app.add_middleware(SessionMiddleware, secret_key=settings.JWT_SECRET_KEY)
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
+    tb_str = traceback.format_exc()
+    logger.error(f"Unhandled error on {request.method} {request.url.path}: {exc}\n{tb_str}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "error": str(exc)},
+    )
 
 
 def seed_defaults(db: Session):
