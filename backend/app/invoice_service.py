@@ -42,13 +42,17 @@ def create_invoice(db: Session, order: Order, invoice_type: InvoiceType, subtota
     initial_status = InvoiceStatus.unpaid
     paid_at = None
     
-    if invoice_type == InvoiceType.advance and order.advance_amount >= total_amount:
+    paid_amt = order.amount_paid or 0.0
+    total_amt = order.total_amount or 0.0
+    adv_amt = order.advance_amount or 0.0
+    
+    if invoice_type == InvoiceType.advance and adv_amt >= total_amount:
         initial_status = InvoiceStatus.paid
         paid_at = datetime.utcnow()
-    elif invoice_type == InvoiceType.full and order.amount_paid >= order.total_amount:
+    elif invoice_type == InvoiceType.full and paid_amt >= total_amt:
         initial_status = InvoiceStatus.paid
         paid_at = datetime.utcnow()
-    elif invoice_type == InvoiceType.balance and order.amount_paid >= order.total_amount:
+    elif invoice_type == InvoiceType.balance and paid_amt >= total_amt:
         initial_status = InvoiceStatus.paid
         paid_at = datetime.utcnow()
     

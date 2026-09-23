@@ -181,7 +181,9 @@ def update_order_status(
 
     if payload.status == OrderStatus.delivered and order.status != OrderStatus.delivered:
         order.delivered_at = datetime.utcnow()
-        balance = order.total_amount - order.amount_paid
+        total_amt = order.total_amount or 0.0
+        paid_amt = order.amount_paid or 0.0
+        balance = total_amt - paid_amt
         if balance > 0:
             from .invoice_service import create_invoice
             from .models import InvoiceType
