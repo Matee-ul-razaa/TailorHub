@@ -727,7 +727,7 @@ const AdminDashboard = () => {
                         )}
                         {/* Delete Order */}
                         <div className="col-md-3">
-                          <Button variant="destructive" className="w-100" onClick={() => setConfirmConfig({ isOpen: true, title: 'Delete Order?', description: 'Are you sure you want to delete this order? This action cannot be undone.', onConfirm: async () => { try { await deleteOrder(order.id); toast.success('Order deleted'); } catch (error) { toast.error(error.message || 'Unable to delete'); } } })}>
+                          <Button variant="destructive" className="w-100" onClick={(e) => { e.stopPropagation(); setConfirmConfig({ isOpen: true, title: 'Delete Order?', description: 'Are you sure you want to delete this order? This action cannot be undone.', onConfirm: async () => { try { await deleteOrder(order.id); toast.success('Order deleted'); } catch (error) { toast.error(error.message || 'Unable to delete'); } } }); }}>
                             <Trash2 size={16} /> Delete
                           </Button>
                         </div>
@@ -1235,7 +1235,7 @@ const AdminDashboard = () => {
                         <Button variant="outline" size="sm" onClick={() => startEditProduct(product)}>
                           <Pencil size={12} /> {t('admin.edit', 'Edit')}
                         </Button>
-                        <Button variant="outline" size="sm" onClick={async () => { try { await deleteProduct(product.id); toast.success('Product deleted'); if (editingProductId === product.id) { setEditingProductId(null); setProductDraft(emptyProduct); } } catch (error) { toast.error(error.message || 'Unable to delete'); } }}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setConfirmConfig({ isOpen: true, title: 'Delete Product?', description: 'Are you sure you want to delete this product?', onConfirm: async () => { try { await deleteProduct(product.id); toast.success('Product deleted'); if (editingProductId === product.id) { setEditingProductId(null); setProductDraft(emptyProduct); } } catch (error) { toast.error(error.message || 'Unable to delete'); } } }); }}>
                           <Trash2 size={12} /> {t('admin.delete', 'Delete')}
                         </Button>
                       </div>
@@ -1285,7 +1285,7 @@ const AdminDashboard = () => {
                   <div className="d-flex flex-column gap-2">
                   {teamMembers.map(member => (
                     <div key={member.id} className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between rounded-3 border p-3 gap-3">
-                      <div className="w-100 overflow-hidden" style={{ minWidth: 0 }}>
+                      <div className="flex-grow-1 overflow-hidden" style={{ minWidth: 0 }}>
                         <p className="fw-medium mb-0 text-truncate">{member.fullName}</p>
                         <p className="text-muted small mb-0 text-truncate">{member.email}</p>
                       </div>
@@ -1296,7 +1296,7 @@ const AdminDashboard = () => {
                           <option value="admin">Admin</option>
                           <option value="delivery">Delivery</option>
                         </select>
-                        <Button variant="destructive" size="sm" onClick={() => setConfirmConfig({ isOpen: true, title: 'Remove Member?', description: 'Are you sure you want to remove this member?', onConfirm: async () => { try { await deleteTeamMember(member.id); toast.success('Member removed'); } catch (error) { toast.error(error.message || 'Unable to remove'); } } })}>
+                        <Button variant="destructive" size="sm" onClick={(e) => { e.stopPropagation(); setConfirmConfig({ isOpen: true, title: 'Remove Member?', description: 'Are you sure you want to remove this member?', onConfirm: async () => { try { await deleteTeamMember(member.id); toast.success('Member removed'); } catch (error) { toast.error(error.message || 'Unable to remove'); } } }); }}>
                           <Trash2 size={16} />
                         </Button>
                       </div>
@@ -1647,8 +1647,14 @@ const AdminDashboard = () => {
             <AlertDialogDescription>{confirmConfig.description}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => confirmConfig.onConfirm && confirmConfig.onConfirm()}>Confirm</AlertDialogAction>
+            <AlertDialogCancel onClick={() => setConfirmConfig(prev => ({...prev, isOpen: false}))}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={async (e) => {
+              e.preventDefault();
+              if (confirmConfig.onConfirm) {
+                await confirmConfig.onConfirm();
+              }
+              setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+            }}>Confirm</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

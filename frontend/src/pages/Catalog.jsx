@@ -59,8 +59,10 @@ const Catalog = () => {
   const categoryLabel = id => language === 'ur' ? urduCategoryLabels[id] : categories.find(item => item.id === id)?.label || id;
 
   const parsePriceInput = value => {
-    if (!value.trim()) return null;
-    const n = Number(value);
+    if (value === null || value === undefined || value === '') return null;
+    const strVal = String(value).replace(/,/g, '');
+    if (!strVal.trim() || strVal === 'null' || strVal === 'undefined') return null;
+    const n = Number(strVal);
     return Number.isFinite(n) ? n : null;
   };
 
@@ -69,12 +71,15 @@ const Catalog = () => {
     if (selectedBrand !== 'all' && p.brand !== selectedBrand) return false;
     if (selectedFabric !== 'all' && p.fabric !== selectedFabric) return false;
     if (selectedWearType !== 'all' && p.wearType !== selectedWearType) return false;
-    if (selectedStitchType === 'stitched' && p.category.startsWith('unstitched-')) return false;
-    if (selectedStitchType === 'unstitched' && !p.category.startsWith('unstitched-')) return false;
+    if (selectedStitchType === 'stitched' && p.category && p.category.startsWith('unstitched-')) return false;
+    if (selectedStitchType === 'unstitched' && p.category && !p.category.startsWith('unstitched-')) return false;
     const min = parsePriceInput(priceMin);
     const max = parsePriceInput(priceMax);
-    if (min !== null && p.price < min) return false;
-    if (max !== null && p.price > max) return false;
+    const productPrice = parsePriceInput(p.price);
+    if (productPrice !== null) {
+      if (min !== null && productPrice < min) return false;
+      if (max !== null && productPrice > max) return false;
+    }
     if (search) {
       const s = search.toLowerCase();
       if (!`${p.name} ${p.brand} ${p.description} ${p.fabric} ${p.colors.join(' ')}`.toLowerCase().includes(s)) return false;
