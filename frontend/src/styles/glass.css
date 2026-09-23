@@ -107,6 +107,40 @@ body.dark-theme .glass-card:hover {
   opacity: 1;
 }
 
+/* ── Hero Secondary Button (Matching btn-gradient) ── */
+.btn-hero-secondary {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1.5px solid #c5a059 !important;
+  color: #1f2937 !important;
+  border-radius: 50px;
+  padding: 0.6rem 1.8rem !important;
+  font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+body.dark-theme .btn-hero-secondary {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: #c5a059 !important;
+  color: #f3f4f6 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+}
+
+.btn-hero-secondary:hover {
+  background: linear-gradient(45deg, #c5a059, #aa8033) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  transform: scale(1.05) translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(197, 160, 89, 0.4) !important;
+}
+
+.btn-hero-secondary:hover .text-accent {
+  color: #ffffff !important;
+}
+
 /* ── Transparent Glass Forms ── */
 .glass-input {
   background: rgba(255, 255, 255, 0.8) !important;

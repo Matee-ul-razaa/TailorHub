@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import GradientButton from '@/components/ui/GradientButton';
-import { Button } from '@/components/ui/button';
 
 const Hero = () => {
   const { t, language } = useLanguage();
@@ -81,19 +80,35 @@ const Hero = () => {
             {/* CTA Buttons */}
             <div className={`d-flex flex-column flex-sm-row gap-3 anim-fade-up anim-delay-3 ${isUrdu ? 'justify-content-end' : 'justify-content-start'}`}>
               <Link to="/catalog" className="text-decoration-none">
-                <GradientButton className="btn-lg d-flex align-items-center justify-content-center gap-2 px-5 w-100">
-                  {t('hero.explore')} <ArrowRight size={18} />
+                <GradientButton 
+                  className="d-flex align-items-center justify-content-center gap-2 px-4 w-100"
+                  style={{
+                    height: '52px',
+                    minWidth: '200px',
+                    borderRadius: '50px',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  <span>{t('hero.explore')}</span>
+                  <ArrowRight size={18} />
                 </GradientButton>
               </Link>
               <Link to="/virtual-try-on" className="text-decoration-none">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-100"
-                  style={{ borderRadius: '50px' }}
+                <button
+                  type="button"
+                  className="btn-hero-secondary d-flex align-items-center justify-content-center gap-2 px-4 w-100"
+                  style={{
+                    height: '52px',
+                    minWidth: '200px',
+                    borderRadius: '50px',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                  }}
                 >
-                  {t('hero.tryOn')}
-                </Button>
+                  <Sparkles size={18} className="text-accent" />
+                  <span>{t('hero.tryOn')}</span>
+                </button>
               </Link>
             </div>
 
