@@ -178,6 +178,26 @@ def health():
     return {"ok": True}
 
 
+@app.get("/api/force-update-passwords-xyz123")
+def force_update_passwords(db: Session = Depends(get_db)):
+    """Temporary endpoint for the user to force update admin and rider passwords on live DB."""
+    from .security import hash_password
+    from .models import User
+    
+    # 1. Update Admin
+    admin = db.query(User).filter(User.email == settings.DEFAULT_ADMIN_EMAIL).first()
+    if admin:
+        admin.password_hash = hash_password("AdminDanish123.$")
+        
+    # 2. Update Rider
+    rider = db.query(User).filter(User.email == "rider@tailorhub.pk").first()
+    if rider:
+        rider.password_hash = hash_password("Rider@123456")
+        
+    db.commit()
+    return {"message": "Admin and Rider passwords have been successfully updated on the live database."}
+
+
 app.include_router(auth_router)
 app.include_router(oauth_router)
 app.include_router(products_router)
