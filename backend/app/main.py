@@ -34,6 +34,7 @@ from .routers_appointments import router as appointments_router
 from .routers_notifications import router as notifications_router
 from .routers_ai_measurements import router as ai_measurements_router
 from .routers_analytics import router as analytics_router
+from .routers_chat import router as chat_router
 from .security import hash_password
 from .services.otp_service import cleanup_expired_otps
 from .config import logger, settings
@@ -342,6 +343,7 @@ app.include_router(appointments_router)
 app.include_router(admin_router)
 app.include_router(analytics_router)
 app.include_router(khata_router)
+app.include_router(chat_router)
 
 # ── SPA static file serving (production Docker image) ─────────────────────────
 import os
