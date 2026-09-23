@@ -73,7 +73,7 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Nav Links */}
-        <div className="d-none d-xxl-flex align-items-center gap-3 mx-auto px-3">
+        <div className="d-none d-lg-flex align-items-center gap-3 mx-auto px-3">
           {navLinks.map(link => (
             <Link key={link.to} to={link.to} className={`th-nav-link ${isActive(link.to) ? 'active' : ''}`}>
               {link.label}
@@ -86,7 +86,7 @@ const Navbar = () => {
           <ThemeToggle />
 
           {/* Language Toggle */}
-          <div className="d-none d-xxl-flex th-lang-toggle">
+          <div className="d-none d-lg-flex th-lang-toggle">
             <Button variant="ghost" size="sm" className={`th-lang-btn ${language === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')}>ENG</Button>
             <Button variant="ghost" size="sm" className={`th-lang-btn ${language === 'ur' ? 'active' : ''}`} onClick={() => setLanguage('ur')}>اردو</Button>
           </div>
@@ -104,7 +104,7 @@ const Navbar = () => {
 
           {/* Auth */}
           {user ? (
-            <div className="d-none d-xxl-flex align-items-center gap-2">
+            <div className="d-none d-lg-flex align-items-center gap-2">
               <span className="text-muted small text-truncate" style={{ maxWidth: '80px' }}>{fullName || user.email}</span>
               <Link to="/change-password" title="Change Password" className="d-inline-flex align-items-center justify-content-center p-2 text-decoration-none" style={{ lineHeight: 1, color: 'var(--th-primary)' }}>
                 <Settings size={18} color="currentColor" />
@@ -114,7 +114,7 @@ const Navbar = () => {
               </button>
             </div>
           ) : (
-            <Link to="/login" className="d-none d-xxl-block">
+            <Link to="/login" className="d-none d-lg-block">
               <Button variant="outline" size="sm" className="d-flex align-items-center gap-2 rounded-pill px-3">
                 <User size={16} /> {t('nav.login')}
               </Button>
@@ -122,7 +122,7 @@ const Navbar = () => {
           )}
 
           {/* Mobile Toggle */}
-          <button className="d-xxl-none p-2 border-0 bg-transparent" onClick={() => setIsOpen(!isOpen)} style={{ lineHeight: 1, color: 'var(--th-primary)', cursor: 'pointer' }}>
+          <button className="d-lg-none p-2 border-0 bg-transparent" onClick={() => setIsOpen(!isOpen)} style={{ lineHeight: 1, color: 'var(--th-primary)', cursor: 'pointer' }}>
             {isOpen ? <X size={20} color="currentColor" /> : <Menu size={20} color="currentColor" />}
           </button>
         </div>
@@ -130,7 +130,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="d-xxl-none border-top px-3 py-3 anim-fade-down" style={{ background: 'var(--th-card-bg)' }}>
+        <div className="d-lg-none border-top px-3 py-3 anim-fade-down" style={{ background: 'var(--th-card-bg)' }}>
           <div className="d-flex justify-content-center mb-3">
             <div className="th-lang-toggle">
               <Button variant="ghost" size="sm" className={`th-lang-btn ${language === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')}>ENG</Button>
