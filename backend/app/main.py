@@ -276,6 +276,38 @@ def debug_smtp_test():
     return result
 
 
+@app.get("/api/debug-products-crash")
+def debug_products_crash():
+    """Diagnose the 500 on /api/products."""
+    import traceback as tb
+    from .database import SessionLocal
+    from .models import Product
+    db = SessionLocal()
+    try:
+        items = db.query(Product).all()
+        results = []
+        for item in items:
+            try:
+                # Reproduce the exact logic from _to_product_out
+                import json
+                modes = json.loads(item.available_modes) if item.available_modes else []
+                colors = json.loads(item.colors) if item.colors else []
+                sizes = json.loads(item.sizes) if item.sizes else []
+                so = json.loads(item.suit_options) if item.suit_options else None
+                results.append({"id": item.id, "ok": True})
+            except Exception as e:
+                results.append({
+                    "id": item.id, "ok": False, "error": str(e),
+                    "modes_raw": repr(item.available_modes)[:200],
+                    "colors_raw": repr(item.colors)[:200],
+                    "sizes_raw": repr(item.sizes)[:200],
+                })
+        return {"count": len(items), "results": results}
+    except Exception as e:
+        return {"error": str(e), "traceback": tb.format_exc()}
+    finally:
+        db.close()
+
 app.include_router(auth_router)
 app.include_router(oauth_router)
 app.include_router(products_router)
