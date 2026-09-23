@@ -33,6 +33,8 @@ const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard"));
 const DeliveryDashboard = React.lazy(() => import("./pages/DeliveryDashboard"));
 const Tracking = React.lazy(() => import("./pages/Tracking"));
 const Invoices = React.lazy(() => import("./pages/Invoices"));
+const PrivacyPolicy = React.lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = React.lazy(() => import("./pages/TermsOfService"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
 // ── Lightweight loading fallback ──
@@ -68,6 +70,8 @@ const App = () => (
                       <Route path="/auth-success" element={<AuthSuccess />} />
                       <Route path="/catalog" element={<Catalog />} />
                       <Route path="/product/:id" element={<ProductDetail />} />
+                      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                      <Route path="/terms-of-service" element={<TermsOfService />} />
                       <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
 
                       {/* Auth-gated customer routes */}

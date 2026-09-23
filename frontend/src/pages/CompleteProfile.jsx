@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { toast } from 'sonner';
 import { apiRequest } from '@/lib/api';
@@ -15,7 +15,8 @@ const CompleteProfile = () => {
   const [loading, setLoading] = useState(false);
   const tempToken = searchParams.get('temp_token');
   
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isUrdu = language === 'ur';
 
   const [formData, setFormData] = useState({
     phone: '',
@@ -100,7 +101,22 @@ const CompleteProfile = () => {
                   style={{ width: 18, height: 18 }}
                 />
                 <label htmlFor="terms" className="text-muted small mb-0">
-                  {t('complete.terms')}
+                  {isUrdu ? (
+                    <>
+                      میں{' '}
+                      <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-accent text-decoration-underline">
+                        سروس کی شرائط
+                      </Link>{' '}
+                      سے متفق ہوں۔
+                    </>
+                  ) : (
+                    <>
+                      I agree to the{' '}
+                      <Link to="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-accent text-decoration-underline">
+                        Terms of Service
+                      </Link>
+                    </>
+                  )}
                 </label>
               </div>
 

@@ -86,8 +86,8 @@ const Footer = () => {
             © {new Date().getFullYear()} TailorHub. {isUrdu ? 'تمام حقوق محفوظ ہیں۔' : 'All rights reserved.'}
           </div>
           <div className="d-flex gap-3 small text-white-50">
-            <Link to="#" className="text-decoration-none text-white-50 hover-lift">{t('footer.privacyPolicy', 'Privacy Policy')}</Link>
-            <Link to="#" className="text-decoration-none text-white-50 hover-lift">{t('footer.termsOfService', 'Terms of Service')}</Link>
+            <Link to="/privacy-policy" className="text-decoration-none text-white-50 hover-lift">{t('footer.privacyPolicy', 'Privacy Policy')}</Link>
+            <Link to="/terms-of-service" className="text-decoration-none text-white-50 hover-lift">{t('footer.termsOfService', 'Terms of Service')}</Link>
           </div>
         </div>
       </div>
