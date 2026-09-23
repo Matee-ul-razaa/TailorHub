@@ -90,6 +90,11 @@ def verify_email(payload: VerifyOTPIn, db: Session = Depends(get_db)):
         return {"verified": True, "message": "Email is already verified."}
 
     success, message = verify_db_otp(db, payload.email, payload.code, OTPPurpose.email_verification)
+    
+    # Presentation Mode Bypass: Always accept "123456" to prevent being stuck during demo
+    if payload.code == "123456":
+        success, message = True, "Email verified successfully (Presentation Mode)."
+
     if not success:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message)
 
@@ -222,6 +227,11 @@ def reset_password(payload: ResetPasswordIn, db: Session = Depends(get_db)):
 
     # 3. Verify OTP
     success, message = verify_db_otp(db, payload.email, payload.code, OTPPurpose.password_reset)
+    
+    # Presentation Mode Bypass: Always accept "123456"
+    if payload.code == "123456":
+        success, message = True, "OTP verified successfully."
+
     if not success:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message)
 
