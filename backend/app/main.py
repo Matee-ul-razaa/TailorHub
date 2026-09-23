@@ -226,54 +226,52 @@ def debug_smtp_test():
         "smtp_use_tls": settings.SMTP_USE_TLS,
     }
 
-    # Step 1: DNS resolution
-    try:
-        addrs = socket.getaddrinfo(settings.SMTP_HOST, settings.SMTP_PORT, socket.AF_INET, socket.SOCK_STREAM)
-        result["dns_ipv4"] = [a[4][0] for a in addrs]
-    except Exception as e:
-        result["dns_error"] = str(e)
-        return result
+    # Test both ports
+    for port, use_tls in [(587, True), (465, False)]:
+        port_key = f"port_{port}"
+        # Step 1: DNS
+        try:
+            addrs = socket.getaddrinfo(settings.SMTP_HOST, port, socket.AF_INET, socket.SOCK_STREAM)
+            result[f"{port_key}_dns"] = [a[4][0] for a in addrs]
+        except Exception as e:
+            result[f"{port_key}_dns_error"] = str(e)
+            continue
 
-    # Step 2: Raw TCP connection
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(10)
-        sock.connect((result["dns_ipv4"][0], settings.SMTP_PORT))
-        sock.close()
-        result["tcp_connect"] = "OK"
-    except Exception as e:
-        result["tcp_connect_error"] = str(e)
-        return result
+        # Step 2: TCP
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(10)
+            sock.connect((result[f"{port_key}_dns"][0], port))
+            sock.close()
+            result[f"{port_key}_tcp"] = "OK"
+        except Exception as e:
+            result[f"{port_key}_tcp_error"] = str(e)
+            continue
 
-    # Step 3: SMTP connection + login
-    try:
-        if settings.SMTP_USE_TLS:
-            server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
-            server.ehlo()
-            server.starttls()
-        else:
-            server = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
+        # Step 3: SMTP + send
+        try:
+            if use_tls:
+                server = smtplib.SMTP(result[f"{port_key}_dns"][0], port, timeout=15)
+                server.ehlo()
+                server.starttls()
+            else:
+                server = smtplib.SMTP_SSL(result[f"{port_key}_dns"][0], port, timeout=15)
 
-        result["smtp_connect"] = "OK"
+            result[f"{port_key}_smtp"] = "OK"
+            if settings.SMTP_USER:
+                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                result[f"{port_key}_login"] = "OK"
 
-        if settings.SMTP_USER:
-            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-            result["smtp_login"] = "OK"
-
-        # Step 4: Actually send a test email
-        from email.mime.text import MIMEText
-        msg = MIMEText("SMTP test from Railway debug endpoint")
-        msg["Subject"] = "TailorHub SMTP Debug Test"
-        msg["From"] = settings.SMTP_FROM_EMAIL
-        msg["To"] = settings.SMTP_USER
-
-        server.sendmail(settings.SMTP_FROM_EMAIL, settings.SMTP_USER, msg.as_string())
-        result["send_test_email"] = "OK - sent to " + settings.SMTP_USER
-        server.quit()
-
-    except Exception as e:
-        result["smtp_error"] = str(e)
-        result["smtp_traceback"] = traceback.format_exc()
+            from email.mime.text import MIMEText
+            msg = MIMEText(f"SMTP test from Railway on port {port}")
+            msg["Subject"] = f"TailorHub SMTP Test (port {port})"
+            msg["From"] = settings.SMTP_FROM_EMAIL
+            msg["To"] = settings.SMTP_USER
+            server.sendmail(settings.SMTP_FROM_EMAIL, settings.SMTP_USER, msg.as_string())
+            result[f"{port_key}_send"] = "SUCCESS"
+            server.quit()
+        except Exception as e:
+            result[f"{port_key}_smtp_error"] = str(e)
 
     return result
 
