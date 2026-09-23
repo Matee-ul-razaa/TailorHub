@@ -1,7 +1,7 @@
 import json
 import asyncio
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 try:
     import sentry_sdk
     from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -15,7 +15,7 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from sqlalchemy.orm import Session
 
 from .config import settings
-from .database import Base, SessionLocal, engine
+from .database import Base, SessionLocal, engine, get_db
 from .models import Product, User, UserRole
 from .routers_auth import router as auth_router
 from .routers_invoices import router as invoices_router
