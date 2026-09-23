@@ -46,6 +46,29 @@ def list_products(db: Session = Depends(get_db)):
     return [_to_product_out(item) for item in db.query(Product).all()]
 
 
+@router.get("/debug-products-xyz")
+def debug_products(db: Session = Depends(get_db)):
+    """Temp debug endpoint to see exactly why /api/products crashes."""
+    import traceback
+    results = []
+    for item in db.query(Product).all():
+        try:
+            out = _to_product_out(item)
+            results.append({"id": item.id, "status": "OK"})
+        except Exception as e:
+            results.append({
+                "id": item.id,
+                "status": "ERROR",
+                "error": str(e),
+                "traceback": traceback.format_exc(),
+                "available_modes": repr(item.available_modes),
+                "colors": repr(item.colors),
+                "sizes": repr(item.sizes),
+                "suit_options": repr(item.suit_options),
+            })
+    return results
+
+
 @router.post("", response_model=ProductOut)
 def create_product(
     payload: ProductIn,
