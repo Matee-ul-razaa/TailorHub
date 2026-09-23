@@ -118,6 +118,7 @@ const AdminDashboard = () => {
           setIsResetting(true);
           await resetDatabase();
           toast.success('Database successfully reset! Khata aur orders ab 0 ho gaye hain.');
+          setTimeout(() => window.location.reload(), 1500);
         } catch (err) {
           toast.error('Reset failed: ' + (err.message || 'Unknown error'));
         } finally {
