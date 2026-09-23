@@ -344,6 +344,33 @@ def debug_products_crash():
     finally:
         db.close()
 
+
+@app.get("/api/debug-order-crash/{order_id}")
+def debug_order_crash(order_id: str):
+    """Diagnose the 500 on PATCH /api/orders/{id}/status."""
+    import traceback as tb
+    from .database import SessionLocal
+    from .models import Order
+    db = SessionLocal()
+    try:
+        order = db.get(Order, order_id)
+        if not order:
+            return {"error": f"Order {order_id} not found"}
+        
+        # Check all columns
+        cols = {}
+        for col in Order.__table__.columns:
+            try:
+                val = getattr(order, col.name)
+                cols[col.name] = repr(val)[:100] if val is not None else "NULL"
+            except Exception as e:
+                cols[col.name] = f"ERROR: {e}"
+        return {"order_id": order_id, "columns": cols}
+    except Exception as e:
+        return {"error": str(e), "traceback": tb.format_exc()}
+    finally:
+        db.close()
+
 app.include_router(auth_router)
 app.include_router(oauth_router)
 app.include_router(products_router)
