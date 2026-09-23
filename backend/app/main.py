@@ -135,6 +135,42 @@ def on_startup():
                         conn.execute(text("ALTER TABLE orders ADD COLUMN delivered_at DATETIME NULL;"))
                 except Exception as e:
                     logger.debug(f"MySQL orders delivered_at patch skipped: {e}")
+                
+                # Add is_sold_out to products if missing
+                try:
+                    res = conn.execute(text("SHOW COLUMNS FROM products LIKE 'is_sold_out';")).fetchall()
+                    if not res:
+                        conn.execute(text("ALTER TABLE products ADD COLUMN is_sold_out BOOLEAN NOT NULL DEFAULT 0;"))
+                        logger.info("Added is_sold_out column to products table")
+                except Exception as e:
+                    logger.debug(f"MySQL products is_sold_out patch skipped: {e}")
+                
+                # Add is_sold_out to inventory_items if missing
+                try:
+                    res = conn.execute(text("SHOW COLUMNS FROM inventory_items LIKE 'is_sold_out';")).fetchall()
+                    if not res:
+                        conn.execute(text("ALTER TABLE inventory_items ADD COLUMN is_sold_out BOOLEAN NOT NULL DEFAULT 0;"))
+                        logger.info("Added is_sold_out column to inventory_items table")
+                except Exception as e:
+                    logger.debug(f"MySQL inventory_items is_sold_out patch skipped: {e}")
+                
+                # Add signature_image to orders if missing
+                try:
+                    res = conn.execute(text("SHOW COLUMNS FROM orders LIKE 'signature_image';")).fetchall()
+                    if not res:
+                        conn.execute(text("ALTER TABLE orders ADD COLUMN signature_image LONGTEXT NULL;"))
+                        logger.info("Added signature_image column to orders table")
+                except Exception as e:
+                    logger.debug(f"MySQL orders signature_image patch skipped: {e}")
+                
+                # Add inventory_consumed_at to orders if missing
+                try:
+                    res = conn.execute(text("SHOW COLUMNS FROM orders LIKE 'inventory_consumed_at';")).fetchall()
+                    if not res:
+                        conn.execute(text("ALTER TABLE orders ADD COLUMN inventory_consumed_at DATETIME NULL;"))
+                        logger.info("Added inventory_consumed_at column to orders table")
+                except Exception as e:
+                    logger.debug(f"MySQL orders inventory_consumed_at patch skipped: {e}")
     except Exception as e:
         logger.warning(f"Metadata table creation warning: {e}")
 
