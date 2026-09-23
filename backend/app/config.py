@@ -104,6 +104,10 @@ class Settings(BaseSettings):
     SMTP_FROM_EMAIL: str = "noreply@tailorhub.pk"
     SMTP_USE_TLS: bool = True
 
+    # ── Resend (HTTP-based email — works on Railway where SMTP ports are blocked)
+    # Sign up at https://resend.com and get an API key
+    RESEND_API_KEY: str = ""
+
     # ── Application ───────────────────────────────────────────────────────────
     FRONTEND_URL: str = "http://localhost:8080"
     CORS_ORIGINS: str = "http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,https://frontend-omega-six-42.vercel.app"

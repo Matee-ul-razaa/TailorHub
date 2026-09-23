@@ -1,25 +1,84 @@
 """
 Email Service
 ───────────────────
-Uses Python stdlib libraries to compose and send emails via SMTP.
+Sends emails via Resend HTTP API (primary, works on Railway)
+or falls back to SMTP (works on local dev).
 """
 
+import json
 import smtplib
 import socket
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from typing import Optional
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
+import base64
 
 from .config import settings, logger
 
 OTP_EXPIRY_MINUTES = 15  # Matches the otp_service.py default
 
 
-def _send_via_smtp(to_email: str, subject: str, text: str, html: str, pdf_bytes: Optional[bytes] = None, pdf_name: Optional[str] = None) -> bool:
-    """
-    Private helper to handle the SMTP transport logic.
-    """
+# ── Resend HTTP API Transport ─────────────────────────────────────────────────
+
+def _send_via_resend(to_email: str, subject: str, html: str, text: str = "",
+                     pdf_bytes: Optional[bytes] = None, pdf_name: Optional[str] = None) -> bool:
+    """Send email via Resend.com HTTP API (port 443 — not blocked by Railway)."""
+    if not settings.RESEND_API_KEY:
+        return False
+
+    from_email = settings.SMTP_FROM_EMAIL or "onboarding@resend.dev"
+
+    payload = {
+        "from": from_email,
+        "to": [to_email],
+        "subject": subject,
+        "html": html,
+    }
+    if text:
+        payload["text"] = text
+
+    if pdf_bytes and pdf_name:
+        payload["attachments"] = [{
+            "filename": pdf_name,
+            "content": base64.b64encode(pdf_bytes).decode("utf-8"),
+        }]
+
+    data = json.dumps(payload).encode("utf-8")
+    req = Request(
+        "https://api.resend.com/emails",
+        data=data,
+        headers={
+            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        resp = urlopen(req, timeout=15)
+        result = json.loads(resp.read().decode("utf-8"))
+        logger.info(f"[EMAIL SERVICE] Resend OK → {to_email} (id={result.get('id', '?')})")
+        return True
+    except HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        logger.error(f"[EMAIL SERVICE] Resend HTTP {e.code}: {body}")
+        return False
+    except Exception as e:
+        logger.error(f"[EMAIL SERVICE] Resend Error: {e}")
+        return False
+
+
+# ── SMTP Transport (fallback for local dev) ───────────────────────────────────
+
+def _send_via_smtp(to_email: str, subject: str, text: str, html: str,
+                   pdf_bytes: Optional[bytes] = None, pdf_name: Optional[str] = None) -> bool:
+    """Send email via SMTP (works on local dev, blocked on Railway)."""
+    if not settings.SMTP_USER or not settings.SMTP_PASSWORD:
+        return False
+
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = settings.SMTP_FROM_EMAIL
@@ -33,55 +92,44 @@ def _send_via_smtp(to_email: str, subject: str, text: str, html: str, pdf_bytes:
         part['Content-Disposition'] = f'attachment; filename="{pdf_name}"'
         msg.attach(part)
 
-    # Force IPv4 to prevent hanging on Railway (Gmail IPv6 issues)
-    _orig_create_connection = socket.create_connection
-    def create_connection_ipv4(address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT, source_address=None):
-        host, port = address
-        for res in socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM):
-            af, socktype, proto, canonname, sa = res
-            sock = None
-            try:
-                sock = socket.socket(af, socktype, proto)
-                if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
-                    sock.settimeout(timeout)
-                if source_address:
-                    sock.bind(source_address)
-                sock.connect(sa)
-                return sock
-            except OSError:
-                if sock is not None:
-                    sock.close()
-        raise OSError("Could not connect using IPv4")
-        
-    socket.create_connection = create_connection_ipv4
-
     try:
         if settings.SMTP_USE_TLS:
             server = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
             server.ehlo()
             server.starttls()
         else:
-            # Fallback for SSL (usually port 465)
             server = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15)
 
-        # Only attempt login if a username is provided
-        if settings.SMTP_USER:
-            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-            
+        server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
         server.sendmail(settings.SMTP_FROM_EMAIL, to_email, msg.as_string())
         server.quit()
+        logger.info(f"[EMAIL SERVICE] SMTP OK → {to_email}")
         return True
     except Exception as e:
         logger.error(f"[EMAIL SERVICE] SMTP Error: {e}")
         return False
-    finally:
-        socket.create_connection = _orig_create_connection
 
+
+# ── Unified send function ─────────────────────────────────────────────────────
+
+def _send_email(to_email: str, subject: str, text: str, html: str,
+                pdf_bytes: Optional[bytes] = None, pdf_name: Optional[str] = None) -> bool:
+    """Try Resend first (HTTP, works on Railway), then fall back to SMTP (local dev)."""
+    # 1. Try Resend (HTTP API — port 443, never blocked)
+    if settings.RESEND_API_KEY:
+        success = _send_via_resend(to_email, subject, html, text, pdf_bytes, pdf_name)
+        if success:
+            return True
+        logger.warning("[EMAIL SERVICE] Resend failed, trying SMTP fallback...")
+
+    # 2. Fallback to SMTP (works on local dev)
+    return _send_via_smtp(to_email, subject, text, html, pdf_bytes, pdf_name)
+
+
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def send_otp_email(to_email: str, otp_code: str) -> bool:
-    """
-    Send the OTP verification email via SMTP.
-    """
+    """Send the OTP verification email."""
     subject = f"TailorHub – Your Verification Code: {otp_code}"
     
     text = f"""
@@ -117,9 +165,9 @@ If you did not request this, please ignore this email.
 </html>
 """
 
-    success = _send_via_smtp(to_email, subject, text, html)
+    success = _send_email(to_email, subject, text, html)
     
-    # In development or if SMTP fails, log to console and file
+    # In development or if email fails, log OTP to console
     if not success or settings.ENVIRONMENT != "production":
         log_line = f"[EMAIL SERVICE] OTP for {to_email}: {otp_code}"
         logger.info(f"{'='*60} {log_line} {'='*60}")
@@ -179,4 +227,4 @@ View your order tracking here: {settings.FRONTEND_URL}/tracking?orderId={order_i
 """
 
     pdf_name = f"TailorHub-{invoice_number}.pdf"
-    return _send_via_smtp(to_email, subject, text, html, pdf_bytes, pdf_name)
+    return _send_email(to_email, subject, text, html, pdf_bytes, pdf_name)
