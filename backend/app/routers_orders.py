@@ -31,6 +31,7 @@ ORDER_PROGRESS = {
 def _to_order_out(order: Order) -> OrderOut:
     return OrderOut(
         id=order.id,
+        customerId=order.customer_id,
         customerName=order.customer_name,
         customerEmail=order.customer_email,
         status=order.status,
@@ -133,6 +134,18 @@ def create_order(payload: OrderIn, request: Request, user: User = Depends(get_cu
         db, action="order.create", actor=user, resource_type="order", resource_id=order.id,
         request=request, details={"total": order.total_amount, "items": len(payload.items)},
     )
+    
+    # Create Khata 'credit' entry for the total order amount
+    from .models import KhataEntry
+    khata = KhataEntry(
+        customer_id=order.customer_id,
+        order_id=order.id,
+        type="credit",
+        amount=order.total_amount,
+        notes=f"Order {order.id} Placed"
+    )
+    db.add(khata)
+    db.commit()
     # Notify customer (confirmation) + all admins (new order alert)
     notify(
         db, user_id=user.id, type="order.created",

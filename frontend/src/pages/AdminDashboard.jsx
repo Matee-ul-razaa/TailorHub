@@ -6,6 +6,9 @@ import { useStore } from '@/context/StoreContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 import { Pencil, ShoppingBag, Trash2, Users, Package, TrendingUp, FileText, BookOpen, Download, Settings, KeyRound, Clock, Loader2, Eye, ChevronDown, ChevronUp, Calendar, CreditCard, Shield, Activity, UserCheck, RefreshCw, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { categories } from '@/data/products';
@@ -83,21 +86,27 @@ const AdminDashboard = () => {
 
   const [isResetting, setIsResetting] = useState(false);
 
-  const handleResetDatabase = async () => {
-    const confirmed = window.confirm(
-      '⚠️ KYA AAP SURE HAIN?\n\nDatabase ka sara transactional data (Orders, Khata ledger, Invoices, Expenses, Appointments, Measurements) delete ho jaye ga aur sab 0 ho jaye ga ta k aap bilkul new se start kr sakein.\n\nAdmin aur Delivery Rider accounts mehfooz rahein gy.\n\nKya aap delete krna chahte hain?'
-    );
-    if (!confirmed) return;
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', description: '', onConfirm: null });
+  const [promptConfig, setPromptConfig] = useState({ isOpen: false, title: '', placeholder: '', onConfirm: null, value: '' });
 
-    try {
-      setIsResetting(true);
-      await resetDatabase();
-      toast.success('Database successfully reset! Khata aur orders ab 0 ho gaye hain.');
-    } catch (err) {
-      toast.error('Reset failed: ' + (err.message || 'Unknown error'));
-    } finally {
-      setIsResetting(false);
-    }
+
+  const handleResetDatabase = () => {
+    setConfirmConfig({
+      isOpen: true,
+      title: '⚠️ KYA AAP SURE HAIN?',
+      description: 'Database ka sara transactional data (Orders, Khata ledger, Invoices, Expenses, Appointments, Measurements) delete ho jaye ga aur sab 0 ho jaye ga ta k aap bilkul new se start kr sakein. Admin aur Delivery Rider accounts mehfooz rahein gy. Kya aap delete krna chahte hain?',
+      onConfirm: async () => {
+        try {
+          setIsResetting(true);
+          await resetDatabase();
+          toast.success('Database successfully reset! Khata aur orders ab 0 ho gaye hain.');
+        } catch (err) {
+          toast.error('Reset failed: ' + (err.message || 'Unknown error'));
+        } finally {
+          setIsResetting(false);
+        }
+      }
+    });
   };
 
   const [productDraft, setProductDraft] = useState(emptyProduct);
@@ -692,14 +701,14 @@ const AdminDashboard = () => {
                             <Button 
                               className="w-100" 
                               style={{ backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}
-                              onClick={async () => { if(window.confirm('Issue a full refund for this order?')) { try { await refundOrder(order.id); toast.success('Refund issued successfully'); } catch (error) { toast.error(error.message || 'Unable to issue refund'); } } }}>
+                              onClick={() => setConfirmConfig({ isOpen: true, title: 'Issue Refund?', description: 'Issue a full refund for this order?', onConfirm: async () => { try { await refundOrder(order.id); toast.success('Refund issued successfully'); } catch (error) { toast.error(error.message || 'Unable to issue refund'); } } })}>
                               Refund
                             </Button>
                           </div>
                         )}
                         {/* Delete Order */}
                         <div className="col-md-3">
-                          <Button variant="destructive" className="w-100" onClick={async () => { if(window.confirm('Delete this order?')) { try { await deleteOrder(order.id); toast.success('Order deleted'); } catch (error) { toast.error(error.message || 'Unable to delete'); } } }}>
+                          <Button variant="destructive" className="w-100" onClick={() => setConfirmConfig({ isOpen: true, title: 'Delete Order?', description: 'Are you sure you want to delete this order? This action cannot be undone.', onConfirm: async () => { try { await deleteOrder(order.id); toast.success('Order deleted'); } catch (error) { toast.error(error.message || 'Unable to delete'); } } })}>
                             <Trash2 size={16} /> Delete
                           </Button>
                         </div>
@@ -883,49 +892,6 @@ const AdminDashboard = () => {
             <div className="row g-4">
               {/* Record Entry Forms */}
               <div className="col-lg-4">
-                <div className="th-card-static p-4 mb-4">
-                  <h6 className="fw-bold mb-3">Record Khata Entry</h6>
-                  <div className="d-flex flex-column gap-3">
-                    <select className="th-select" value={khataDraft.customer_id} onChange={e => setKhataDraft(prev => ({ ...prev, customer_id: e.target.value, order_id: '' }))}>
-                      <option value="">Select Customer</option>
-                      {teamMembers
-                        .filter(m => m.role === 'customer')
-                        .sort((a, b) => (a.fullName || a.email).localeCompare(b.fullName || b.email))
-                        .map(m => (
-                          <option key={m.id} value={m.id}>
-                            {m.fullName ? `${m.fullName} (${m.email})` : m.email}
-                          </option>
-                        ))}
-                    </select>
-                    {khataDraft.customer_id && (
-                      <select className="th-select" value={khataDraft.order_id} onChange={e => setKhataDraft(prev => ({ ...prev, order_id: e.target.value }))}>
-                        <option value="">No Linked Order</option>
-                        {orders.filter(o => o.customer_id === khataDraft.customer_id).map(o => (
-                          <option key={o.id} value={o.id}>
-                            {o.id} — Rs. {o.total_amount} (Paid: Rs. {o.amount_paid})
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                    <div className="row g-2">
-                      <div className="col-6">
-                        <select className="th-select" value={khataDraft.type} onChange={e => setKhataDraft(prev => ({ ...prev, type: e.target.value }))}>
-                          <option value="payment">Payment In</option>
-                          <option value="credit">Credit Out</option>
-                        </select>
-                      </div>
-                      <div className="col-6">
-                        <input className="th-input" type="number" placeholder="Amount" value={khataDraft.amount || ''} onChange={e => setKhataDraft(prev => ({ ...prev, amount: Number(e.target.value) }))} />
-                      </div>
-                    </div>
-                    <input className="th-input" placeholder="Notes (Optional)" value={khataDraft.notes} onChange={e => setKhataDraft(prev => ({ ...prev, notes: e.target.value }))} />
-                    <Button className="w-100" onClick={async () => {
-                      if(!khataDraft.customer_id || !khataDraft.amount) return toast.error('Fill required fields');
-                      try { await addKhataEntry({ ...khataDraft, order_id: khataDraft.order_id || null }); setKhataDraft({ customer_id: '', type: 'payment', amount: 0, notes: '', order_id: '' }); toast.success('Entry recorded'); } catch(e) { toast.error(e.message); }
-                    }}>Record Entry</Button>
-                  </div>
-                </div>
-
                 <div className="th-card-static p-4">
                   <h6 className="fw-bold mb-3">Record Expense</h6>
                   <div className="d-flex flex-column gap-3">
@@ -1311,7 +1277,7 @@ const AdminDashboard = () => {
                           <option value="admin">Admin</option>
                           <option value="delivery">Delivery</option>
                         </select>
-                        <Button variant="destructive" size="sm" onClick={async () => { if(window.confirm('Remove this member?')) { try { await deleteTeamMember(member.id); toast.success('Member removed'); } catch (error) { toast.error(error.message || 'Unable to remove'); } } }}>
+                        <Button variant="destructive" size="sm" onClick={() => setConfirmConfig({ isOpen: true, title: 'Remove Member?', description: 'Are you sure you want to remove this member?', onConfirm: async () => { try { await deleteTeamMember(member.id); toast.success('Member removed'); } catch (error) { toast.error(error.message || 'Unable to remove'); } } })}>
                           <Trash2 size={16} />
                         </Button>
                       </div>
@@ -1654,6 +1620,52 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+    
+      <AlertDialog open={confirmConfig.isOpen} onOpenChange={(o) => setConfirmConfig(prev => ({...prev, isOpen: o}))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmConfig.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmConfig.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmConfig.onConfirm && confirmConfig.onConfirm()}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={promptConfig.isOpen} onOpenChange={(o) => setPromptConfig(prev => ({...prev, isOpen: o, value: o ? '' : prev.value}))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{promptConfig.title}</DialogTitle>
+            <DialogDescription>Please provide the required information below.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <input 
+              type="text" 
+              className="th-input w-100" 
+              placeholder={promptConfig.placeholder} 
+              value={promptConfig.value} 
+              onChange={e => setPromptConfig(prev => ({...prev, value: e.target.value}))}
+              onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                      setPromptConfig(prev => ({...prev, isOpen: false}));
+                      promptConfig.onConfirm && promptConfig.onConfirm(promptConfig.value);
+                  }
+              }}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPromptConfig(prev => ({...prev, isOpen: false}))}>Cancel</Button>
+            <Button onClick={() => {
+              setPromptConfig(prev => ({...prev, isOpen: false}));
+              promptConfig.onConfirm && promptConfig.onConfirm(promptConfig.value);
+            }}>Submit</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </Layout>
   );
 };

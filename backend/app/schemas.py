@@ -110,6 +110,7 @@ class OrderItemOut(BaseModel):
 class OrderOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str
+    customerId: str
     customerName: str
     customerEmail: EmailStr
     status: OrderStatus

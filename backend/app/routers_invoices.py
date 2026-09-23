@@ -166,10 +166,21 @@ def mark_paid(invoice_number: str, user: User = Depends(require_role(UserRole.ad
         
     service_mark_paid(db, invoice, "cod")
 
-    # Also sync order.amount_paid
+    # Also sync order.amount_paid and Khata
     order = db.get(Order, invoice.order_id)
     if order and order.amount_paid < order.total_amount:
+        payment_amount = order.total_amount - order.amount_paid
         order.amount_paid = order.total_amount
+        
+        from .models import KhataEntry
+        khata_payment = KhataEntry(
+            customer_id=invoice.customer_id,
+            order_id=invoice.order_id,
+            type="payment",
+            amount=payment_amount,
+            notes="Invoice marked as paid"
+        )
+        db.add(khata_payment)
         db.commit()
 
     # Send email receipt if possible

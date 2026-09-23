@@ -116,6 +116,13 @@ def on_startup():
                         conn.execute(text("ALTER TABLE products ADD COLUMN is_sold_out BOOLEAN DEFAULT 0;"))
                 except Exception as e:
                     logger.debug(f"SQLite products patch skipped: {e}")
+                try:
+                    res = conn.execute(text("PRAGMA table_info(inventory_items);")).fetchall()
+                    cols = [r[1] for r in res]
+                    if "is_sold_out" not in cols:
+                        conn.execute(text("ALTER TABLE inventory_items ADD COLUMN is_sold_out BOOLEAN DEFAULT 0;"))
+                except Exception as e:
+                    logger.debug(f"SQLite inventory_items patch skipped: {e}")
     except Exception as e:
         logger.warning(f"Metadata table creation warning: {e}")
 

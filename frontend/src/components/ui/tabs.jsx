@@ -23,15 +23,26 @@ const Tabs = ({ defaultValue, value, onValueChange, children, className }) => {
 const TabsList = ({ children, className }) => {
   return React.createElement('div', {
     className: `d-flex gap-1 p-1 rounded-3 mb-4 ${className || ''}`,
-    style: { background: '#e9ecef' }
-  }, children);
+    style: { 
+      background: '#e9ecef', 
+      overflowX: 'auto', 
+      flexWrap: 'nowrap',
+      WebkitOverflowScrolling: 'touch',
+      msOverflowStyle: 'none',  /* IE and Edge */
+      scrollbarWidth: 'none'    /* Firefox */
+    }
+  }, 
+  React.createElement('style', null, `
+    .d-flex.gap-1.p-1.rounded-3::-webkit-scrollbar { display: none; }
+  `),
+  children);
 };
 
 const TabsTrigger = ({ value, children, className }) => {
   const ctx = React.useContext(TabsContext);
   const isActive = ctx.value === value;
   return React.createElement('button', {
-    className: `th-filter-btn flex-grow-1 ${isActive ? 'active' : ''} ${className || ''}`,
+    className: `th-filter-btn flex-grow-1 flex-shrink-0 text-nowrap ${isActive ? 'active' : ''} ${className || ''}`,
     onClick: () => ctx.onChange(value),
   }, children);
 };

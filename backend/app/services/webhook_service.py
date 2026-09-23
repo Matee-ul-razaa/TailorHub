@@ -111,10 +111,32 @@ def _handle_checkout_completed(db: Session, event: dict):
             transaction_id=session.get('payment_intent')
         )
         db.add(payment)
+        
+        # Add Khata Payment
+        from ..models import KhataEntry
+        khata_payment = KhataEntry(
+            customer_id=order.customer_id,
+            order_id=order.id,
+            type="payment",
+            amount=amount_paid,
+            notes=f"Stripe Payment: {session.get('payment_intent')}"
+        )
+        db.add(khata_payment)
     else:
         payment.status = PaymentStatus.completed
         payment.amount += amount_paid
         payment.transaction_id = session.get('payment_intent')
+        
+        # Add Khata Payment
+        from ..models import KhataEntry
+        khata_payment = KhataEntry(
+            customer_id=order.customer_id,
+            order_id=order.id,
+            type="payment",
+            amount=amount_paid,
+            notes=f"Stripe Payment: {session.get('payment_intent')}"
+        )
+        db.add(khata_payment)
     
     db.commit()
 

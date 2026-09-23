@@ -52,7 +52,7 @@ const Topbar = ({ onMenuToggle }) => {
       </nav>
 
       <div className="ms-auto d-flex align-items-center gap-2">
-        <div className="th-lang-toggle d-none d-sm-flex">
+        <div className="th-lang-toggle d-flex">
           <Button variant="ghost" size="sm" className={`th-lang-btn ${language === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')}>ENG</Button>
           <Button variant="ghost" size="sm" className={`th-lang-btn ${language === 'ur' ? 'active' : ''}`} onClick={() => setLanguage('ur')}>اردو</Button>
         </div>
