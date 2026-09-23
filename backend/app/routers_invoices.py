@@ -168,17 +168,18 @@ def mark_paid(invoice_number: str, user: User = Depends(require_role(UserRole.ad
 
     # Also sync order.amount_paid and Khata
     order = db.get(Order, invoice.order_id)
-    if order and order.amount_paid < order.total_amount:
-        payment_amount = order.total_amount - order.amount_paid
-        order.amount_paid = order.total_amount
-        
+    if order:
+        order.amount_paid += invoice.total_amount
+        if order.amount_paid > order.total_amount:
+            order.amount_paid = order.total_amount  # cap it just in case
+            
         from .models import KhataEntry
         khata_payment = KhataEntry(
             customer_id=invoice.customer_id,
             order_id=invoice.order_id,
             type="payment",
-            amount=payment_amount,
-            notes="Invoice marked as paid"
+            amount=invoice.total_amount,
+            notes=f"Invoice {invoice.invoice_number} paid (COD)"
         )
         db.add(khata_payment)
         db.commit()

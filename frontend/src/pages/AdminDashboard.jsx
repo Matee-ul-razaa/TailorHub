@@ -84,6 +84,24 @@ const AdminDashboard = () => {
     resetDatabase,
   } = useStore();
 
+  const [activeTab, setActiveTab] = useState(() => {
+    return window.location.hash.replace('#', '') || 'orders';
+  });
+
+  const handleTabChange = (value) => {
+    setActiveTab(value);
+    window.location.hash = value;
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) setActiveTab(hash);
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   const [isResetting, setIsResetting] = useState(false);
 
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', description: '', onConfirm: null });
@@ -483,7 +501,7 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        <Tabs defaultValue="orders" className="mt-4">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-4">
           <TabsList>
             <TabsTrigger value="orders">{t('admin.orders', 'Orders')}</TabsTrigger>
             <TabsTrigger value="customers"><Users size={14} className="me-1" /> {t('admin.customers', 'Customers')}</TabsTrigger>
