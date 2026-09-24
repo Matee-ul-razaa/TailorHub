@@ -107,6 +107,153 @@ def seed_defaults(db: Session):
         db.commit()
 
 
+def seed_products(db: Session):
+    """Seed the products table with the same 20 catalog items from the frontend
+    if the table is currently empty. This ensures the live database has products
+    to display in the catalog, admin dashboard, etc."""
+    existing = db.query(Product).count()
+    if existing > 0:
+        return  # Already seeded
+
+    logger.info("Products table is empty — seeding 20 default catalog products...")
+
+    # ── Category definitions (must match frontend/src/data/products.jsx) ──
+    categories = [
+        {'id': 'pent-coat', 'label': 'Pent Coat'},
+        {'id': 'shalwar-kameez', 'label': 'Shalwar Kameez'},
+        {'id': 'unstitched-pent-coat', 'label': 'Unstitched Pent Coat'},
+        {'id': 'unstitched-shalwar-kameez', 'label': 'Unstitched Shalwar Kameez'},
+    ]
+
+    descriptors = [
+        'Royal', 'Signature', 'Modern', 'Classic', 'Heritage',
+    ]
+
+    brands = ['Gul Ahmed', 'J.', 'Alkaram', 'Khaadi', 'Bonanza Satrangi']
+
+    category_seeds = {
+        'pent-coat': {
+            'wearType': 'western',
+            'baseNames': ['Prince Coat', 'Designer Pent Coat', 'Wedding Pent Coat', 'Formal Pent Coat', 'Embroidered Pent Coat'],
+            'fabrics': ['Jamawar Silk', 'Raw Silk', 'Brocade', 'Cotton Silk', 'Velvet'],
+            'palettes': [
+                ['Ivory', 'Gold', 'Maroon', 'Black'],
+                ['Navy', 'Teal', 'Charcoal', 'Olive'],
+                ['Cream', 'Rust', 'Bottle Green', 'Plum'],
+                ['Ivory', 'Gold', 'Maroon', 'Black'],
+                ['Navy', 'Teal', 'Charcoal', 'Olive'],
+            ],
+            'availableModes': ['ready-to-wear', 'custom-stitching', 'unstitched'],
+            'sizes': ['S', 'M', 'L', 'XL', 'XXL'],
+            'basePrice': 8500, 'step': 600,
+            'hasWaistcoatOption': False,
+            'suitOptions': ['2-piece', '3-piece', 'blazer-only', 'pants-only'],
+            'description': "Premium men's pent coat (prince coat) with elegant tailoring, perfect for formal events.",
+        },
+        'shalwar-kameez': {
+            'wearType': 'traditional',
+            'baseNames': ['Embroidered Kurta Pajama', 'Festive Kurta Set', 'Classic Kurta Pajama', 'Wedding Kurta Ensemble', 'Premium Shalwar Kameez'],
+            'fabrics': ['Wash & Wear', 'Boski Cotton', 'Blended Wash & Wear', 'Banarsi Silk', 'Raw Silk'],
+            'palettes': [
+                ['Beige', 'Mustard', 'Maroon', 'Black'],
+                ['Navy', 'Teal', 'Charcoal', 'Olive'],
+                ['Cream', 'Rust', 'Bottle Green', 'Plum'],
+                ['Ivory', 'Gold', 'Maroon', 'Black'],
+                ['Navy', 'Teal', 'Charcoal', 'Olive'],
+            ],
+            'availableModes': ['ready-to-wear', 'custom-stitching', 'unstitched'],
+            'sizes': ['S', 'M', 'L', 'XL', 'XXL'],
+            'basePrice': 7600, 'step': 500,
+            'hasWaistcoatOption': True,
+            'suitOptions': ['kameez-shalwar', 'kameez-only', 'shalwar-only'],
+            'description': "Traditional men's shalwar kameez with contemporary finesse, featuring rich detailing.",
+        },
+        'unstitched-pent-coat': {
+            'wearType': 'western',
+            'baseNames': ['Premium Suiting Fabric', 'Classic Suiting Fabric', 'Egyptian Suiting Fabric', 'Latha Suiting Fabric', 'Gents Suiting Fabric'],
+            'fabrics': ['Jamawar Silk', 'Raw Silk', 'Brocade', 'Cotton Silk', 'Velvet'],
+            'palettes': [
+                ['Ivory', 'Gold', 'Black', 'Maroon'],
+                ['Navy', 'Teal', 'Charcoal', 'Olive'],
+                ['Cream', 'Rust', 'Bottle Green', 'Plum'],
+                ['Ivory', 'Gold', 'Maroon', 'Black'],
+                ['Navy', 'Teal', 'Charcoal', 'Olive'],
+            ],
+            'availableModes': ['unstitched'],
+            'sizes': ['4 Meters', '4.5 Meters', '5 Meters'],
+            'basePrice': 4500, 'step': 300,
+            'hasWaistcoatOption': False,
+            'suitOptions': None,
+            'description': 'High-quality unstitched suiting fabric, perfect for custom tailoring of pent coats.',
+        },
+        'unstitched-shalwar-kameez': {
+            'wearType': 'traditional',
+            'baseNames': ['Premium Wash & Wear Fabric', 'Classic Boski Fabric', 'Egyptian Cotton Fabric', 'Latha Fabric', 'Karandi Fabric'],
+            'fabrics': ['Wash & Wear', 'Boski Cotton', 'Blended Wash & Wear', 'Banarsi Silk', 'Raw Silk'],
+            'palettes': [
+                ['Beige', 'Mustard', 'Maroon', 'Black'],
+                ['Navy', 'Teal', 'Charcoal', 'Olive'],
+                ['Cream', 'Rust', 'Bottle Green', 'Plum'],
+                ['Ivory', 'Gold', 'Maroon', 'Black'],
+                ['Navy', 'Teal', 'Charcoal', 'Olive'],
+            ],
+            'availableModes': ['unstitched'],
+            'sizes': ['4 Meters', '4.5 Meters', '5 Meters'],
+            'basePrice': 3500, 'step': 300,
+            'hasWaistcoatOption': False,
+            'suitOptions': None,
+            'description': 'High-quality unstitched fabric for men, perfect for custom tailoring of shalwar kameez.',
+        },
+    }
+
+    count = 0
+    for cat_idx, cat in enumerate(categories):
+        seed = category_seeds[cat['id']]
+        is_unstitched = cat['id'].startswith('unstitched-')
+        for idx in range(5):
+            descriptor = descriptors[idx]
+            base_name = seed['baseNames'][idx]
+            fabric = seed['fabrics'][idx]
+            colors = seed['palettes'][idx]
+            brand = brands[idx % len(brands)]
+
+            if cat['id'] in ('pent-coat', 'unstitched-pent-coat'):
+                img_index = 1 + idx
+            else:
+                img_index = 6 + idx
+
+            if is_unstitched:
+                image = f"/catalog/garments/us_{img_index}-1.jpg"
+            else:
+                image = f"/catalog/garments/g{img_index}-1.jpg"
+
+            product_id = f"{cat['id']}-{idx + 1}"
+            price = seed['basePrice'] + (idx % 8) * seed['step'] + (cat_idx % 2) * 120
+
+            db.add(Product(
+                id=product_id,
+                name=f"{descriptor} {base_name}",
+                description=f"{seed['description']} This piece by {brand} is designed in {fabric} and offered in {', '.join(colors)} tones.",
+                price=price,
+                category=cat['id'],
+                wear_type=seed['wearType'],
+                image=image,
+                available_modes=json.dumps(seed['availableModes']),
+                fabric=fabric,
+                colors=json.dumps(colors),
+                sizes=json.dumps(seed['sizes']),
+                featured=(idx == 0),
+                has_waistcoat_option=seed['hasWaistcoatOption'],
+                suit_options=json.dumps(seed['suitOptions']) if seed['suitOptions'] else None,
+                brand=brand,
+                is_sold_out=False,
+            ))
+            count += 1
+
+    db.commit()
+    logger.info(f"✅ Seeded {count} products into the database.")
+
+
 @app.on_event("startup")
 def on_startup():
     """Seed default data and ensure tables exist on startup."""
@@ -190,6 +337,7 @@ def on_startup():
     db = SessionLocal()
     try:
         seed_defaults(db)
+        seed_products(db)
     finally:
         db.close()
 
@@ -237,6 +385,50 @@ async def otp_cleanup_loop():
 @app.get("/health")
 def health():
     return {"ok": True, "version": "b42d7f7-v2"}
+
+
+@app.get("/api/debug-db-check-xyz")
+def debug_db_check(db: Session = Depends(get_db)):
+    """Temporary diagnostic endpoint to check database connectivity and data. DELETE after debugging."""
+    from sqlalchemy import text, inspect
+    result = {}
+    try:
+        # 1. Which database engine?
+        result["dialect"] = engine.dialect.name
+        result["database_url_prefix"] = str(engine.url).split("@")[0][:30] + "..."  # safe prefix only
+        
+        # 2. Can we query?
+        row = db.execute(text("SELECT 1")).fetchone()
+        result["query_test"] = "OK" if row else "FAILED"
+        
+        # 3. What tables exist?
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        result["tables"] = tables
+        result["table_count"] = len(tables)
+        
+        # 4. Row counts for key tables
+        counts = {}
+        for t in ["users", "orders", "payments", "products", "khata_entries", "notifications"]:
+            if t in tables:
+                try:
+                    cnt = db.execute(text(f"SELECT COUNT(*) FROM {t}")).scalar()
+                    counts[t] = cnt
+                except Exception as e:
+                    counts[t] = f"ERROR: {e}"
+        result["row_counts"] = counts
+        
+        # 5. Test write + read (insert a dummy, read it, then rollback)
+        try:
+            db.execute(text("SELECT 1"))
+            result["write_test"] = "OK (connection alive)"
+        except Exception as e:
+            result["write_test"] = f"FAILED: {e}"
+            
+    except Exception as e:
+        result["error"] = str(e)
+    
+    return result
 
 
 @app.get("/api/force-update-passwords-xyz123")
